@@ -1,0 +1,38 @@
+package br.com.devpasso.order_management.api.controller;
+
+import br.com.devpasso.order_management.application.dto.PaginatedResponse;
+import br.com.devpasso.order_management.application.dto.ProductResponse;
+import br.com.devpasso.order_management.application.mapper.ProductResponseMapper;
+import br.com.devpasso.order_management.application.usecase.ListProductsUseCase;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@RestController
+@RequestMapping( "/v1/products")
+public class ProductsController {
+    private final ListProductsUseCase listProductsUseCase;
+    private final ProductResponseMapper mapper;
+
+    public ProductsController(ListProductsUseCase listProductsUseCase,
+                              ProductResponseMapper mapper) {
+        this.listProductsUseCase = listProductsUseCase;
+        this.mapper = mapper;
+    }
+
+    @GetMapping
+    public ResponseEntity<PaginatedResponse<ProductResponse>> listAll(
+            @PageableDefault(size = 20, sort = "name") Pageable pageable
+    ) {
+        Page<ProductResponse> products = listProductsUseCase.execute(pageable)
+                .map(mapper::toResponse);
+        PaginatedResponse<ProductResponse> response = PaginatedResponse.from(products, products.getContent());
+        return ResponseEntity.ok(response);
+    }
+}

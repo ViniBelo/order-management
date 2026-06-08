@@ -22,4 +22,28 @@ public class Product {
     private Integer stockQuantity;
     @Column(nullable = false)
     private Instant createdAt;
+
+    public UUID getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public Integer getStockQuantity() {
+        return stockQuantity;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
 }
