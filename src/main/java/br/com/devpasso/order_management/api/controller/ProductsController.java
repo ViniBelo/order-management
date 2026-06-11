@@ -31,9 +31,10 @@ public class ProductsController {
     public ResponseEntity<PaginatedResponse<ProductResponse>> listAll(
             @ParameterObject
             @PageableDefault(size = 20, sort = "name")
-            Pageable pageable
+            Pageable pageable,
+            @RequestParam(required = false, defaultValue = "") String name
     ) {
-        Page<ProductResponse> products = listProductsUseCase.execute(pageable)
+        Page<ProductResponse> products = listProductsUseCase.execute(pageable, name)
                 .map(mapper::toResponse);
         PaginatedResponse<ProductResponse> response = PaginatedResponse.from(products, products.getContent());
         return ResponseEntity.ok(response);

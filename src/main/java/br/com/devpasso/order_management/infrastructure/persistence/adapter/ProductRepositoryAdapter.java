@@ -14,7 +14,7 @@ public class ProductRepositoryAdapter implements ProductRepository {
     }
 
     @Override
-    public Page<Product> listAll(Pageable pageable) {
-        return productJpaRepository.findAll(pageable);
+    public Page<Product> listAll(Pageable pageable, String name) {
+        return productJpaRepository.findAll(pageable, name);
     }
 }

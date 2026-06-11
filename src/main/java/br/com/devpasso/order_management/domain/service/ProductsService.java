@@ -19,9 +19,9 @@ public class ProductsService implements ListProductsUseCase {
     }
 
     @Override
-    public Page<Product> execute(Pageable pageable) {
+    public Page<Product> execute(Pageable pageable, String name) {
         Page<br.com.devpasso.order_management.infrastructure.persistence.entity.Product> persistedProducts =
-                productRepository.listAll(pageable);
+                productRepository.listAll(pageable, name);
         return persistedProducts.map(mapper::toModel);
     }
 }

@@ -5,5 +5,5 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface ListProductsUseCase {
-    Page<Product> execute(Pageable pageable);
+    Page<Product> execute(Pageable pageable, String name);
 }
