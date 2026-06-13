@@ -21,7 +21,7 @@ public class ProductsService implements ListProductsUseCase {
     @Override
     public Page<Product> execute(Pageable pageable, String name) {
         Page<br.com.devpasso.order_management.infrastructure.persistence.entity.Product> persistedProducts =
-                productRepository.listAll(pageable, name);
+                productRepository.findAllByNameContainingIgnoreCase(pageable, name);
         return persistedProducts.map(mapper::toModel);
     }
 }
