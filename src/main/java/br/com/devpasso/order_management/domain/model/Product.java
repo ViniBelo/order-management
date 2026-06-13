@@ -12,7 +12,12 @@ public class Product {
     private final Integer stockQuantity;
     private final Instant createdAt;
 
-    public Product(UUID id, String name, String description, BigDecimal price, Integer stockQuantity, Instant createdAt) {
+    public Product(UUID id,
+                   String name,
+                   String description,
+                   BigDecimal price,
+                   Integer stockQuantity,
+                   Instant createdAt) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -39,9 +44,5 @@ public class Product {
 
     public Integer getStockQuantity() {
         return stockQuantity;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
     }
 }
