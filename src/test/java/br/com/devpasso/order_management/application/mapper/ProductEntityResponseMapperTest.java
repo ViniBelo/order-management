@@ -10,7 +10,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ProductResponseMapperTest {
+class ProductEntityResponseMapperTest {
 
     private final ProductResponseMapper mapper = new ProductResponseMapper();
 

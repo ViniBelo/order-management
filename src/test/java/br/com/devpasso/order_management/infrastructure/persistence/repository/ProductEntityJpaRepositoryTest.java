@@ -1,6 +1,6 @@
 package br.com.devpasso.order_management.infrastructure.persistence.repository;
 
-import br.com.devpasso.order_management.infrastructure.persistence.entity.Product;
+import br.com.devpasso.order_management.infrastructure.persistence.entity.ProductEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DataJpaTest
 @Testcontainers
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class ProductJpaRepositoryTest {
+class ProductEntityJpaRepositoryTest {
 
     @Container
     @ServiceConnection
@@ -33,22 +33,22 @@ class ProductJpaRepositoryTest {
     @Test
     void findAllByNameContainingIgnoreCase_ShouldReturnMatchingProducts() {
         // Given
-        Product product1 = new Product();
-        product1.changeName("Laptop");
-        product1.changePrice(new BigDecimal("1000.00"));
-        product1.changeStockQuantity(10);
-        repository.save(product1);
+        ProductEntity productEntity1 = new ProductEntity();
+        productEntity1.changeName("Laptop");
+        productEntity1.changePrice(new BigDecimal("1000.00"));
+        productEntity1.changeStockQuantity(10);
+        repository.save(productEntity1);
 
-        Product product2 = new Product();
-        product2.changeName("Desktop");
-        product2.changePrice(new BigDecimal("800.00"));
-        product2.changeStockQuantity(5);
-        repository.save(product2);
+        ProductEntity productEntity2 = new ProductEntity();
+        productEntity2.changeName("Desktop");
+        productEntity2.changePrice(new BigDecimal("800.00"));
+        productEntity2.changeStockQuantity(5);
+        repository.save(productEntity2);
 
         Pageable pageable = PageRequest.of(0, 10);
 
         // When
-        Page<Product> result = repository.findAllByNameContainingIgnoreCase(pageable, "lap");
+        Page<ProductEntity> result = repository.findAllByNameContainingIgnoreCase(pageable, "lap");
 
         // Then
         assertEquals(1, result.getTotalElements());
@@ -63,7 +63,7 @@ class ProductJpaRepositoryTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // When
-        Page<Product> result = repository.findAllByNameContainingIgnoreCase(pageable, "NonExistent");
+        Page<ProductEntity> result = repository.findAllByNameContainingIgnoreCase(pageable, "NonExistent");
 
         // Then
         assertTrue(result.isEmpty());

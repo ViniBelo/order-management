@@ -1,6 +1,6 @@
 package br.com.devpasso.order_management.infrastructure.persistence.adapter;
 
-import br.com.devpasso.order_management.infrastructure.persistence.entity.Product;
+import br.com.devpasso.order_management.infrastructure.persistence.entity.ProductEntity;
 import br.com.devpasso.order_management.infrastructure.persistence.repository.ProductJpaRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,7 +19,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ProductRepositoryAdapterTest {
+class ProductEntityRepositoryAdapterTest {
 
     @Mock
     private ProductJpaRepository productJpaRepository;
@@ -32,13 +32,13 @@ class ProductRepositoryAdapterTest {
         // Given
         Pageable pageable = PageRequest.of(0, 10);
         String name = "test";
-        Page<Product> expectedPage = new PageImpl<>(List.of(new Product()));
+        Page<ProductEntity> expectedPage = new PageImpl<>(List.of(new ProductEntity()));
         
         when(productJpaRepository.findAllByNameContainingIgnoreCase(pageable, name))
                 .thenReturn(expectedPage);
 
         // When
-        Page<Product> result = productRepositoryAdapter.findAllByNameContainingIgnoreCase(pageable, name);
+        Page<ProductEntity> result = productRepositoryAdapter.findAllByNameContainingIgnoreCase(pageable, name);
 
         // Then
         assertEquals(expectedPage, result);

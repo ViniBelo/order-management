@@ -3,6 +3,7 @@ package br.com.devpasso.order_management.domain.service;
 import br.com.devpasso.order_management.domain.model.Product;
 import br.com.devpasso.order_management.domain.repository.ProductRepository;
 import br.com.devpasso.order_management.domain.service.mapper.ProductModelMapper;
+import br.com.devpasso.order_management.infrastructure.persistence.entity.ProductEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,7 +17,6 @@ import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -40,11 +40,11 @@ class ProductsServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         String name = "Test";
         
-        br.com.devpasso.order_management.infrastructure.persistence.entity.Product entity = 
-            new br.com.devpasso.order_management.infrastructure.persistence.entity.Product();
+        ProductEntity entity =
+            new ProductEntity();
         entity.changeName("Test Product");
         
-        Page<br.com.devpasso.order_management.infrastructure.persistence.entity.Product> entityPage = 
+        Page<ProductEntity> entityPage =
             new PageImpl<>(List.of(entity), pageable, 1);
         
         Product domainProduct = new Product(entity.getId(),

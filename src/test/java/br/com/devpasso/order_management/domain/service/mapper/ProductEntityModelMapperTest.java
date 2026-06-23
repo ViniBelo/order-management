@@ -1,6 +1,7 @@
 package br.com.devpasso.order_management.domain.service.mapper;
 
 import br.com.devpasso.order_management.domain.model.Product;
+import br.com.devpasso.order_management.infrastructure.persistence.entity.ProductEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -10,7 +11,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ProductModelMapperTest {
+class ProductEntityModelMapperTest {
 
     private final ProductModelMapper mapper = new ProductModelMapper();
 
@@ -23,18 +24,18 @@ class ProductModelMapperTest {
         Integer stockQuantity = 10;
         Instant createdAt = Instant.now();
 
-        br.com.devpasso.order_management.infrastructure.persistence.entity.Product persistenceProduct =
-                new br.com.devpasso.order_management.infrastructure.persistence.entity.Product();
+        ProductEntity ProductEntity =
+                new ProductEntity();
 
-        ReflectionTestUtils.setField(persistenceProduct, "id", id);
-        ReflectionTestUtils.setField(persistenceProduct, "createdAt", createdAt);
+        ReflectionTestUtils.setField(ProductEntity, "id", id);
+        ReflectionTestUtils.setField(ProductEntity, "createdAt", createdAt);
 
-        persistenceProduct.changeName(name);
-        persistenceProduct.changeDescription(description);
-        persistenceProduct.changePrice(price);
-        persistenceProduct.changeStockQuantity(stockQuantity);
+        ProductEntity.changeName(name);
+        ProductEntity.changeDescription(description);
+        ProductEntity.changePrice(price);
+        ProductEntity.changeStockQuantity(stockQuantity);
 
-        Product domainProduct = mapper.toModel(persistenceProduct);
+        Product domainProduct = mapper.toModel(ProductEntity);
 
         assertNotNull(domainProduct);
         assertEquals(id, domainProduct.getId());

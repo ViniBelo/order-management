@@ -4,6 +4,7 @@ import br.com.devpasso.order_management.application.usecase.ListProductsUseCase;
 import br.com.devpasso.order_management.domain.repository.ProductRepository;
 import br.com.devpasso.order_management.domain.model.Product;
 import br.com.devpasso.order_management.domain.service.mapper.ProductModelMapper;
+import br.com.devpasso.order_management.infrastructure.persistence.entity.ProductEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -20,8 +21,8 @@ public class ProductsService implements ListProductsUseCase {
 
     @Override
     public Page<Product> execute(Pageable pageable, String name) {
-        Page<br.com.devpasso.order_management.infrastructure.persistence.entity.Product> persistedProducts =
+        Page<ProductEntity> productEntities =
                 productRepository.findAllByNameContainingIgnoreCase(pageable, name);
-        return persistedProducts.map(mapper::toModel);
+        return productEntities.map(mapper::toModel);
     }
 }

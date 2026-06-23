@@ -1,6 +1,6 @@
 package br.com.devpasso.order_management.api.controller;
 
-import br.com.devpasso.order_management.infrastructure.persistence.entity.Product;
+import br.com.devpasso.order_management.infrastructure.persistence.entity.ProductEntity;
 import br.com.devpasso.order_management.infrastructure.persistence.repository.ProductJpaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,12 +34,12 @@ class ProductsControllerIT {
     void setUp() {
         productJpaRepository.deleteAll();
         
-        Product p1 = new Product();
+        ProductEntity p1 = new ProductEntity();
         p1.changeName("Apple iPhone");
         p1.changePrice(new BigDecimal("999.99"));
         p1.changeStockQuantity(10);
 
-        Product p2 = new Product();
+        ProductEntity p2 = new ProductEntity();
         p2.changeName("Samsung Galaxy");
         p2.changePrice(new BigDecimal("899.99"));
         p2.changeStockQuantity(15);
