@@ -73,4 +73,67 @@ class ProductsControllerIT {
                 .andExpect(jsonPath("$.content.length()").value(1))
                 .andExpect(jsonPath("$.content[0].name").value("Samsung Galaxy"));
     }
+
+    @Test
+    void shouldFilterProductsByNameCaseInsensitive() throws Exception {
+        mockMvc.perform(get("/v1/products")
+                        .param("name", "IPHONE"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].name").value("Apple iPhone"));
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenNoProductsFound() throws Exception {
+        mockMvc.perform(get("/v1/products")
+                        .param("name", "nonexistent"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(0));
+    }
+
+    @Test
+    void shouldReturnFirstPage() throws Exception {
+        mockMvc.perform(get("/v1/products")
+                        .param("page", "0")
+                        .param("size", "1"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].name").value("Apple iPhone"));
+    }
+
+    @Test
+    void shouldReturnLastPage() throws Exception {
+        mockMvc.perform(get("/v1/products")
+                        .param("page", "1")
+                        .param("size", "1"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].name").value("Samsung Galaxy"));
+    }
+
+    @Test
+    void shouldReturnEmptyListForInvalidPage() throws Exception {
+        mockMvc.perform(get("/v1/products")
+                        .param("page", "2")
+                        .param("size", "1"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(0));
+    }
+
+    @Test
+    void shouldHandleInvalidSortParameter() throws Exception {
+        mockMvc.perform(get("/v1/products")
+                        .param("sort", "invalidField,asc"))
+                .andExpect(status().isBadRequest());
+    }
 }
