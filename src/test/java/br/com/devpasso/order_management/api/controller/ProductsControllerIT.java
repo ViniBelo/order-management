@@ -6,9 +6,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -16,7 +17,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.math.BigDecimal;
 import java.util.List;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureMockMvc
 @Testcontainers
 class ProductsControllerIT {
 
@@ -25,7 +30,7 @@ class ProductsControllerIT {
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
 
     @Autowired
-    private WebTestClient webTestClient;
+    private MockMvc mockMvc;
 
     @Autowired
     private ProductJpaRepository productJpaRepository;
@@ -48,28 +53,24 @@ class ProductsControllerIT {
     }
 
     @Test
-    void shouldListAllProducts() {
-        webTestClient.get().uri("/v1/products")
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.content").isArray()
-                .jsonPath("$.content.length()").isEqualTo(2)
-                .jsonPath("$.content[0].name").isEqualTo("Apple iPhone")
-                .jsonPath("$.content[1].name").isEqualTo("Samsung Galaxy");
+    void shouldListAllProducts() throws Exception {
+        mockMvc.perform(get("/v1/products"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.content[0].name").value("Apple iPhone"))
+                .andExpect(jsonPath("$.content[1].name").value("Samsung Galaxy"));
     }
 
     @Test
-    void shouldFilterProductsByName() {
-        webTestClient.get().uri(uriBuilder -> uriBuilder
-                        .path("/v1/products")
-                        .queryParam("name", "samsung")
-                        .build())
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.content.length()").isEqualTo(1)
-                .jsonPath("$.content[0].name").isEqualTo("Samsung Galaxy");
+    void shouldFilterProductsByName() throws Exception {
+        mockMvc.perform(get("/v1/products")
+                        .param("name", "samsung"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].name").value("Samsung Galaxy"));
     }
 }

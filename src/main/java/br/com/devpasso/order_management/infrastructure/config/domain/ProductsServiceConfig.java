@@ -10,8 +10,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ProductsServiceConfig {
     @Bean
-    public ListProductsUseCase listProductsUseCase(ProductRepository productRepository,
-                                                   WebPaginationMapper paginationMapper) {
-        return new ProductsService(productRepository, paginationMapper);
+    public ListProductsUseCase listProductsUseCase(ProductRepository productRepository) {
+        return new ProductsService(productRepository);
     }
 }

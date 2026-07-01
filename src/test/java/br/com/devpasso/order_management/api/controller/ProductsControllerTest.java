@@ -1,16 +1,18 @@
 package br.com.devpasso.order_management.api.controller;
 
+import br.com.devpasso.order_management.application.dto.PaginatedResponse;
 import br.com.devpasso.order_management.application.dto.ProductResponse;
 import br.com.devpasso.order_management.application.mapper.ProductResponseMapper;
+import br.com.devpasso.order_management.application.mapper.WebPaginationMapper;
 import br.com.devpasso.order_management.application.usecase.ListProductsUseCase;
+import br.com.devpasso.order_management.domain.common.PaginatedResult;
 import br.com.devpasso.order_management.domain.model.Product;
+import br.com.devpasso.order_management.domain.common.PaginationQuery;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -30,6 +32,9 @@ class ProductsControllerTest {
 
     @Mock
     private ListProductsUseCase listProductsUseCase;
+    
+    @Mock
+    private WebPaginationMapper paginationMapper;
 
     @Mock
     private ProductResponseMapper mapper;
@@ -40,36 +45,43 @@ class ProductsControllerTest {
     @Test
     void listAll_ShouldReturnOkWithPaginatedProducts() {
         // Given
-        Pageable pageable = PageRequest.of(0, 20);
+        PaginationQuery paginationQuery = new PaginationQuery(0, 20, "");
+        Pageable pageable = PageRequest.of(paginationQuery.page(), paginationQuery.size());
         String name = "Test";
-        
+
         Product product = new Product(UUID.randomUUID(),
                 "Test Product",
                 "Desc", new BigDecimal("10.0"),
                 5, Instant.now());
-        Page<Product> productPage = new PageImpl<>(List.of(product),
-                pageable,
-                1);
-        
+
+        PaginatedResult<Product> productPaginatedResult = new PaginatedResult<>(
+                List.of(product), 0, 20, 1, 1
+        );
+
         ProductResponse response = new ProductResponse(product.getId(),
                 product.getName(),
                 product.getDescription(),
                 product.getPrice(),
                 product.getStockQuantity());
-        
-        when(listProductsUseCase.execute(pageable, name))
-                .thenReturn(productPage);
+
+        when(paginationMapper.toDomainQuery(pageable))
+                .thenReturn(paginationQuery);
+        when(listProductsUseCase.execute(paginationQuery, name))
+                .thenReturn(productPaginatedResult);
         when(mapper.toResponse(product))
                 .thenReturn(response);
 
         // When
-        ResponseEntity<?> result = productsController.listAll(pageable, name);
+        ResponseEntity<PaginatedResponse<ProductResponse>> result = productsController.listAll(pageable, name);
 
         // Then
         assertEquals(HttpStatus.OK,
                 result.getStatusCode());
         assertNotNull(result.getBody());
-        verify(listProductsUseCase).execute(pageable, name);
+        assertEquals(1, result.getBody().totalElements());
+        assertEquals(response, result.getBody().content().getFirst());
+
+        verify(listProductsUseCase).execute(paginationQuery, name);
         verify(mapper).toResponse(product);
     }
 }
