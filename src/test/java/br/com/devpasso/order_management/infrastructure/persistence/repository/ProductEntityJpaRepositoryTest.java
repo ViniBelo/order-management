@@ -1,6 +1,7 @@
 package br.com.devpasso.order_management.infrastructure.persistence.repository;
 
 import br.com.devpasso.order_management.infrastructure.persistence.entity.ProductEntity;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -31,6 +32,7 @@ class ProductEntityJpaRepositoryTest {
     private ProductJpaRepository repository;
 
     @Test
+    @DisplayName("Should return products when name contains the search term")
     void findAllByNameContainingIgnoreCase_ShouldReturnMatchingProducts() {
         // Given
         ProductEntity productEntity1 = new ProductEntity();
@@ -58,6 +60,7 @@ class ProductEntityJpaRepositoryTest {
     }
 
     @Test
+    @DisplayName("Should return empty when no products match the search term")
     void findAllByNameContainingIgnoreCase_ShouldReturnEmptyWhenNoMatch() {
         // Given
         Pageable pageable = PageRequest.of(0, 10);

@@ -7,6 +7,7 @@ import br.com.devpasso.order_management.infrastructure.persistence.adapter.mappe
 import br.com.devpasso.order_management.infrastructure.persistence.adapter.mapper.ProductModelMapper;
 import br.com.devpasso.order_management.infrastructure.persistence.entity.ProductEntity;
 import br.com.devpasso.order_management.infrastructure.persistence.repository.ProductJpaRepository;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -42,6 +43,7 @@ class ProductEntityRepositoryAdapterTest {
     private ProductRepositoryAdapter productRepositoryAdapter;
 
     @Test
+    @DisplayName("Should delegate to JPA repository")
     void findAllByNameContainingIgnoreCase_ShouldDelegateToJpaRepository() {
         // Given
         PaginationQuery paginationQuery = new PaginationQuery(0, 10, "name,ASC");

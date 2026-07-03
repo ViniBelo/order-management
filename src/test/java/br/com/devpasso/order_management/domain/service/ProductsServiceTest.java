@@ -1,12 +1,12 @@
 package br.com.devpasso.order_management.domain.service;
 
-import br.com.devpasso.order_management.application.mapper.WebPaginationMapper;
 import br.com.devpasso.order_management.application.service.ProductsService;
 import br.com.devpasso.order_management.domain.common.PaginatedResult;
 import br.com.devpasso.order_management.domain.common.PaginationQuery;
 import br.com.devpasso.order_management.domain.model.Product;
 import br.com.devpasso.order_management.domain.repository.ProductRepository;
 import br.com.devpasso.order_management.infrastructure.persistence.entity.ProductEntity;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,6 +33,7 @@ class ProductsServiceTest {
     private ProductsService productsService;
 
     @Test
+    @DisplayName("Should return paginated products")
     void execute_ShouldReturnPaginatedProducts() {
         // Given
         PaginationQuery paginationQuery = new PaginationQuery(0, 10, "");

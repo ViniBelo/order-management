@@ -3,6 +3,7 @@ package br.com.devpasso.order_management.api.controller;
 import br.com.devpasso.order_management.infrastructure.persistence.entity.ProductEntity;
 import br.com.devpasso.order_management.infrastructure.persistence.repository.ProductJpaRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -53,6 +54,7 @@ class ProductsControllerIT {
     }
 
     @Test
+    @DisplayName("Should list all products")
     void shouldListAllProducts() throws Exception {
         mockMvc.perform(get("/v1/products"))
                 .andExpect(status().isOk())
@@ -64,6 +66,7 @@ class ProductsControllerIT {
     }
 
     @Test
+    @DisplayName("Should filter products by name")
     void shouldFilterProductsByName() throws Exception {
         mockMvc.perform(get("/v1/products")
                         .param("name", "samsung"))
@@ -75,6 +78,7 @@ class ProductsControllerIT {
     }
 
     @Test
+    @DisplayName("Should filter products by name ignoring case")
     void shouldFilterProductsByNameCaseInsensitive() throws Exception {
         mockMvc.perform(get("/v1/products")
                         .param("name", "IPHONE"))
@@ -86,6 +90,7 @@ class ProductsControllerIT {
     }
 
     @Test
+    @DisplayName("Should return empty list when no products match the search term")
     void shouldReturnEmptyListWhenNoProductsFound() throws Exception {
         mockMvc.perform(get("/v1/products")
                         .param("name", "nonexistent"))
@@ -96,6 +101,7 @@ class ProductsControllerIT {
     }
 
     @Test
+    @DisplayName("Should return first page when page is 0 and size is 1")
     void shouldReturnFirstPage() throws Exception {
         mockMvc.perform(get("/v1/products")
                         .param("page", "0")
@@ -108,6 +114,7 @@ class ProductsControllerIT {
     }
 
     @Test
+    @DisplayName("Should return last page when size is greater than total elements")
     void shouldReturnLastPage() throws Exception {
         mockMvc.perform(get("/v1/products")
                         .param("page", "1")
@@ -120,6 +127,7 @@ class ProductsControllerIT {
     }
 
     @Test
+    @DisplayName("Should return empty list for invalid page number")
     void shouldReturnEmptyListForInvalidPage() throws Exception {
         mockMvc.perform(get("/v1/products")
                         .param("page", "2")
@@ -131,6 +139,7 @@ class ProductsControllerIT {
     }
 
     @Test
+    @DisplayName("Should return 400 Bad Request when sort parameter is invalid")
     void shouldHandleInvalidSortParameter() throws Exception {
         mockMvc.perform(get("/v1/products")
                         .param("sort", "invalidField,asc"))

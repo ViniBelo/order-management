@@ -2,6 +2,7 @@ package br.com.devpasso.order_management.application.mapper;
 
 import br.com.devpasso.order_management.application.dto.ProductResponse;
 import br.com.devpasso.order_management.domain.model.Product;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -15,6 +16,7 @@ class ProductResponseMapperTest {
     private final ProductResponseMapper mapper = new ProductResponseMapper();
 
     @Test
+    @DisplayName("Should map product to product response")
     void toResponse_ShouldMapProductToProductResponse() {
         UUID id = UUID.randomUUID();
         String name = "Test Product";

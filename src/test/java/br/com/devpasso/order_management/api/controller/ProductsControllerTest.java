@@ -8,6 +8,7 @@ import br.com.devpasso.order_management.application.usecase.ListProductsUseCase;
 import br.com.devpasso.order_management.domain.common.PaginatedResult;
 import br.com.devpasso.order_management.domain.model.Product;
 import br.com.devpasso.order_management.domain.common.PaginationQuery;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -43,6 +44,7 @@ class ProductsControllerTest {
     private ProductsController productsController;
 
     @Test
+    @DisplayName("Should return paginated products")
     void listAll_ShouldReturnOkWithPaginatedProducts() {
         // Given
         PaginationQuery paginationQuery = new PaginationQuery(0, 20, "");
