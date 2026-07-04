@@ -1,5 +1,6 @@
 package br.com.devpasso.order_management.api.exception;
 
+import br.com.devpasso.order_management.domain.exception.ResourceNotFoundException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,20 @@ public class GlobalExceptionHandler {
         );
         problem.setTitle("Bad Request");
 
+        return problem;
+    }
+
+    /**
+     * Handles 404 Not Found: When the user requests a resource that does not exist.
+     */
+    // Class that runs the exception handler
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ProblemDetail handleResourceNotFound(RuntimeException e) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.NOT_FOUND,
+                "The requested resource could not be found."
+        );
+        problem.setTitle("Not Found");
         return problem;
     }
 
