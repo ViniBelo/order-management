@@ -1,4 +1,4 @@
-package br.com.devpasso.order_management.application.dto;
+package br.com.devpasso.order_management.application.dto.response;
 
 import br.com.devpasso.order_management.domain.common.PaginatedResult;
 

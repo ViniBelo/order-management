@@ -1,4 +1,4 @@
-package br.com.devpasso.order_management.application.dto;
+package br.com.devpasso.order_management.application.dto.response;
 
 import java.math.BigDecimal;
 import java.util.UUID;
