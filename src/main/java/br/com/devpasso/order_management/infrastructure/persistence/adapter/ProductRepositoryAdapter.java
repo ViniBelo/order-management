@@ -11,6 +11,8 @@ import br.com.devpasso.order_management.infrastructure.persistence.repository.Pr
 import org.springframework.data.domain.Page;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 public class ProductRepositoryAdapter implements ProductRepository {
     private final ProductJpaRepository productJpaRepository;
@@ -38,5 +40,11 @@ public class ProductRepositoryAdapter implements ProductRepository {
                 .toList();
 
         return paginationMapper.toDomainResult(productEntities, products);
+    }
+
+    @Override
+    public Optional<Product> findById(String id) {
+        return productJpaRepository.findById(UUID.fromString(id))
+                .map(mapper::toModel);
     }
 }

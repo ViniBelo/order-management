@@ -1,6 +1,7 @@
 package br.com.devpasso.order_management.api.exception;
 
 import br.com.devpasso.order_management.domain.exception.ResourceNotFoundException;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
@@ -8,6 +9,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+@Hidden
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
