@@ -17,6 +17,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -36,6 +37,8 @@ class ProductsControllerIT {
     @Autowired
     private ProductJpaRepository productJpaRepository;
 
+    private List<ProductEntity> savedProducts;
+
     @BeforeEach
     void setUp() {
         productJpaRepository.deleteAll();
@@ -50,7 +53,7 @@ class ProductsControllerIT {
         p2.changePrice(new BigDecimal("899.99"));
         p2.changeStockQuantity(15);
 
-        productJpaRepository.saveAll(List.of(p1, p2));
+        savedProducts = productJpaRepository.saveAll(List.of(p1, p2));
     }
 
     @Test
@@ -63,6 +66,28 @@ class ProductsControllerIT {
                 .andExpect(jsonPath("$.content.length()").value(2))
                 .andExpect(jsonPath("$.content[0].name").value("Apple iPhone"))
                 .andExpect(jsonPath("$.content[1].name").value("Samsung Galaxy"));
+    }
+
+    @Test
+    @DisplayName("Should find product by ID")
+    void shouldFindProductById() throws Exception {
+        UUID id = savedProducts.getFirst().getId();
+        mockMvc.perform(get("/v1/products/{id}", id))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(id.toString()))
+                .andExpect(jsonPath("$.name").value("Apple iPhone"))
+                .andExpect(jsonPath("$.price").value(999.99));
+    }
+
+    @Test
+    @DisplayName("Should return 404 Not Found when product does not exist")
+    void shouldReturn404WhenNotFound() throws Exception {
+        UUID id = UUID.randomUUID();
+        mockMvc.perform(get("/v1/products/{id}", id))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.title").value("Not Found"))
+                .andExpect(jsonPath("$.detail").value("The requested resource could not be found."));
     }
 
     @Test

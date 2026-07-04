@@ -21,9 +21,11 @@ import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -43,7 +45,7 @@ class ProductEntityRepositoryAdapterTest {
     private ProductRepositoryAdapter productRepositoryAdapter;
 
     @Test
-    @DisplayName("Should delegate to JPA repository")
+    @DisplayName("Should delegate to JPA repository for findAllByName")
     void findAllByNameContainingIgnoreCase_ShouldDelegateToJpaRepository() {
         // Given
         PaginationQuery paginationQuery = new PaginationQuery(0, 10, "name,ASC");
@@ -87,5 +89,35 @@ class ProductEntityRepositoryAdapterTest {
         verify(productJpaRepository).findAllByNameContainingIgnoreCase(pageable, name);
         verify(mapper).toModel(productEntity);
         verify(paginationMapper).toDomainResult(entityPage, List.of(domainProduct));
+    }
+
+    @Test
+    @DisplayName("Should find product by ID and map to model")
+    void findById_ShouldReturnMappedProduct() {
+        // Given
+        UUID id = UUID.randomUUID();
+        ProductEntity productEntity = new ProductEntity();
+        Product domainProduct = new Product(
+                id,
+                "Test product",
+                "Test description",
+                new BigDecimal("10.0"),
+                5,
+                Instant.now()
+        );
+
+        when(productJpaRepository.findById(id))
+                .thenReturn(Optional.of(productEntity));
+        when(mapper.toModel(productEntity))
+                .thenReturn(domainProduct);
+
+        // When
+        Optional<Product> result = productRepositoryAdapter.findById(id.toString());
+
+        // Then
+        assertTrue(result.isPresent());
+        assertEquals(domainProduct, result.get());
+        verify(productJpaRepository).findById(id);
+        verify(mapper).toModel(productEntity);
     }
 }

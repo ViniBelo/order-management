@@ -4,6 +4,7 @@ import br.com.devpasso.order_management.application.dto.response.PaginatedRespon
 import br.com.devpasso.order_management.application.dto.response.ProductResponse;
 import br.com.devpasso.order_management.application.mapper.ProductResponseMapper;
 import br.com.devpasso.order_management.application.mapper.WebPaginationMapper;
+import br.com.devpasso.order_management.application.usecase.FindProductByIdUseCase;
 import br.com.devpasso.order_management.application.usecase.ListProductsUseCase;
 import br.com.devpasso.order_management.domain.common.PaginatedResult;
 import br.com.devpasso.order_management.domain.model.Product;
@@ -33,7 +34,10 @@ class ProductsControllerTest {
 
     @Mock
     private ListProductsUseCase listProductsUseCase;
-    
+
+    @Mock
+    private FindProductByIdUseCase findProductByIdUseCase;
+
     @Mock
     private WebPaginationMapper paginationMapper;
 
@@ -84,6 +88,39 @@ class ProductsControllerTest {
         assertEquals(response, result.getBody().content().getFirst());
 
         verify(listProductsUseCase).execute(paginationQuery, name);
+        verify(mapper).toResponse(product);
+    }
+
+    @Test
+    @DisplayName("Should return product by ID")
+    void findById_ShouldReturnOkWithProduct() {
+        // Given
+        UUID id = UUID.randomUUID();
+        Product product = new Product(id,
+                "Test Product",
+                "Desc", new BigDecimal("10.0"),
+                5, Instant.now());
+
+        ProductResponse response = new ProductResponse(product.getId(),
+                product.getName(),
+                product.getDescription(),
+                product.getPrice(),
+                product.getStockQuantity());
+
+        when(findProductByIdUseCase.execute(id.toString()))
+                .thenReturn(product);
+        when(mapper.toResponse(product))
+                .thenReturn(response);
+
+        // When
+        ResponseEntity<ProductResponse> result = productsController.findById(id);
+
+        // Then
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertNotNull(result.getBody());
+        assertEquals(response, result.getBody());
+
+        verify(findProductByIdUseCase).execute(id.toString());
         verify(mapper).toResponse(product);
     }
 }
