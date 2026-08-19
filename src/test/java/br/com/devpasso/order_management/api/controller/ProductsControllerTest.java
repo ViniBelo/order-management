@@ -1,9 +1,14 @@
 package br.com.devpasso.order_management.api.controller;
 
+import br.com.devpasso.order_management.api.dto.CreateProductRequest;
+import br.com.devpasso.order_management.api.mapper.ProductRequestMapper;
+import br.com.devpasso.order_management.application.dto.command.CreateProductCommand;
+import br.com.devpasso.order_management.application.dto.response.CreateProductResponse;
 import br.com.devpasso.order_management.application.dto.response.PaginatedResponse;
 import br.com.devpasso.order_management.application.dto.response.ProductResponse;
 import br.com.devpasso.order_management.application.mapper.ProductResponseMapper;
 import br.com.devpasso.order_management.application.mapper.WebPaginationMapper;
+import br.com.devpasso.order_management.application.usecase.CreateProductUseCase;
 import br.com.devpasso.order_management.application.usecase.FindProductByIdUseCase;
 import br.com.devpasso.order_management.application.usecase.ListProductsUseCase;
 import br.com.devpasso.order_management.domain.common.PaginatedResult;
@@ -21,6 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
+import java.net.URI;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -39,10 +45,16 @@ class ProductsControllerTest {
     private FindProductByIdUseCase findProductByIdUseCase;
 
     @Mock
+    private CreateProductUseCase createProductUseCase;
+
+    @Mock
     private WebPaginationMapper paginationMapper;
 
     @Mock
     private ProductResponseMapper mapper;
+
+    @Mock
+    private ProductRequestMapper productRequestMapper;
 
     @InjectMocks
     private ProductsController productsController;
@@ -122,5 +134,55 @@ class ProductsControllerTest {
 
         verify(findProductByIdUseCase).execute(id.toString());
         verify(mapper).toResponse(product);
+    }
+
+    @Test
+    @DisplayName("Should create product and return created status with location header")
+    void createProduct_ShouldReturnCreatedWithLocationAndProductResponse() {
+        // Given
+        CreateProductRequest request = new CreateProductRequest(
+                "New Product",
+                "Product description",
+                new BigDecimal("49.99"),
+                10
+        );
+
+        CreateProductCommand command = new CreateProductCommand(
+                request.name(),
+                request.description(),
+                request.price(),
+                request.stockQuantity()
+        );
+
+        UUID productId = UUID.randomUUID();
+        Instant createdAt = Instant.now();
+        Product createdProduct = new Product(
+                productId,
+                request.name(),
+                request.description(),
+                request.price(),
+                request.stockQuantity(),
+                createdAt
+        );
+
+        when(productRequestMapper.toCommand(request)).thenReturn(command);
+        when(createProductUseCase.execute(command)).thenReturn(createdProduct);
+
+        // When
+        ResponseEntity<CreateProductResponse> result = productsController.createProduct(request);
+
+        // Then
+        assertEquals(HttpStatus.CREATED, result.getStatusCode());
+        assertEquals(URI.create("/v1/products/" + productId), result.getHeaders().getLocation());
+        assertNotNull(result.getBody());
+        assertEquals(productId.toString(), result.getBody().id());
+        assertEquals(request.name(), result.getBody().name());
+        assertEquals(request.description(), result.getBody().description());
+        assertEquals(request.price(), result.getBody().price());
+        assertEquals(request.stockQuantity(), result.getBody().stockQuantity());
+        assertEquals(createdAt.toString(), result.getBody().createdAt());
+
+        verify(productRequestMapper).toCommand(request);
+        verify(createProductUseCase).execute(command);
     }
 }

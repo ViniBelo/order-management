@@ -1,5 +1,7 @@
 package br.com.devpasso.order_management.domain.service;
 
+import br.com.devpasso.order_management.application.dto.command.CreateProductCommand;
+import br.com.devpasso.order_management.application.exception.ResourceConflictException;
 import br.com.devpasso.order_management.application.service.ProductsService;
 import br.com.devpasso.order_management.domain.common.PaginatedResult;
 import br.com.devpasso.order_management.domain.common.PaginationQuery;
@@ -109,5 +111,70 @@ class ProductsServiceTest {
         // When & Then
         assertThrows(ResourceNotFoundException.class, () -> productsService.execute(id));
         verify(productRepository).findById(id);
+    }
+
+    @Test
+    @DisplayName("Should create and return product when name is unique")
+    void execute_WithCreateProductCommand_ShouldSaveAndReturnProduct() {
+        // Given
+        CreateProductCommand command = new CreateProductCommand(
+                "Unique Product",
+                "Description",
+                new BigDecimal("99.99"),
+                10
+        );
+
+        UUID generatedId = UUID.randomUUID();
+        Instant createdAt = Instant.now();
+        Product savedProduct = new Product(
+                generatedId,
+                command.name(),
+                command.description(),
+                command.price(),
+                command.stockQuantity(),
+                createdAt
+        );
+
+        when(productRepository.existsByName(command.name())).thenReturn(false);
+        when(productRepository.save(any(Product.class))).thenReturn(savedProduct);
+
+        // When
+        Product result = productsService.execute(command);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(generatedId, result.getId());
+        assertEquals(command.name(), result.getName());
+        assertEquals(command.description(), result.getDescription());
+        assertEquals(command.price(), result.getPrice());
+        assertEquals(command.stockQuantity(), result.getStockQuantity());
+        assertEquals(createdAt, result.getCreatedAt());
+
+        verify(productRepository).existsByName(command.name());
+        verify(productRepository).save(any(Product.class));
+    }
+
+    @Test
+    @DisplayName("Should throw ResourceConflictException when creating product with existing name")
+    void execute_WithCreateProductCommand_ShouldThrowConflictExceptionWhenNameExists() {
+        // Given
+        CreateProductCommand command = new CreateProductCommand(
+                "Existing Product",
+                "Description",
+                new BigDecimal("99.99"),
+                10
+        );
+
+        when(productRepository.existsByName(command.name())).thenReturn(true);
+
+        // When & Then
+        ResourceConflictException exception = assertThrows(
+                ResourceConflictException.class,
+                () -> productsService.execute(command)
+        );
+
+        assertEquals("Product already exists with name: " + command.name(), exception.getMessage());
+        verify(productRepository).existsByName(command.name());
+        verify(productRepository, never()).save(any());
     }
 }

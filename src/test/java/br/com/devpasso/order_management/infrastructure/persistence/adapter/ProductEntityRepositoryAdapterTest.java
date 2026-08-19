@@ -4,6 +4,7 @@ import br.com.devpasso.order_management.domain.common.PaginatedResult;
 import br.com.devpasso.order_management.domain.common.PaginationQuery;
 import br.com.devpasso.order_management.domain.model.Product;
 import br.com.devpasso.order_management.infrastructure.persistence.adapter.mapper.InfraPaginationMapper;
+import br.com.devpasso.order_management.infrastructure.persistence.adapter.mapper.ProductEntityMapper;
 import br.com.devpasso.order_management.infrastructure.persistence.adapter.mapper.ProductModelMapper;
 import br.com.devpasso.order_management.infrastructure.persistence.entity.ProductEntity;
 import br.com.devpasso.order_management.infrastructure.persistence.repository.ProductJpaRepository;
@@ -25,6 +26,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -40,6 +42,9 @@ class ProductEntityRepositoryAdapterTest {
 
     @Mock
     private ProductModelMapper mapper;
+
+    @Mock
+    private ProductEntityMapper productEntityMapper;
 
     @InjectMocks
     private ProductRepositoryAdapter productRepositoryAdapter;
@@ -119,5 +124,76 @@ class ProductEntityRepositoryAdapterTest {
         assertEquals(domainProduct, result.get());
         verify(productJpaRepository).findById(id);
         verify(mapper).toModel(productEntity);
+    }
+
+    @Test
+    @DisplayName("Should save product and map persisted entity to model")
+    void save_ShouldDelegateToJpaRepositoryAndMapToModel() {
+        // Given
+        Product domainProduct = new Product(
+                null,
+                "New Product",
+                "Description",
+                new BigDecimal("99.99"),
+                10,
+                null
+        );
+
+        ProductEntity entityToSave = new ProductEntity();
+        ProductEntity savedEntity = new ProductEntity();
+        UUID generatedId = UUID.randomUUID();
+        Instant createdAt = Instant.now();
+
+        Product persistedProduct = new Product(
+                generatedId,
+                "New Product",
+                "Description",
+                new BigDecimal("99.99"),
+                10,
+                createdAt
+        );
+
+        when(productEntityMapper.toEntity(domainProduct)).thenReturn(entityToSave);
+        when(productJpaRepository.save(entityToSave)).thenReturn(savedEntity);
+        when(mapper.toModel(savedEntity)).thenReturn(persistedProduct);
+
+        // When
+        Product result = productRepositoryAdapter.save(domainProduct);
+
+        // Then
+        assertEquals(persistedProduct, result);
+        verify(productEntityMapper).toEntity(domainProduct);
+        verify(productJpaRepository).save(entityToSave);
+        verify(mapper).toModel(savedEntity);
+    }
+
+    @Test
+    @DisplayName("Should return true when product exists by name")
+    void existsByName_ShouldReturnTrueWhenProductExists() {
+        // Given
+        String name = "Existing Product";
+        when(productJpaRepository.existsByName(name)).thenReturn(true);
+
+        // When
+        boolean result = productRepositoryAdapter.existsByName(name);
+
+        // Then
+        assertTrue(result);
+        verify(productJpaRepository).existsByName(name);
+    }
+
+    @Test
+    @DisplayName("Should return false when product does not exist by name")
+    void existsByName_ShouldReturnFalseWhenProductDoesNotExist() {
+        // Given
+        String name = "Non-existent Product";
+        when(productJpaRepository.existsByName(name)).thenReturn(false);
+
+        // When
+        boolean result = productRepositoryAdapter.existsByName(name);
+
+        // Then
+        assertFalse(result);
+        verify(productJpaRepository).existsByName(name);
     }
 }

@@ -9,4 +9,6 @@ import java.util.Optional;
 public interface ProductRepository {
     PaginatedResult<Product> findAllByNameContainingIgnoreCase(PaginationQuery paginationQuery, String name);
     Optional<Product> findById(String id);
+    Product save(Product product);
+    boolean existsByName(String name);
 }

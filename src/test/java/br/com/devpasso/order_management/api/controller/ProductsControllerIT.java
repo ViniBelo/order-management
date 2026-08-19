@@ -19,7 +19,10 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.matchesPattern;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -169,5 +172,185 @@ class ProductsControllerIT {
         mockMvc.perform(get("/v1/products")
                         .param("sort", "invalidField,asc"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Should create product successfully")
+    void shouldCreateProductSuccessfully() throws Exception {
+        String requestJson = """
+                {
+                    "name": "iPad Pro",
+                    "description": "Apple tablet",
+                    "price": 1199.99,
+                    "stockQuantity": 20
+                }
+                """;
+
+        mockMvc.perform(post("/v1/products")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isCreated())
+                .andExpect(header().exists("Location"))
+                .andExpect(header().string("Location", matchesPattern("^/v1/products/[a-f0-9\\-]+$")))
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.name").value("iPad Pro"))
+                .andExpect(jsonPath("$.description").value("Apple tablet"))
+                .andExpect(jsonPath("$.price").value(1199.99))
+                .andExpect(jsonPath("$.stockQuantity").value(20))
+                .andExpect(jsonPath("$.createdAt").isNotEmpty());
+
+        assertTrue(productJpaRepository.existsByName("iPad Pro"));
+    }
+
+    @Test
+    @DisplayName("Should return 409 Conflict when product name already exists")
+    void shouldReturn409ConflictWhenProductNameAlreadyExists() throws Exception {
+        String requestJson = """
+                {
+                    "name": "Apple iPhone",
+                    "description": "Another Apple iPhone",
+                    "price": 999.99,
+                    "stockQuantity": 5
+                }
+                """;
+
+        mockMvc.perform(post("/v1/products")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.title").value("Conflict"))
+                .andExpect(jsonPath("$.detail").value("Product already exists with name: Apple iPhone"));
+    }
+
+    @Test
+    @DisplayName("Should return 400 Bad Request when name is blank")
+    void shouldReturn400BadRequestWhenNameIsBlank() throws Exception {
+        String requestJson = """
+                {
+                    "name": "",
+                    "description": "Description",
+                    "price": 49.99,
+                    "stockQuantity": 10
+                }
+                """;
+
+        mockMvc.perform(post("/v1/products")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Bad Request"))
+                .andExpect(jsonPath("$.detail").value("Invalid value provided."));
+    }
+
+    @Test
+    @DisplayName("Should return 400 Bad Request when name is shorter than 3 characters")
+    void shouldReturn400BadRequestWhenNameIsTooShort() throws Exception {
+        String requestJson = """
+                {
+                    "name": "ab",
+                    "description": "Description",
+                    "price": 49.99,
+                    "stockQuantity": 10
+                }
+                """;
+
+        mockMvc.perform(post("/v1/products")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Bad Request"))
+                .andExpect(jsonPath("$.detail").value("Invalid value provided."));
+    }
+
+    @Test
+    @DisplayName("Should return 400 Bad Request when price is null")
+    void shouldReturn400BadRequestWhenPriceIsNull() throws Exception {
+        String requestJson = """
+                {
+                    "name": "Valid Product Name",
+                    "description": "Description",
+                    "price": null,
+                    "stockQuantity": 10
+                }
+                """;
+
+        mockMvc.perform(post("/v1/products")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Bad Request"))
+                .andExpect(jsonPath("$.detail").value("Invalid value provided."));
+    }
+
+    @Test
+    @DisplayName("Should return 400 Bad Request when price is less than 0.01")
+    void shouldReturn400BadRequestWhenPriceIsLessThanMinimum() throws Exception {
+        String requestJson = """
+                {
+                    "name": "Valid Product Name",
+                    "description": "Description",
+                    "price": 0.00,
+                    "stockQuantity": 10
+                }
+                """;
+
+        mockMvc.perform(post("/v1/products")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Bad Request"))
+                .andExpect(jsonPath("$.detail").value("Invalid value provided."));
+    }
+
+    @Test
+    @DisplayName("Should return 400 Bad Request when stock quantity is null")
+    void shouldReturn400BadRequestWhenStockQuantityIsNull() throws Exception {
+        String requestJson = """
+                {
+                    "name": "Valid Product Name",
+                    "description": "Description",
+                    "price": 49.99,
+                    "stockQuantity": null
+                }
+                """;
+
+        mockMvc.perform(post("/v1/products")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Bad Request"))
+                .andExpect(jsonPath("$.detail").value("Invalid value provided."));
+    }
+
+    @Test
+    @DisplayName("Should return 400 Bad Request when stock quantity is negative")
+    void shouldReturn400BadRequestWhenStockQuantityIsNegative() throws Exception {
+        String requestJson = """
+                {
+                    "name": "Valid Product Name",
+                    "description": "Description",
+                    "price": 49.99,
+                    "stockQuantity": -1
+                }
+                """;
+
+        mockMvc.perform(post("/v1/products")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Bad Request"))
+                .andExpect(jsonPath("$.detail").value("Invalid value provided."));
+    }
+
+    @Test
+    @DisplayName("Should return 400 Bad Request when request body is empty")
+    void shouldReturn400BadRequestWhenRequestBodyIsEmpty() throws Exception {
+        mockMvc.perform(post("/v1/products")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Bad Request"))
+                .andExpect(jsonPath("$.detail").value("Invalid value provided."));
     }
 }

@@ -12,4 +12,6 @@ import java.util.UUID;
 @Repository
 public interface ProductJpaRepository extends JpaRepository<ProductEntity, UUID> {
     Page<ProductEntity> findAllByNameContainingIgnoreCase(Pageable pageable, @Param("name") String name);
+
+    boolean existsByName(String name);
 }

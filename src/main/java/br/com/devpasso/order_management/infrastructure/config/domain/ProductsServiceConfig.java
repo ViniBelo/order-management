@@ -1,6 +1,7 @@
 package br.com.devpasso.order_management.infrastructure.config.domain;
 
 import br.com.devpasso.order_management.application.mapper.WebPaginationMapper;
+import br.com.devpasso.order_management.application.usecase.CreateProductUseCase;
 import br.com.devpasso.order_management.application.usecase.FindProductByIdUseCase;
 import br.com.devpasso.order_management.application.usecase.ListProductsUseCase;
 import br.com.devpasso.order_management.domain.repository.ProductRepository;
@@ -17,6 +18,11 @@ public class ProductsServiceConfig {
 
     @Bean
     public FindProductByIdUseCase findProductByIdUseCase(ProductRepository productRepository) {
+        return new ProductsService(productRepository);
+    }
+
+    @Bean
+    public CreateProductUseCase createProductUseCase(ProductRepository productRepository) {
         return new ProductsService(productRepository);
     }
 }

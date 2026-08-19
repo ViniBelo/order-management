@@ -1,7 +1,12 @@
 package br.com.devpasso.order_management.api.controller;
 
+import br.com.devpasso.order_management.api.dto.CreateProductRequest;
+import br.com.devpasso.order_management.application.dto.command.CreateProductCommand;
+import br.com.devpasso.order_management.application.dto.response.CreateProductResponse;
+import br.com.devpasso.order_management.api.mapper.ProductRequestMapper;
 import br.com.devpasso.order_management.application.dto.response.PaginatedResponse;
 import br.com.devpasso.order_management.application.mapper.WebPaginationMapper;
+import br.com.devpasso.order_management.application.usecase.CreateProductUseCase;
 import br.com.devpasso.order_management.application.usecase.FindProductByIdUseCase;
 import br.com.devpasso.order_management.domain.common.PaginatedResult;
 import br.com.devpasso.order_management.application.dto.response.ProductResponse;
@@ -14,6 +19,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -21,6 +27,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,17 +37,23 @@ import java.util.UUID;
 public class ProductsController {
     private final ListProductsUseCase listProductsUseCase;
     private final FindProductByIdUseCase findProductByIdUseCase;
+    private final CreateProductUseCase createProductUseCase;
     private final WebPaginationMapper paginationMapper;
-    private final ProductResponseMapper mapper;
+    private final ProductResponseMapper productResponseMapper;
+    private final ProductRequestMapper productRequestMapper;
 
     public ProductsController(ListProductsUseCase listProductsUseCase,
                               FindProductByIdUseCase findProductByIdUseCase,
+                              CreateProductUseCase createProductUseCase,
                               WebPaginationMapper paginationMapper,
-                              ProductResponseMapper mapper) {
+                              ProductResponseMapper productResponseMapper,
+                              ProductRequestMapper productRequestMapper) {
         this.listProductsUseCase = listProductsUseCase;
         this.findProductByIdUseCase = findProductByIdUseCase;
+        this.createProductUseCase = createProductUseCase;
         this.paginationMapper = paginationMapper;
-        this.mapper = mapper;
+        this.productResponseMapper = productResponseMapper;
+        this.productRequestMapper = productRequestMapper;
     }
 
     @GetMapping
@@ -65,7 +78,7 @@ public class ProductsController {
         );
         List<ProductResponse> productsResponse = products.content()
                 .stream()
-                .map(mapper::toResponse)
+                .map(productResponseMapper::toResponse)
                 .toList();
         PaginatedResponse<ProductResponse> response =
                 PaginatedResponse.from(products, productsResponse);
@@ -85,7 +98,29 @@ public class ProductsController {
             @PathVariable UUID id
     ) {
         Product product = findProductByIdUseCase.execute(id.toString());
-        ProductResponse response = mapper.toResponse(product);
+        ProductResponse response = productResponseMapper.toResponse(product);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping
+    @Operation(summary = "Create a new product")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Product created successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "409", description = "Product already exists",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity<CreateProductResponse> createProduct(
+            @RequestBody
+            @Valid
+            CreateProductRequest createProductRequest
+    ) {
+        CreateProductCommand productToCreate = productRequestMapper.toCommand(createProductRequest);
+        Product createdProduct = createProductUseCase.execute(productToCreate);
+        return ResponseEntity.created(URI.create("/v1/products/" + createdProduct.getId()))
+                .body(CreateProductResponse.build(createdProduct));
     }
 }

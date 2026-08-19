@@ -17,6 +17,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
@@ -70,5 +71,32 @@ class ProductEntityJpaRepositoryTest {
 
         // Then
         assertTrue(result.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should return true when product exists by name")
+    void existsByName_ShouldReturnTrueWhenProductExists() {
+        // Given
+        ProductEntity productEntity = new ProductEntity();
+        productEntity.changeName("Tablet");
+        productEntity.changePrice(new BigDecimal("500.00"));
+        productEntity.changeStockQuantity(15);
+        repository.save(productEntity);
+
+        // When
+        boolean exists = repository.existsByName("Tablet");
+
+        // Then
+        assertTrue(exists);
+    }
+
+    @Test
+    @DisplayName("Should return false when product does not exist by name")
+    void existsByName_ShouldReturnFalseWhenProductDoesNotExist() {
+        // When
+        boolean exists = repository.existsByName("NonExistentProduct");
+
+        // Then
+        assertFalse(exists);
     }
 }

@@ -1,5 +1,8 @@
 package br.com.devpasso.order_management.application.service;
 
+import br.com.devpasso.order_management.application.dto.command.CreateProductCommand;
+import br.com.devpasso.order_management.application.exception.ResourceConflictException;
+import br.com.devpasso.order_management.application.usecase.CreateProductUseCase;
 import br.com.devpasso.order_management.application.usecase.FindProductByIdUseCase;
 import br.com.devpasso.order_management.application.usecase.ListProductsUseCase;
 import br.com.devpasso.order_management.domain.common.PaginatedResult;
@@ -8,7 +11,9 @@ import br.com.devpasso.order_management.domain.exception.ResourceNotFoundExcepti
 import br.com.devpasso.order_management.domain.repository.ProductRepository;
 import br.com.devpasso.order_management.domain.model.Product;
 
-public class ProductsService implements ListProductsUseCase, FindProductByIdUseCase {
+public class ProductsService implements ListProductsUseCase,
+        FindProductByIdUseCase,
+        CreateProductUseCase {
     private final ProductRepository productRepository;
 
     public ProductsService(ProductRepository productRepository) {
@@ -24,5 +29,14 @@ public class ProductsService implements ListProductsUseCase, FindProductByIdUseC
     public Product execute(String id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found for ID: " + id));
+    }
+
+    @Override
+    public Product execute(CreateProductCommand product) {
+        if (productRepository.existsByName(product.name())) {
+            throw new ResourceConflictException("Product already exists with name: " + product.name());
+        }
+        Product newProduct = product.toDomainModel();
+        return productRepository.save(newProduct);
     }
 }

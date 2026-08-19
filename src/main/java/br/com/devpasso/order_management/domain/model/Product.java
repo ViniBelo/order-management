@@ -45,4 +45,8 @@ public class Product {
     public Integer getStockQuantity() {
         return stockQuantity;
     }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
 }

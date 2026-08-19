@@ -1,11 +1,13 @@
 package br.com.devpasso.order_management.api.exception;
 
+import br.com.devpasso.order_management.application.exception.ResourceConflictException;
 import br.com.devpasso.order_management.domain.exception.ResourceNotFoundException;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -29,6 +31,20 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles 400 Bad Request: When the user passes invalid payload values failing validation.
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ProblemDetail handleMethodArgumentNotValid(MethodArgumentNotValidException e) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                "Invalid value provided."
+        );
+        problem.setTitle("Bad Request");
+
+        return problem;
+    }
+
+    /**
      * Handles 404 Not Found: When the user requests a resource that does not exist.
      */
     // Class that runs the exception handler
@@ -39,6 +55,19 @@ public class GlobalExceptionHandler {
                 "The requested resource could not be found."
         );
         problem.setTitle("Not Found");
+        return problem;
+    }
+
+    /**
+     * Handles 409 Conflict: When the user tries to create a resource that already exists.
+     */
+    @ExceptionHandler(ResourceConflictException.class)
+    public ProblemDetail handleConflict(RuntimeException e) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.CONFLICT,
+                e.getMessage()
+        );
+        problem.setTitle("Conflict");
         return problem;
     }
 

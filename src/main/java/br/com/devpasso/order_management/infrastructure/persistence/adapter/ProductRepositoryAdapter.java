@@ -5,6 +5,7 @@ import br.com.devpasso.order_management.domain.common.PaginationQuery;
 import br.com.devpasso.order_management.domain.model.Product;
 import br.com.devpasso.order_management.domain.repository.ProductRepository;
 import br.com.devpasso.order_management.infrastructure.persistence.adapter.mapper.InfraPaginationMapper;
+import br.com.devpasso.order_management.infrastructure.persistence.adapter.mapper.ProductEntityMapper;
 import br.com.devpasso.order_management.infrastructure.persistence.adapter.mapper.ProductModelMapper;
 import br.com.devpasso.order_management.infrastructure.persistence.entity.ProductEntity;
 import br.com.devpasso.order_management.infrastructure.persistence.repository.ProductJpaRepository;
@@ -17,13 +18,17 @@ import java.util.UUID;
 public class ProductRepositoryAdapter implements ProductRepository {
     private final ProductJpaRepository productJpaRepository;
     private final InfraPaginationMapper paginationMapper;
-    private final ProductModelMapper mapper;
+    private final ProductModelMapper productModelMapper;
+    private final ProductEntityMapper productEntityMapper;
 
-    public ProductRepositoryAdapter(ProductJpaRepository productJpaRepository, InfraPaginationMapper paginationMapper,
-                                    ProductModelMapper mapper) {
+    public ProductRepositoryAdapter(ProductJpaRepository productJpaRepository,
+                                    InfraPaginationMapper paginationMapper,
+                                    ProductModelMapper productModelMapper,
+                                    ProductEntityMapper productEntityMapper) {
         this.productJpaRepository = productJpaRepository;
         this.paginationMapper = paginationMapper;
-        this.mapper = mapper;
+        this.productModelMapper = productModelMapper;
+        this.productEntityMapper = productEntityMapper;
     }
 
     @Override
@@ -36,7 +41,7 @@ public class ProductRepositoryAdapter implements ProductRepository {
 
         List<Product> products = productEntities.getContent()
                 .stream()
-                .map(mapper::toModel)
+                .map(productModelMapper::toModel)
                 .toList();
 
         return paginationMapper.toDomainResult(productEntities, products);
@@ -45,6 +50,18 @@ public class ProductRepositoryAdapter implements ProductRepository {
     @Override
     public Optional<Product> findById(String id) {
         return productJpaRepository.findById(UUID.fromString(id))
-                .map(mapper::toModel);
+                .map(productModelMapper::toModel);
+    }
+
+    @Override
+    public Product save(Product product) {
+        ProductEntity persistedProduct =
+                productJpaRepository.save(productEntityMapper.toEntity(product));
+        return productModelMapper.toModel(persistedProduct);
+    }
+
+    @Override
+    public boolean existsByName(String name) {
+        return  productJpaRepository.existsByName(name);
     }
 }
