@@ -8,10 +8,12 @@ import org.springframework.stereotype.Component;
 public class ProductEntityMapper {
     public ProductEntity toEntity(Product product) {
         ProductEntity productEntity = new ProductEntity();
+        productEntity.changeId(product.getId());
         productEntity.changeName(product.getName());
         productEntity.changeDescription(product.getDescription());
         productEntity.changePrice(product.getPrice());
         productEntity.changeStockQuantity(product.getStockQuantity());
+        productEntity.changeCreatedAt(product.getCreatedAt());
         return productEntity;
     }
 }

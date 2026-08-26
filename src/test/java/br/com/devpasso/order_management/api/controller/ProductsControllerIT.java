@@ -20,9 +20,11 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.matchesPattern;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -352,5 +354,156 @@ class ProductsControllerIT {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value("Bad Request"))
                 .andExpect(jsonPath("$.detail").value("Invalid value provided."));
+    }
+
+    @Test
+    @DisplayName("Should update product successfully and retain id, createdAt, and stockQuantity")
+    void shouldUpdateProductSuccessfully() throws Exception {
+        ProductEntity existing = savedProducts.getFirst();
+        UUID id = existing.getId();
+
+        String requestJson = """
+                {
+                    "name": "Apple iPhone 15 Pro",
+                    "description": "Updated Description",
+                    "price": 1099.99
+                }
+                """;
+
+        mockMvc.perform(put("/v1/products/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(id.toString()))
+                .andExpect(jsonPath("$.name").value("Apple iPhone 15 Pro"))
+                .andExpect(jsonPath("$.description").value("Updated Description"))
+                .andExpect(jsonPath("$.price").value(1099.99))
+                .andExpect(jsonPath("$.stockQuantity").value(existing.getStockQuantity()));
+
+        ProductEntity updatedInDb = productJpaRepository.findById(id).orElseThrow();
+        assertEquals(id, updatedInDb.getId());
+        assertEquals("Apple iPhone 15 Pro", updatedInDb.getName());
+        assertEquals("Updated Description", updatedInDb.getDescription());
+        assertEquals(new BigDecimal("1099.99"), updatedInDb.getPrice());
+        assertEquals(existing.getStockQuantity(), updatedInDb.getStockQuantity());
+        assertEquals(existing.getCreatedAt(), updatedInDb.getCreatedAt());
+    }
+
+    @Test
+    @DisplayName("Should return 404 Not Found when updating non-existent product")
+    void shouldReturn404WhenUpdatingNonExistentProduct() throws Exception {
+        UUID nonExistentId = UUID.randomUUID();
+        String requestJson = """
+                {
+                    "name": "Non-existent Product",
+                    "description": "Description",
+                    "price": 49.99
+                }
+                """;
+
+        mockMvc.perform(put("/v1/products/{id}", nonExistentId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.title").value("Not Found"))
+                .andExpect(jsonPath("$.detail").value("The requested resource could not be found."));
+    }
+
+    @Test
+    @DisplayName("Should return 400 Bad Request when update name is blank")
+    void shouldReturn400BadRequestWhenUpdateNameIsBlank() throws Exception {
+        UUID id = savedProducts.getFirst().getId();
+        String requestJson = """
+                {
+                    "name": "",
+                    "description": "Description",
+                    "price": 49.99
+                }
+                """;
+
+        mockMvc.perform(put("/v1/products/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Bad Request"))
+                .andExpect(jsonPath("$.detail").value("Invalid value provided."));
+    }
+
+    @Test
+    @DisplayName("Should return 400 Bad Request when update price is less than 0.01")
+    void shouldReturn400BadRequestWhenUpdatePriceIsLessThanMinimum() throws Exception {
+        UUID id = savedProducts.getFirst().getId();
+        String requestJson = """
+                {
+                    "name": "Valid Product Name",
+                    "description": "Description",
+                    "price": 0.00
+                }
+                """;
+
+        mockMvc.perform(put("/v1/products/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Bad Request"))
+                .andExpect(jsonPath("$.detail").value("Invalid value provided."));
+    }
+
+    @Test
+    @DisplayName("Should return 409 Conflict when updating product name to an existing name")
+    void shouldReturn409ConflictWhenUpdatingProductNameToExistingName() throws Exception {
+        UUID id = savedProducts.get(0).getId();
+        String existingOtherName = savedProducts.get(1).getName();
+
+        String requestJson = """
+                {
+                    "name": "%s",
+                    "description": "Updated Description",
+                    "price": 1099.99
+                }
+                """.formatted(existingOtherName);
+
+        mockMvc.perform(put("/v1/products/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.title").value("Conflict"))
+                .andExpect(jsonPath("$.detail").value("Product already exists with name: " + existingOtherName));
+    }
+
+    @Test
+    @DisplayName("Should update product successfully when name is unchanged")
+    void shouldUpdateProductSuccessfullyWhenNameIsUnchanged() throws Exception {
+        ProductEntity existing = savedProducts.getFirst();
+        UUID id = existing.getId();
+        String currentName = existing.getName();
+
+        String requestJson = """
+                {
+                    "name": "%s",
+                    "description": "New Description Same Name",
+                    "price": 1299.99
+                }
+                """.formatted(currentName);
+
+        mockMvc.perform(put("/v1/products/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(id.toString()))
+                .andExpect(jsonPath("$.name").value(currentName))
+                .andExpect(jsonPath("$.description").value("New Description Same Name"))
+                .andExpect(jsonPath("$.price").value(1299.99))
+                .andExpect(jsonPath("$.stockQuantity").value(existing.getStockQuantity()));
+
+        ProductEntity updatedInDb = productJpaRepository.findById(id).orElseThrow();
+        assertEquals(id, updatedInDb.getId());
+        assertEquals(currentName, updatedInDb.getName());
+        assertEquals("New Description Same Name", updatedInDb.getDescription());
+        assertEquals(new BigDecimal("1299.99"), updatedInDb.getPrice());
+        assertEquals(existing.getStockQuantity(), updatedInDb.getStockQuantity());
+        assertEquals(existing.getCreatedAt(), updatedInDb.getCreatedAt());
     }
 }

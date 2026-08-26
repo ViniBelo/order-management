@@ -1,10 +1,13 @@
 package br.com.devpasso.order_management.application.service;
 
 import br.com.devpasso.order_management.application.dto.command.CreateProductCommand;
+import br.com.devpasso.order_management.application.dto.command.UpdateProductCommand;
+import br.com.devpasso.order_management.application.dto.response.ProductResponse;
 import br.com.devpasso.order_management.application.exception.ResourceConflictException;
 import br.com.devpasso.order_management.application.usecase.CreateProductUseCase;
 import br.com.devpasso.order_management.application.usecase.FindProductByIdUseCase;
 import br.com.devpasso.order_management.application.usecase.ListProductsUseCase;
+import br.com.devpasso.order_management.application.usecase.UpdateProductUseCase;
 import br.com.devpasso.order_management.domain.common.PaginatedResult;
 import br.com.devpasso.order_management.domain.common.PaginationQuery;
 import br.com.devpasso.order_management.domain.exception.ResourceNotFoundException;
@@ -13,7 +16,8 @@ import br.com.devpasso.order_management.domain.model.Product;
 
 public class ProductsService implements ListProductsUseCase,
         FindProductByIdUseCase,
-        CreateProductUseCase {
+        CreateProductUseCase,
+        UpdateProductUseCase {
     private final ProductRepository productRepository;
 
     public ProductsService(ProductRepository productRepository) {
@@ -32,11 +36,29 @@ public class ProductsService implements ListProductsUseCase,
     }
 
     @Override
-    public Product execute(CreateProductCommand product) {
-        if (productRepository.existsByName(product.name())) {
-            throw new ResourceConflictException("Product already exists with name: " + product.name());
-        }
-        Product newProduct = product.toDomainModel();
+    public Product execute(CreateProductCommand command) {
+        validateDuplicatedName(command.name());
+        Product newProduct = command.toDomainModel();
         return productRepository.save(newProduct);
+    }
+
+    @Override
+    public Product execute(String id, UpdateProductCommand command) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found for ID: " + id));
+
+        if (!product.getName().equals(command.name())) {
+            validateDuplicatedName(command.name());
+            product.changeName(command.name());
+        }
+
+        product.changeDescription(command.description());
+        product.changePrice(command.price());
+        return productRepository.save(product);
+    }
+
+    private void validateDuplicatedName(String name) {
+        if (productRepository.existsByName(name))
+            throw new ResourceConflictException("Product already exists with name: " + name);
     }
 }

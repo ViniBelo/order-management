@@ -1,19 +1,25 @@
 package br.com.devpasso.order_management.api.controller;
 
 import br.com.devpasso.order_management.api.dto.CreateProductRequest;
-import br.com.devpasso.order_management.api.mapper.ProductRequestMapper;
+import br.com.devpasso.order_management.api.dto.UpdateProductRequest;
+import br.com.devpasso.order_management.api.mapper.CreateProductRequestMapper;
+import br.com.devpasso.order_management.api.mapper.UpdateProductRequestMapper;
 import br.com.devpasso.order_management.application.dto.command.CreateProductCommand;
+import br.com.devpasso.order_management.application.dto.command.UpdateProductCommand;
 import br.com.devpasso.order_management.application.dto.response.CreateProductResponse;
 import br.com.devpasso.order_management.application.dto.response.PaginatedResponse;
 import br.com.devpasso.order_management.application.dto.response.ProductResponse;
+import br.com.devpasso.order_management.application.exception.ResourceConflictException;
 import br.com.devpasso.order_management.application.mapper.ProductResponseMapper;
 import br.com.devpasso.order_management.application.mapper.WebPaginationMapper;
 import br.com.devpasso.order_management.application.usecase.CreateProductUseCase;
 import br.com.devpasso.order_management.application.usecase.FindProductByIdUseCase;
 import br.com.devpasso.order_management.application.usecase.ListProductsUseCase;
+import br.com.devpasso.order_management.application.usecase.UpdateProductUseCase;
 import br.com.devpasso.order_management.domain.common.PaginatedResult;
-import br.com.devpasso.order_management.domain.model.Product;
 import br.com.devpasso.order_management.domain.common.PaginationQuery;
+import br.com.devpasso.order_management.domain.exception.ResourceNotFoundException;
+import br.com.devpasso.order_management.domain.model.Product;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,8 +37,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,13 +53,19 @@ class ProductsControllerTest {
     private CreateProductUseCase createProductUseCase;
 
     @Mock
+    private UpdateProductUseCase updateProductUseCase;
+
+    @Mock
     private WebPaginationMapper paginationMapper;
 
     @Mock
     private ProductResponseMapper mapper;
 
     @Mock
-    private ProductRequestMapper productRequestMapper;
+    private CreateProductRequestMapper createProductRequestMapper;
+
+    @Mock
+    private UpdateProductRequestMapper updateProductRequestMapper;
 
     @InjectMocks
     private ProductsController productsController;
@@ -104,6 +115,37 @@ class ProductsControllerTest {
     }
 
     @Test
+    @DisplayName("Should return empty paginated response when no products found")
+    void listAll_ShouldReturnOkWithEmptyPaginatedProducts() {
+        // Given
+        PaginationQuery paginationQuery = new PaginationQuery(0, 20, "");
+        Pageable pageable = PageRequest.of(paginationQuery.page(), paginationQuery.size());
+        String name = "Nonexistent";
+
+        PaginatedResult<Product> emptyPaginatedResult = new PaginatedResult<>(
+                List.of(), 0, 20, 0, 0
+        );
+
+        when(paginationMapper.toDomainQuery(pageable))
+                .thenReturn(paginationQuery);
+        when(listProductsUseCase.execute(paginationQuery, name))
+                .thenReturn(emptyPaginatedResult);
+
+        // When
+        ResponseEntity<PaginatedResponse<ProductResponse>> result = productsController.listAll(pageable, name);
+
+        // Then
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertNotNull(result.getBody());
+        assertEquals(0, result.getBody().totalElements());
+        assertTrue(result.getBody().content().isEmpty());
+
+        verify(paginationMapper).toDomainQuery(pageable);
+        verify(listProductsUseCase).execute(paginationQuery, name);
+        verifyNoInteractions(mapper);
+    }
+
+    @Test
     @DisplayName("Should return product by ID")
     void findById_ShouldReturnOkWithProduct() {
         // Given
@@ -137,6 +179,26 @@ class ProductsControllerTest {
     }
 
     @Test
+    @DisplayName("Should throw ResourceNotFoundException when product not found by ID")
+    void findById_ShouldThrowResourceNotFoundExceptionWhenProductNotFound() {
+        // Given
+        UUID id = UUID.randomUUID();
+
+        when(findProductByIdUseCase.execute(id.toString()))
+                .thenThrow(new ResourceNotFoundException("Product not found for ID: " + id));
+
+        // When & Then
+        ResourceNotFoundException exception = assertThrows(
+                ResourceNotFoundException.class,
+                () -> productsController.findById(id)
+        );
+
+        assertEquals("Product not found for ID: " + id, exception.getMessage());
+        verify(findProductByIdUseCase).execute(id.toString());
+        verifyNoInteractions(mapper);
+    }
+
+    @Test
     @DisplayName("Should create product and return created status with location header")
     void createProduct_ShouldReturnCreatedWithLocationAndProductResponse() {
         // Given
@@ -165,7 +227,7 @@ class ProductsControllerTest {
                 createdAt
         );
 
-        when(productRequestMapper.toCommand(request)).thenReturn(command);
+        when(createProductRequestMapper.toCommand(request)).thenReturn(command);
         when(createProductUseCase.execute(command)).thenReturn(createdProduct);
 
         // When
@@ -182,7 +244,158 @@ class ProductsControllerTest {
         assertEquals(request.stockQuantity(), result.getBody().stockQuantity());
         assertEquals(createdAt.toString(), result.getBody().createdAt());
 
-        verify(productRequestMapper).toCommand(request);
+        verify(createProductRequestMapper).toCommand(request);
         verify(createProductUseCase).execute(command);
+    }
+
+    @Test
+    @DisplayName("Should throw ResourceConflictException when creating product with duplicate name")
+    void createProduct_ShouldThrowResourceConflictExceptionWhenNameAlreadyExists() {
+        // Given
+        CreateProductRequest request = new CreateProductRequest(
+                "Duplicate Product",
+                "Product description",
+                new BigDecimal("49.99"),
+                10
+        );
+
+        CreateProductCommand command = new CreateProductCommand(
+                request.name(),
+                request.description(),
+                request.price(),
+                request.stockQuantity()
+        );
+
+        when(createProductRequestMapper.toCommand(request)).thenReturn(command);
+        when(createProductUseCase.execute(command))
+                .thenThrow(new ResourceConflictException("Product already exists with name: " + request.name()));
+
+        // When & Then
+        ResourceConflictException exception = assertThrows(
+                ResourceConflictException.class,
+                () -> productsController.createProduct(request)
+        );
+
+        assertEquals("Product already exists with name: " + request.name(), exception.getMessage());
+        verify(createProductRequestMapper).toCommand(request);
+        verify(createProductUseCase).execute(command);
+    }
+
+    @Test
+    @DisplayName("Should update product and return ok status with product response")
+    void updateProduct_ShouldReturnOkWithProductResponse() {
+        // Given
+        UUID productId = UUID.randomUUID();
+        UpdateProductRequest request = new UpdateProductRequest(
+                "Updated Name",
+                "Updated Description",
+                new BigDecimal("59.99")
+        );
+
+        UpdateProductCommand command = new UpdateProductCommand(
+                request.name(),
+                request.description(),
+                request.price()
+        );
+
+        Instant createdAt = Instant.now();
+        Product updatedProduct = new Product(
+                productId,
+                request.name(),
+                request.description(),
+                request.price(),
+                10,
+                createdAt
+        );
+
+        ProductResponse response = new ProductResponse(
+                productId,
+                request.name(),
+                request.description(),
+                request.price(),
+                10
+        );
+
+        when(updateProductRequestMapper.toCommand(request)).thenReturn(command);
+        when(updateProductUseCase.execute(productId.toString(), command)).thenReturn(updatedProduct);
+        when(mapper.toResponse(updatedProduct)).thenReturn(response);
+
+        // When
+        ResponseEntity<ProductResponse> result = productsController.updateProduct(productId, request);
+
+        // Then
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertNotNull(result.getBody());
+        assertEquals(response, result.getBody());
+
+        verify(updateProductRequestMapper).toCommand(request);
+        verify(updateProductUseCase).execute(productId.toString(), command);
+        verify(mapper).toResponse(updatedProduct);
+    }
+
+    @Test
+    @DisplayName("Should throw ResourceNotFoundException when updating non-existent product")
+    void updateProduct_ShouldThrowResourceNotFoundExceptionWhenProductNotFound() {
+        // Given
+        UUID productId = UUID.randomUUID();
+        UpdateProductRequest request = new UpdateProductRequest(
+                "Updated Name",
+                "Updated Description",
+                new BigDecimal("59.99")
+        );
+
+        UpdateProductCommand command = new UpdateProductCommand(
+                request.name(),
+                request.description(),
+                request.price()
+        );
+
+        when(updateProductRequestMapper.toCommand(request)).thenReturn(command);
+        when(updateProductUseCase.execute(productId.toString(), command))
+                .thenThrow(new ResourceNotFoundException("Product not found for ID: " + productId));
+
+        // When & Then
+        ResourceNotFoundException exception = assertThrows(
+                ResourceNotFoundException.class,
+                () -> productsController.updateProduct(productId, request)
+        );
+
+        assertEquals("Product not found for ID: " + productId, exception.getMessage());
+        verify(updateProductRequestMapper).toCommand(request);
+        verify(updateProductUseCase).execute(productId.toString(), command);
+        verifyNoInteractions(mapper);
+    }
+
+    @Test
+    @DisplayName("Should throw ResourceConflictException when updating product with duplicate name")
+    void updateProduct_ShouldThrowResourceConflictExceptionWhenNameAlreadyExists() {
+        // Given
+        UUID productId = UUID.randomUUID();
+        UpdateProductRequest request = new UpdateProductRequest(
+                "Existing Name",
+                "Updated Description",
+                new BigDecimal("59.99")
+        );
+
+        UpdateProductCommand command = new UpdateProductCommand(
+                request.name(),
+                request.description(),
+                request.price()
+        );
+
+        when(updateProductRequestMapper.toCommand(request)).thenReturn(command);
+        when(updateProductUseCase.execute(productId.toString(), command))
+                .thenThrow(new ResourceConflictException("Product already exists with name: " + request.name()));
+
+        // When & Then
+        ResourceConflictException exception = assertThrows(
+                ResourceConflictException.class,
+                () -> productsController.updateProduct(productId, request)
+        );
+
+        assertEquals("Product already exists with name: " + request.name(), exception.getMessage());
+        verify(updateProductRequestMapper).toCommand(request);
+        verify(updateProductUseCase).execute(productId.toString(), command);
+        verifyNoInteractions(mapper);
     }
 }

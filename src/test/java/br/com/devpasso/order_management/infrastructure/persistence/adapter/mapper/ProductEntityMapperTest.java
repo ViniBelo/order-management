@@ -34,9 +34,11 @@ class ProductEntityMapperTest {
 
         // Then
         assertNotNull(entity);
+        assertEquals(id, entity.getId());
         assertEquals(name, entity.getName());
         assertEquals(description, entity.getDescription());
         assertEquals(price, entity.getPrice());
         assertEquals(stockQuantity, entity.getStockQuantity());
+        assertEquals(createdAt, entity.getCreatedAt());
     }
 }

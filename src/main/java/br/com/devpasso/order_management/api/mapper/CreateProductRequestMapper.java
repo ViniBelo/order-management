@@ -5,7 +5,7 @@ import br.com.devpasso.order_management.application.dto.command.CreateProductCom
 import org.springframework.stereotype.Component;
 
 @Component
-public class ProductRequestMapper {
+public class CreateProductRequestMapper {
     public CreateProductCommand toCommand(CreateProductRequest createProductRequest) {
         return new CreateProductCommand(
                 createProductRequest.name(),

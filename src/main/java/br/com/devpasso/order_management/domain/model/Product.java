@@ -6,9 +6,9 @@ import java.util.UUID;
 
 public class Product {
     private final UUID id;
-    private final String name;
-    private final String description;
-    private final BigDecimal price;
+    private String name;
+    private String description;
+    private BigDecimal price;
     private final Integer stockQuantity;
     private final Instant createdAt;
 
@@ -34,12 +34,24 @@ public class Product {
         return name;
     }
 
+    public void changeName(String name) {
+        this.name = name;
+    }
+
     public String getDescription() {
         return description;
     }
 
+    public void changeDescription(String description) {
+        this.description = description;
+    }
+
     public BigDecimal getPrice() {
         return price;
+    }
+
+    public void changePrice(BigDecimal price) {
+        this.price = price;
     }
 
     public Integer getStockQuantity() {

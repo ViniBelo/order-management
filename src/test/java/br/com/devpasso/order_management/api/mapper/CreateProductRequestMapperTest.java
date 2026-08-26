@@ -10,9 +10,9 @@ import java.math.BigDecimal;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-class ProductRequestMapperTest {
+class CreateProductRequestMapperTest {
 
-    private final ProductRequestMapper mapper = new ProductRequestMapper();
+    private final CreateProductRequestMapper mapper = new CreateProductRequestMapper();
 
     @Test
     @DisplayName("Should map create product request to create product command")

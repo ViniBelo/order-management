@@ -1,13 +1,17 @@
 package br.com.devpasso.order_management.api.controller;
 
 import br.com.devpasso.order_management.api.dto.CreateProductRequest;
+import br.com.devpasso.order_management.api.dto.UpdateProductRequest;
+import br.com.devpasso.order_management.api.mapper.UpdateProductRequestMapper;
 import br.com.devpasso.order_management.application.dto.command.CreateProductCommand;
+import br.com.devpasso.order_management.application.dto.command.UpdateProductCommand;
 import br.com.devpasso.order_management.application.dto.response.CreateProductResponse;
-import br.com.devpasso.order_management.api.mapper.ProductRequestMapper;
+import br.com.devpasso.order_management.api.mapper.CreateProductRequestMapper;
 import br.com.devpasso.order_management.application.dto.response.PaginatedResponse;
 import br.com.devpasso.order_management.application.mapper.WebPaginationMapper;
 import br.com.devpasso.order_management.application.usecase.CreateProductUseCase;
 import br.com.devpasso.order_management.application.usecase.FindProductByIdUseCase;
+import br.com.devpasso.order_management.application.usecase.UpdateProductUseCase;
 import br.com.devpasso.order_management.domain.common.PaginatedResult;
 import br.com.devpasso.order_management.application.dto.response.ProductResponse;
 import br.com.devpasso.order_management.application.mapper.ProductResponseMapper;
@@ -38,22 +42,28 @@ public class ProductsController {
     private final ListProductsUseCase listProductsUseCase;
     private final FindProductByIdUseCase findProductByIdUseCase;
     private final CreateProductUseCase createProductUseCase;
+    private final UpdateProductUseCase updateProductUseCase;
     private final WebPaginationMapper paginationMapper;
     private final ProductResponseMapper productResponseMapper;
-    private final ProductRequestMapper productRequestMapper;
+    private final CreateProductRequestMapper createProductRequestMapper;
+    private final UpdateProductRequestMapper updateProductRequestMapper;
 
     public ProductsController(ListProductsUseCase listProductsUseCase,
                               FindProductByIdUseCase findProductByIdUseCase,
                               CreateProductUseCase createProductUseCase,
+                              UpdateProductUseCase updateProductUseCase,
                               WebPaginationMapper paginationMapper,
                               ProductResponseMapper productResponseMapper,
-                              ProductRequestMapper productRequestMapper) {
+                              CreateProductRequestMapper createProductRequestMapper,
+                              UpdateProductRequestMapper updateProductRequestMapper) {
         this.listProductsUseCase = listProductsUseCase;
         this.findProductByIdUseCase = findProductByIdUseCase;
         this.createProductUseCase = createProductUseCase;
+        this.updateProductUseCase = updateProductUseCase;
         this.paginationMapper = paginationMapper;
         this.productResponseMapper = productResponseMapper;
-        this.productRequestMapper = productRequestMapper;
+        this.createProductRequestMapper = createProductRequestMapper;
+        this.updateProductRequestMapper = updateProductRequestMapper;
     }
 
     @GetMapping
@@ -118,9 +128,32 @@ public class ProductsController {
             @Valid
             CreateProductRequest createProductRequest
     ) {
-        CreateProductCommand productToCreate = productRequestMapper.toCommand(createProductRequest);
-        Product createdProduct = createProductUseCase.execute(productToCreate);
-        return ResponseEntity.created(URI.create("/v1/products/" + createdProduct.getId()))
-                .body(CreateProductResponse.build(createdProduct));
+        CreateProductCommand productToCreate = createProductRequestMapper.toCommand(createProductRequest);
+        CreateProductResponse createdProduct = CreateProductResponse.build(createProductUseCase.execute(productToCreate));
+        return ResponseEntity.created(URI.create("/v1/products/" + createdProduct.id()))
+                .body(createdProduct);
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Updates products fields, except stock")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Product updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "404", description = "Product not found",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity<ProductResponse> updateProduct(
+            @PathVariable UUID id,
+            @RequestBody
+            @Valid
+            UpdateProductRequest updateProductRequest
+    ) {
+        UpdateProductCommand updateProductCommand = updateProductRequestMapper.toCommand(updateProductRequest);
+        ProductResponse updatedProduct = productResponseMapper.toResponse(updateProductUseCase.execute(id.toString(),
+                updateProductCommand));
+        return ResponseEntity.ok(updatedProduct);
     }
 }

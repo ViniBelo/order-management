@@ -58,6 +58,14 @@ public class ProductEntity {
         return createdAt;
     }
 
+    public void changeId(UUID id) {
+        this.id = id;
+    }
+
+    public void changeCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
+
     public void changeName(String name) {
         this.name = name;
     }

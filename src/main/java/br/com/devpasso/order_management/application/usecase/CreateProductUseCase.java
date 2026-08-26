@@ -4,5 +4,5 @@ import br.com.devpasso.order_management.application.dto.command.CreateProductCom
 import br.com.devpasso.order_management.domain.model.Product;
 
 public interface CreateProductUseCase {
-    Product execute(CreateProductCommand product);
+    Product execute(CreateProductCommand command);
 }
