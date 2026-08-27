@@ -2,10 +2,13 @@ package br.com.devpasso.order_management.api.controller;
 
 import br.com.devpasso.order_management.api.dto.CreateProductRequest;
 import br.com.devpasso.order_management.api.dto.UpdateProductRequest;
+import br.com.devpasso.order_management.api.dto.UpdateProductStockRequest;
 import br.com.devpasso.order_management.api.mapper.CreateProductRequestMapper;
 import br.com.devpasso.order_management.api.mapper.UpdateProductRequestMapper;
+import br.com.devpasso.order_management.api.mapper.UpdateProductStockRequestMapper;
 import br.com.devpasso.order_management.application.dto.command.CreateProductCommand;
 import br.com.devpasso.order_management.application.dto.command.UpdateProductCommand;
+import br.com.devpasso.order_management.application.dto.command.UpdateProductStockCommand;
 import br.com.devpasso.order_management.application.dto.response.CreateProductResponse;
 import br.com.devpasso.order_management.application.dto.response.PaginatedResponse;
 import br.com.devpasso.order_management.application.dto.response.ProductResponse;
@@ -15,6 +18,7 @@ import br.com.devpasso.order_management.application.mapper.WebPaginationMapper;
 import br.com.devpasso.order_management.application.usecase.CreateProductUseCase;
 import br.com.devpasso.order_management.application.usecase.FindProductByIdUseCase;
 import br.com.devpasso.order_management.application.usecase.ListProductsUseCase;
+import br.com.devpasso.order_management.application.usecase.UpdateProductStockUseCase;
 import br.com.devpasso.order_management.application.usecase.UpdateProductUseCase;
 import br.com.devpasso.order_management.domain.common.PaginatedResult;
 import br.com.devpasso.order_management.domain.common.PaginationQuery;
@@ -56,6 +60,9 @@ class ProductsControllerTest {
     private UpdateProductUseCase updateProductUseCase;
 
     @Mock
+    private UpdateProductStockUseCase updateProductStockUseCase;
+
+    @Mock
     private WebPaginationMapper paginationMapper;
 
     @Mock
@@ -66,6 +73,9 @@ class ProductsControllerTest {
 
     @Mock
     private UpdateProductRequestMapper updateProductRequestMapper;
+
+    @Mock
+    private UpdateProductStockRequestMapper updateProductStockRequestMapper;
 
     @InjectMocks
     private ProductsController productsController;
@@ -396,6 +406,73 @@ class ProductsControllerTest {
         assertEquals("Product already exists with name: " + request.name(), exception.getMessage());
         verify(updateProductRequestMapper).toCommand(request);
         verify(updateProductUseCase).execute(productId.toString(), command);
+        verifyNoInteractions(mapper);
+    }
+
+    @Test
+    @DisplayName("Should update product stock and return ok status with product response")
+    void updateStock_ShouldReturnOkWithProductResponse() {
+        // Given
+        UUID productId = UUID.randomUUID();
+        UpdateProductStockRequest request = new UpdateProductStockRequest(50);
+        UpdateProductStockCommand command = new UpdateProductStockCommand(50);
+
+        Instant createdAt = Instant.now();
+        Product updatedProduct = new Product(
+                productId,
+                "Test Product",
+                "Test Description",
+                new BigDecimal("29.99"),
+                50,
+                createdAt
+        );
+
+        ProductResponse response = new ProductResponse(
+                productId,
+                "Test Product",
+                "Test Description",
+                new BigDecimal("29.99"),
+                50
+        );
+
+        when(updateProductStockRequestMapper.toCommand(request)).thenReturn(command);
+        when(updateProductStockUseCase.execute(productId.toString(), command)).thenReturn(updatedProduct);
+        when(mapper.toResponse(updatedProduct)).thenReturn(response);
+
+        // When
+        ResponseEntity<ProductResponse> result = productsController.updateStock(productId, request);
+
+        // Then
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertNotNull(result.getBody());
+        assertEquals(response, result.getBody());
+
+        verify(updateProductStockRequestMapper).toCommand(request);
+        verify(updateProductStockUseCase).execute(productId.toString(), command);
+        verify(mapper).toResponse(updatedProduct);
+    }
+
+    @Test
+    @DisplayName("Should throw ResourceNotFoundException when updating stock of non-existent product")
+    void updateStock_ShouldThrowResourceNotFoundExceptionWhenProductNotFound() {
+        // Given
+        UUID productId = UUID.randomUUID();
+        UpdateProductStockRequest request = new UpdateProductStockRequest(50);
+        UpdateProductStockCommand command = new UpdateProductStockCommand(50);
+
+        when(updateProductStockRequestMapper.toCommand(request)).thenReturn(command);
+        when(updateProductStockUseCase.execute(productId.toString(), command))
+                .thenThrow(new ResourceNotFoundException("Product not found for ID: " + productId));
+
+        // When & Then
+        ResourceNotFoundException exception = assertThrows(
+                ResourceNotFoundException.class,
+                () -> productsController.updateStock(productId, request)
+        );
+
+        assertEquals("Product not found for ID: " + productId, exception.getMessage());
+        verify(updateProductStockRequestMapper).toCommand(request);
+        verify(updateProductStockUseCase).execute(productId.toString(), command);
         verifyNoInteractions(mapper);
     }
 }

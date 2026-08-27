@@ -10,6 +10,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @Hidden
 @RestControllerAdvice
@@ -19,7 +20,8 @@ public class GlobalExceptionHandler {
      * Handles 400 Bad Request: When the user passes a sort parameter that does not exist in the Entity,
      * or formats the query parameters incorrectly.
      */
-    @ExceptionHandler({PropertyReferenceException.class, InvalidDataAccessApiUsageException.class})
+    @ExceptionHandler({PropertyReferenceException.class,
+            InvalidDataAccessApiUsageException.class})
     public ProblemDetail handleInvalidSortParameter(RuntimeException e) {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_REQUEST,
@@ -31,10 +33,11 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handles 400 Bad Request: When the user passes invalid payload values failing validation.
+     * Handles 400 Bad Request: When the user passes invalid payload values failing validation or path variable format fails.
      */
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ProblemDetail handleMethodArgumentNotValid(MethodArgumentNotValidException e) {
+    @ExceptionHandler({MethodArgumentNotValidException.class,
+            MethodArgumentTypeMismatchException.class})
+    public ProblemDetail handleMethodArgumentNotValid(Exception e) {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_REQUEST,
                 "Invalid value provided."

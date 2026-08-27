@@ -2,20 +2,24 @@ package br.com.devpasso.order_management.api.controller;
 
 import br.com.devpasso.order_management.api.dto.CreateProductRequest;
 import br.com.devpasso.order_management.api.dto.UpdateProductRequest;
+import br.com.devpasso.order_management.api.dto.UpdateProductStockRequest;
+import br.com.devpasso.order_management.api.mapper.CreateProductRequestMapper;
 import br.com.devpasso.order_management.api.mapper.UpdateProductRequestMapper;
+import br.com.devpasso.order_management.api.mapper.UpdateProductStockRequestMapper;
 import br.com.devpasso.order_management.application.dto.command.CreateProductCommand;
 import br.com.devpasso.order_management.application.dto.command.UpdateProductCommand;
+import br.com.devpasso.order_management.application.dto.command.UpdateProductStockCommand;
 import br.com.devpasso.order_management.application.dto.response.CreateProductResponse;
-import br.com.devpasso.order_management.api.mapper.CreateProductRequestMapper;
 import br.com.devpasso.order_management.application.dto.response.PaginatedResponse;
+import br.com.devpasso.order_management.application.dto.response.ProductResponse;
+import br.com.devpasso.order_management.application.mapper.ProductResponseMapper;
 import br.com.devpasso.order_management.application.mapper.WebPaginationMapper;
 import br.com.devpasso.order_management.application.usecase.CreateProductUseCase;
 import br.com.devpasso.order_management.application.usecase.FindProductByIdUseCase;
+import br.com.devpasso.order_management.application.usecase.ListProductsUseCase;
+import br.com.devpasso.order_management.application.usecase.UpdateProductStockUseCase;
 import br.com.devpasso.order_management.application.usecase.UpdateProductUseCase;
 import br.com.devpasso.order_management.domain.common.PaginatedResult;
-import br.com.devpasso.order_management.application.dto.response.ProductResponse;
-import br.com.devpasso.order_management.application.mapper.ProductResponseMapper;
-import br.com.devpasso.order_management.application.usecase.ListProductsUseCase;
 import br.com.devpasso.order_management.domain.model.Product;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -43,27 +47,33 @@ public class ProductsController {
     private final FindProductByIdUseCase findProductByIdUseCase;
     private final CreateProductUseCase createProductUseCase;
     private final UpdateProductUseCase updateProductUseCase;
+    private final UpdateProductStockUseCase updateProductStockUseCase;
     private final WebPaginationMapper paginationMapper;
     private final ProductResponseMapper productResponseMapper;
     private final CreateProductRequestMapper createProductRequestMapper;
     private final UpdateProductRequestMapper updateProductRequestMapper;
+    private final UpdateProductStockRequestMapper updateProductStockRequestMapper;
 
     public ProductsController(ListProductsUseCase listProductsUseCase,
                               FindProductByIdUseCase findProductByIdUseCase,
                               CreateProductUseCase createProductUseCase,
                               UpdateProductUseCase updateProductUseCase,
+                              UpdateProductStockUseCase updateProductStockUseCase,
                               WebPaginationMapper paginationMapper,
                               ProductResponseMapper productResponseMapper,
                               CreateProductRequestMapper createProductRequestMapper,
-                              UpdateProductRequestMapper updateProductRequestMapper) {
+                              UpdateProductRequestMapper updateProductRequestMapper,
+                              UpdateProductStockRequestMapper updateProductStockRequestMapper) {
         this.listProductsUseCase = listProductsUseCase;
         this.findProductByIdUseCase = findProductByIdUseCase;
         this.createProductUseCase = createProductUseCase;
         this.updateProductUseCase = updateProductUseCase;
+        this.updateProductStockUseCase = updateProductStockUseCase;
         this.paginationMapper = paginationMapper;
         this.productResponseMapper = productResponseMapper;
         this.createProductRequestMapper = createProductRequestMapper;
         this.updateProductRequestMapper = updateProductRequestMapper;
+        this.updateProductStockRequestMapper = updateProductStockRequestMapper;
     }
 
     @GetMapping
@@ -154,6 +164,27 @@ public class ProductsController {
         UpdateProductCommand updateProductCommand = updateProductRequestMapper.toCommand(updateProductRequest);
         ProductResponse updatedProduct = productResponseMapper.toResponse(updateProductUseCase.execute(id.toString(),
                 updateProductCommand));
+        return ResponseEntity.ok(updatedProduct);
+    }
+
+    @PatchMapping("/{id}/stock")
+    @Operation(summary = "Update product stock quantity")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Stock updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "404", description = "Product not found",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity<ProductResponse> updateStock(
+            @PathVariable UUID id,
+            @RequestBody @Valid UpdateProductStockRequest updateProductStockRequest
+    ) {
+        UpdateProductStockCommand command = updateProductStockRequestMapper.toCommand(updateProductStockRequest);
+        ProductResponse updatedProduct = productResponseMapper.toResponse(updateProductStockUseCase.execute(id.toString(),
+                command));
         return ResponseEntity.ok(updatedProduct);
     }
 }

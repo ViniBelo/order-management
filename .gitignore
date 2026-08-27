@@ -19,6 +19,9 @@ target/
 *.iml
 *.ipr
 
+### IntelliJ AI ###
+.junie
+
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/

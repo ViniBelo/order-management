@@ -23,6 +23,7 @@ import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -505,5 +506,125 @@ class ProductsControllerIT {
         assertEquals(new BigDecimal("1299.99"), updatedInDb.getPrice());
         assertEquals(existing.getStockQuantity(), updatedInDb.getStockQuantity());
         assertEquals(existing.getCreatedAt(), updatedInDb.getCreatedAt());
+    }
+
+    @Test
+    @DisplayName("Should update product stock successfully")
+    void shouldUpdateProductStockSuccessfully() throws Exception {
+        ProductEntity existing = savedProducts.getFirst();
+        UUID id = existing.getId();
+
+        String requestJson = """
+                {
+                    "stockQuantity": 50
+                }
+                """;
+
+        mockMvc.perform(patch("/v1/products/{id}/stock", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(id.toString()))
+                .andExpect(jsonPath("$.name").value(existing.getName()))
+                .andExpect(jsonPath("$.description").value(existing.getDescription()))
+                .andExpect(jsonPath("$.price").value(existing.getPrice().doubleValue()))
+                .andExpect(jsonPath("$.stockQuantity").value(50));
+
+        ProductEntity updatedInDb = productJpaRepository.findById(id).orElseThrow();
+        assertEquals(id, updatedInDb.getId());
+        assertEquals(existing.getName(), updatedInDb.getName());
+        assertEquals(existing.getDescription(), updatedInDb.getDescription());
+        assertEquals(existing.getPrice(), updatedInDb.getPrice());
+        assertEquals(50, updatedInDb.getStockQuantity());
+        assertEquals(existing.getCreatedAt(), updatedInDb.getCreatedAt());
+    }
+
+    @Test
+    @DisplayName("Should update product stock to zero successfully")
+    void shouldUpdateProductStockToZeroSuccessfully() throws Exception {
+        ProductEntity existing = savedProducts.getFirst();
+        UUID id = existing.getId();
+
+        String requestJson = """
+                {
+                    "stockQuantity": 0
+                }
+                """;
+
+        mockMvc.perform(patch("/v1/products/{id}/stock", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(id.toString()))
+                .andExpect(jsonPath("$.stockQuantity").value(0));
+
+        ProductEntity updatedInDb = productJpaRepository.findById(id).orElseThrow();
+        assertEquals(0, updatedInDb.getStockQuantity());
+    }
+
+    @Test
+    @DisplayName("Should return 404 Not Found when updating stock of non-existent product")
+    void shouldReturn404WhenUpdatingStockOfNonExistentProduct() throws Exception {
+        UUID nonExistentId = UUID.randomUUID();
+        String requestJson = """
+                {
+                    "stockQuantity": 50
+                }
+                """;
+
+        mockMvc.perform(patch("/v1/products/{id}/stock", nonExistentId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.title").value("Not Found"))
+                .andExpect(jsonPath("$.detail").value("The requested resource could not be found."));
+    }
+
+    @Test
+    @DisplayName("Should return 400 Bad Request when stock quantity is negative")
+    void shouldReturn400WhenStockIsNegative() throws Exception {
+        UUID id = savedProducts.getFirst().getId();
+        String requestJson = """
+                {
+                    "stockQuantity": -5
+                }
+                """;
+
+        mockMvc.perform(patch("/v1/products/{id}/stock", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Bad Request"))
+                .andExpect(jsonPath("$.detail").value("Invalid value provided."));
+    }
+
+    @Test
+    @DisplayName("Should return 400 Bad Request when stock quantity is null or body is empty")
+    void shouldReturn400WhenStockIsNull() throws Exception {
+        UUID id = savedProducts.getFirst().getId();
+
+        mockMvc.perform(patch("/v1/products/{id}/stock", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Bad Request"))
+                .andExpect(jsonPath("$.detail").value("Invalid value provided."));
+    }
+
+    @Test
+    @DisplayName("Should return 400 Bad Request when ID is not a valid UUID")
+    void shouldReturn400WhenUpdatingStockWithInvalidUUID() throws Exception {
+        String requestJson = """
+                {
+                    "stockQuantity": 10
+                }
+                """;
+
+        mockMvc.perform(patch("/v1/products/{id}/stock", "invalid-uuid")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isBadRequest());
     }
 }

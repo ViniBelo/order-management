@@ -9,7 +9,7 @@ public class Product {
     private String name;
     private String description;
     private BigDecimal price;
-    private final Integer stockQuantity;
+    private Integer stockQuantity;
     private final Instant createdAt;
 
     public Product(UUID id,
@@ -56,6 +56,13 @@ public class Product {
 
     public Integer getStockQuantity() {
         return stockQuantity;
+    }
+
+    public void changeStockQuantity(Integer stockQuantity) {
+        if (stockQuantity == null || stockQuantity < 0) {
+            throw new IllegalArgumentException("Stock quantity cannot be negative");
+        }
+        this.stockQuantity = stockQuantity;
     }
 
     public Instant getCreatedAt() {

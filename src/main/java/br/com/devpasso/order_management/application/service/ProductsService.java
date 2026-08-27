@@ -2,11 +2,13 @@ package br.com.devpasso.order_management.application.service;
 
 import br.com.devpasso.order_management.application.dto.command.CreateProductCommand;
 import br.com.devpasso.order_management.application.dto.command.UpdateProductCommand;
+import br.com.devpasso.order_management.application.dto.command.UpdateProductStockCommand;
 import br.com.devpasso.order_management.application.dto.response.ProductResponse;
 import br.com.devpasso.order_management.application.exception.ResourceConflictException;
 import br.com.devpasso.order_management.application.usecase.CreateProductUseCase;
 import br.com.devpasso.order_management.application.usecase.FindProductByIdUseCase;
 import br.com.devpasso.order_management.application.usecase.ListProductsUseCase;
+import br.com.devpasso.order_management.application.usecase.UpdateProductStockUseCase;
 import br.com.devpasso.order_management.application.usecase.UpdateProductUseCase;
 import br.com.devpasso.order_management.domain.common.PaginatedResult;
 import br.com.devpasso.order_management.domain.common.PaginationQuery;
@@ -17,7 +19,8 @@ import br.com.devpasso.order_management.domain.model.Product;
 public class ProductsService implements ListProductsUseCase,
         FindProductByIdUseCase,
         CreateProductUseCase,
-        UpdateProductUseCase {
+        UpdateProductUseCase,
+        UpdateProductStockUseCase {
     private final ProductRepository productRepository;
 
     public ProductsService(ProductRepository productRepository) {
@@ -31,8 +34,7 @@ public class ProductsService implements ListProductsUseCase,
 
     @Override
     public Product execute(String id) {
-        return productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found for ID: " + id));
+        return fetchProduct(id);
     }
 
     @Override
@@ -44,8 +46,7 @@ public class ProductsService implements ListProductsUseCase,
 
     @Override
     public Product execute(String id, UpdateProductCommand command) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found for ID: " + id));
+        Product product = fetchProduct(id);
 
         if (!product.getName().equals(command.name())) {
             validateDuplicatedName(command.name());
@@ -55,6 +56,19 @@ public class ProductsService implements ListProductsUseCase,
         product.changeDescription(command.description());
         product.changePrice(command.price());
         return productRepository.save(product);
+    }
+
+    @Override
+    public Product execute(String id, UpdateProductStockCommand command) {
+        Product product = fetchProduct(id);
+
+        product.changeStockQuantity(command.stockQuantity());
+        return productRepository.save(product);
+    }
+
+    private Product fetchProduct(String id) {
+        return productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found for ID: " + id));
     }
 
     private void validateDuplicatedName(String name) {

@@ -4,6 +4,7 @@ import br.com.devpasso.order_management.application.mapper.WebPaginationMapper;
 import br.com.devpasso.order_management.application.usecase.CreateProductUseCase;
 import br.com.devpasso.order_management.application.usecase.FindProductByIdUseCase;
 import br.com.devpasso.order_management.application.usecase.ListProductsUseCase;
+import br.com.devpasso.order_management.application.usecase.UpdateProductStockUseCase;
 import br.com.devpasso.order_management.application.usecase.UpdateProductUseCase;
 import br.com.devpasso.order_management.domain.repository.ProductRepository;
 import br.com.devpasso.order_management.application.service.ProductsService;
@@ -29,6 +30,11 @@ public class ProductsServiceConfig {
 
     @Bean
     public UpdateProductUseCase updateProductUseCase(ProductRepository productRepository) {
+        return new ProductsService(productRepository);
+    }
+
+    @Bean
+    public UpdateProductStockUseCase updateProductStockUseCase(ProductRepository productRepository) {
         return new ProductsService(productRepository);
     }
 }
