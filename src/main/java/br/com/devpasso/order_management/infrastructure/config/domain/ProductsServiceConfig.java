@@ -1,13 +1,9 @@
 package br.com.devpasso.order_management.infrastructure.config.domain;
 
-import br.com.devpasso.order_management.application.mapper.WebPaginationMapper;
-import br.com.devpasso.order_management.application.usecase.CreateProductUseCase;
-import br.com.devpasso.order_management.application.usecase.FindProductByIdUseCase;
-import br.com.devpasso.order_management.application.usecase.ListProductsUseCase;
-import br.com.devpasso.order_management.application.usecase.UpdateProductStockUseCase;
-import br.com.devpasso.order_management.application.usecase.UpdateProductUseCase;
-import br.com.devpasso.order_management.domain.repository.ProductRepository;
+import br.com.devpasso.order_management.application.service.DeleteProductService;
 import br.com.devpasso.order_management.application.service.ProductsService;
+import br.com.devpasso.order_management.application.usecase.*;
+import br.com.devpasso.order_management.domain.repository.ProductRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -36,5 +32,10 @@ public class ProductsServiceConfig {
     @Bean
     public UpdateProductStockUseCase updateProductStockUseCase(ProductRepository productRepository) {
         return new ProductsService(productRepository);
+    }
+
+    @Bean
+    public DeleteProductUseCase deleteProductUseCase(ProductRepository productRepository) {
+        return new DeleteProductService(productRepository);
     }
 }

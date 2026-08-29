@@ -14,11 +14,7 @@ import br.com.devpasso.order_management.application.dto.response.PaginatedRespon
 import br.com.devpasso.order_management.application.dto.response.ProductResponse;
 import br.com.devpasso.order_management.application.mapper.ProductResponseMapper;
 import br.com.devpasso.order_management.application.mapper.WebPaginationMapper;
-import br.com.devpasso.order_management.application.usecase.CreateProductUseCase;
-import br.com.devpasso.order_management.application.usecase.FindProductByIdUseCase;
-import br.com.devpasso.order_management.application.usecase.ListProductsUseCase;
-import br.com.devpasso.order_management.application.usecase.UpdateProductStockUseCase;
-import br.com.devpasso.order_management.application.usecase.UpdateProductUseCase;
+import br.com.devpasso.order_management.application.usecase.*;
 import br.com.devpasso.order_management.domain.common.PaginatedResult;
 import br.com.devpasso.order_management.domain.model.Product;
 import io.swagger.v3.oas.annotations.Operation;
@@ -48,6 +44,7 @@ public class ProductsController {
     private final CreateProductUseCase createProductUseCase;
     private final UpdateProductUseCase updateProductUseCase;
     private final UpdateProductStockUseCase updateProductStockUseCase;
+    private final DeleteProductUseCase deleteProductUseCase;
     private final WebPaginationMapper paginationMapper;
     private final ProductResponseMapper productResponseMapper;
     private final CreateProductRequestMapper createProductRequestMapper;
@@ -59,6 +56,7 @@ public class ProductsController {
                               CreateProductUseCase createProductUseCase,
                               UpdateProductUseCase updateProductUseCase,
                               UpdateProductStockUseCase updateProductStockUseCase,
+                              DeleteProductUseCase deleteProductUseCase,
                               WebPaginationMapper paginationMapper,
                               ProductResponseMapper productResponseMapper,
                               CreateProductRequestMapper createProductRequestMapper,
@@ -69,6 +67,7 @@ public class ProductsController {
         this.createProductUseCase = createProductUseCase;
         this.updateProductUseCase = updateProductUseCase;
         this.updateProductStockUseCase = updateProductStockUseCase;
+        this.deleteProductUseCase = deleteProductUseCase;
         this.paginationMapper = paginationMapper;
         this.productResponseMapper = productResponseMapper;
         this.createProductRequestMapper = createProductRequestMapper;
@@ -186,5 +185,21 @@ public class ProductsController {
         ProductResponse updatedProduct = productResponseMapper.toResponse(updateProductStockUseCase.execute(id.toString(),
                 command));
         return ResponseEntity.ok(updatedProduct);
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete product by ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Product deleted successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid product ID",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "404", description = "Product not found",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity<Void> deleteProduct(@PathVariable UUID id) {
+        deleteProductUseCase.execute(id.toString());
+        return ResponseEntity.noContent().build();
     }
 }

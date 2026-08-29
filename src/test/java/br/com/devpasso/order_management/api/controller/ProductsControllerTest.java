@@ -15,11 +15,7 @@ import br.com.devpasso.order_management.application.dto.response.ProductResponse
 import br.com.devpasso.order_management.application.exception.ResourceConflictException;
 import br.com.devpasso.order_management.application.mapper.ProductResponseMapper;
 import br.com.devpasso.order_management.application.mapper.WebPaginationMapper;
-import br.com.devpasso.order_management.application.usecase.CreateProductUseCase;
-import br.com.devpasso.order_management.application.usecase.FindProductByIdUseCase;
-import br.com.devpasso.order_management.application.usecase.ListProductsUseCase;
-import br.com.devpasso.order_management.application.usecase.UpdateProductStockUseCase;
-import br.com.devpasso.order_management.application.usecase.UpdateProductUseCase;
+import br.com.devpasso.order_management.application.usecase.*;
 import br.com.devpasso.order_management.domain.common.PaginatedResult;
 import br.com.devpasso.order_management.domain.common.PaginationQuery;
 import br.com.devpasso.order_management.domain.exception.ResourceNotFoundException;
@@ -61,6 +57,9 @@ class ProductsControllerTest {
 
     @Mock
     private UpdateProductStockUseCase updateProductStockUseCase;
+
+    @Mock
+    private DeleteProductUseCase deleteProductUseCase;
 
     @Mock
     private WebPaginationMapper paginationMapper;
@@ -474,5 +473,38 @@ class ProductsControllerTest {
         verify(updateProductStockRequestMapper).toCommand(request);
         verify(updateProductStockUseCase).execute(productId.toString(), command);
         verifyNoInteractions(mapper);
+    }
+
+    @Test
+    @DisplayName("Should delete product and return no content status")
+    void deleteProduct_ShouldReturnNoContent() {
+        // Given
+        UUID productId = UUID.randomUUID();
+
+        // When
+        ResponseEntity<Void> result = productsController.deleteProduct(productId);
+
+        // Then
+        assertEquals(HttpStatus.NO_CONTENT, result.getStatusCode());
+        assertNull(result.getBody());
+        verify(deleteProductUseCase).execute(productId.toString());
+    }
+
+    @Test
+    @DisplayName("Should throw ResourceNotFoundException when deleting non-existent product")
+    void deleteProduct_ShouldThrowResourceNotFoundExceptionWhenProductNotFound() {
+        // Given
+        UUID productId = UUID.randomUUID();
+        doThrow(new ResourceNotFoundException("Product not found for ID: " + productId))
+                .when(deleteProductUseCase).execute(productId.toString());
+
+        // When & Then
+        ResourceNotFoundException exception = assertThrows(
+                ResourceNotFoundException.class,
+                () -> productsController.deleteProduct(productId)
+        );
+
+        assertEquals("Product not found for ID: " + productId, exception.getMessage());
+        verify(deleteProductUseCase).execute(productId.toString());
     }
 }

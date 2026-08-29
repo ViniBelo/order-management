@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,9 +16,12 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
@@ -98,5 +102,73 @@ class ProductEntityJpaRepositoryTest {
 
         // Then
         assertFalse(exists);
+    }
+
+    @Test
+    @DisplayName("Should throw exception when inserting duplicate active product name")
+    void shouldThrowExceptionWhenDuplicateActiveProductName() {
+        // Given
+        ProductEntity product1 = new ProductEntity();
+        product1.changeName("Keyboard");
+        product1.changePrice(new BigDecimal("150.00"));
+        product1.changeStockQuantity(10);
+        repository.saveAndFlush(product1);
+
+        ProductEntity product2 = new ProductEntity();
+        product2.changeName("Keyboard");
+        product2.changePrice(new BigDecimal("200.00"));
+        product2.changeStockQuantity(5);
+
+        // When & Then
+        assertThrows(DataIntegrityViolationException.class, () -> repository.saveAndFlush(product2));
+    }
+
+    @Test
+    @DisplayName("Should allow same product name when previous product is soft deleted")
+    void shouldAllowSameNameWhenPreviousProductIsSoftDeleted() {
+        // Given
+        ProductEntity deletedProduct = new ProductEntity();
+        deletedProduct.changeName("Mouse");
+        deletedProduct.changePrice(new BigDecimal("50.00"));
+        deletedProduct.changeStockQuantity(10);
+        deletedProduct.changeDeletedAt(Instant.now());
+        repository.saveAndFlush(deletedProduct);
+
+        ProductEntity activeProduct = new ProductEntity();
+        activeProduct.changeName("Mouse");
+        activeProduct.changePrice(new BigDecimal("60.00"));
+        activeProduct.changeStockQuantity(20);
+
+        // When
+        ProductEntity savedActiveProduct = repository.saveAndFlush(activeProduct);
+
+        // Then
+        assertNotNull(savedActiveProduct.getId());
+        assertEquals("Mouse", savedActiveProduct.getName());
+    }
+
+    @Test
+    @DisplayName("Should allow multiple soft deleted products with the same name")
+    void shouldAllowMultipleSoftDeletedProductsWithSameName() {
+        // Given
+        ProductEntity deletedProduct1 = new ProductEntity();
+        deletedProduct1.changeName("Monitor");
+        deletedProduct1.changePrice(new BigDecimal("300.00"));
+        deletedProduct1.changeStockQuantity(5);
+        deletedProduct1.changeDeletedAt(Instant.now());
+        repository.saveAndFlush(deletedProduct1);
+
+        ProductEntity deletedProduct2 = new ProductEntity();
+        deletedProduct2.changeName("Monitor");
+        deletedProduct2.changePrice(new BigDecimal("350.00"));
+        deletedProduct2.changeStockQuantity(2);
+        deletedProduct2.changeDeletedAt(Instant.now());
+
+        // When
+        ProductEntity savedDeletedProduct2 = repository.saveAndFlush(deletedProduct2);
+
+        // Then
+        assertNotNull(savedDeletedProduct2.getId());
+        assertEquals("Monitor", savedDeletedProduct2.getName());
     }
 }

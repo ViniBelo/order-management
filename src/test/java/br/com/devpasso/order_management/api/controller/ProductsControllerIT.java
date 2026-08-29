@@ -22,6 +22,7 @@ import java.util.UUID;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -626,5 +627,60 @@ class ProductsControllerIT {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Should delete product successfully (soft-delete)")
+    void shouldDeleteProductSuccessfully() throws Exception {
+        UUID id = savedProducts.getFirst().getId();
+
+        mockMvc.perform(delete("/v1/products/{id}", id))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(get("/v1/products/{id}", id))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.title").value("Not Found"))
+                .andExpect(jsonPath("$.detail").value("The requested resource could not be found."));
+
+        mockMvc.perform(get("/v1/products"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].name").value("Samsung Galaxy"));
+
+        assertTrue(productJpaRepository.findById(id).isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should return 404 Not Found when deleting non-existent product")
+    void shouldReturn404WhenDeletingNonExistentProduct() throws Exception {
+        UUID nonExistentId = UUID.randomUUID();
+
+        mockMvc.perform(delete("/v1/products/{id}", nonExistentId))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.title").value("Not Found"))
+                .andExpect(jsonPath("$.detail").value("The requested resource could not be found."));
+    }
+
+    @Test
+    @DisplayName("Should return 404 Not Found when deleting already deleted product")
+    void shouldReturn404WhenDeletingAlreadyDeletedProduct() throws Exception {
+        UUID id = savedProducts.getFirst().getId();
+
+        mockMvc.perform(delete("/v1/products/{id}", id))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(delete("/v1/products/{id}", id))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.title").value("Not Found"))
+                .andExpect(jsonPath("$.detail").value("The requested resource could not be found."));
+    }
+
+    @Test
+    @DisplayName("Should return 400 Bad Request when deleting with invalid UUID")
+    void shouldReturn400WhenDeletingWithInvalidUUID() throws Exception {
+        mockMvc.perform(delete("/v1/products/{id}", "invalid-uuid"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Bad Request"))
+                .andExpect(jsonPath("$.detail").value("Invalid value provided."));
     }
 }

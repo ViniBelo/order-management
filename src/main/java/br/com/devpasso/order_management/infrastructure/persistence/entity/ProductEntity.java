@@ -1,6 +1,8 @@
 package br.com.devpasso.order_management.infrastructure.persistence.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.math.BigDecimal;
@@ -9,11 +11,13 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "products")
+@SQLDelete(sql = "UPDATE products SET deleted_at = NOW() WHERE id = ?")
+@SQLRestriction("deleted_at IS NULL")
 public class ProductEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String name;
     @Column()
     private String description;
@@ -26,6 +30,8 @@ public class ProductEntity {
             nullable = false,
             updatable = false)
     private Instant createdAt;
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
 
     @PrePersist
     void prePersist() {
@@ -58,12 +64,20 @@ public class ProductEntity {
         return createdAt;
     }
 
+    public Instant getDeletedAt() {
+        return deletedAt;
+    }
+
     public void changeId(UUID id) {
         this.id = id;
     }
 
     public void changeCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public void changeDeletedAt(Instant deletedAt) {
+        this.deletedAt = deletedAt;
     }
 
     public void changeName(String name) {

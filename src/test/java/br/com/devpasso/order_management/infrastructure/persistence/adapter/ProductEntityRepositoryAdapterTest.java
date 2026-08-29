@@ -196,4 +196,17 @@ class ProductEntityRepositoryAdapterTest {
         assertFalse(result);
         verify(productJpaRepository).existsByName(name);
     }
+
+    @Test
+    @DisplayName("Should delegate deleteById to JPA repository with converted UUID")
+    void deleteById_ShouldDelegateToJpaRepository() {
+        // Given
+        UUID id = UUID.randomUUID();
+
+        // When
+        productRepositoryAdapter.deleteById(id.toString());
+
+        // Then
+        verify(productJpaRepository).deleteById(id);
+    }
 }

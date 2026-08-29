@@ -64,4 +64,9 @@ public class ProductRepositoryAdapter implements ProductRepository {
     public boolean existsByName(String name) {
         return  productJpaRepository.existsByName(name);
     }
+
+    @Override
+    public void deleteById(String id) {
+        productJpaRepository.deleteById(UUID.fromString(id));
+    }
 }
