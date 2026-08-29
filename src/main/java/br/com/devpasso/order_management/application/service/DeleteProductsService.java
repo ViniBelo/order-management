@@ -4,10 +4,10 @@ import br.com.devpasso.order_management.application.usecase.DeleteProductUseCase
 import br.com.devpasso.order_management.domain.exception.ResourceNotFoundException;
 import br.com.devpasso.order_management.domain.repository.ProductRepository;
 
-public class DeleteProductService implements DeleteProductUseCase {
+public class DeleteProductsService implements DeleteProductUseCase {
     private final ProductRepository productRepository;
 
-    public DeleteProductService(ProductRepository productRepository) {
+    public DeleteProductsService(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
 

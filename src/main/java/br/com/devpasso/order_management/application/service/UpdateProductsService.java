@@ -1,47 +1,19 @@
 package br.com.devpasso.order_management.application.service;
 
-import br.com.devpasso.order_management.application.dto.command.CreateProductCommand;
 import br.com.devpasso.order_management.application.dto.command.UpdateProductCommand;
 import br.com.devpasso.order_management.application.dto.command.UpdateProductStockCommand;
-import br.com.devpasso.order_management.application.dto.response.ProductResponse;
 import br.com.devpasso.order_management.application.exception.ResourceConflictException;
-import br.com.devpasso.order_management.application.usecase.CreateProductUseCase;
-import br.com.devpasso.order_management.application.usecase.FindProductByIdUseCase;
-import br.com.devpasso.order_management.application.usecase.ListProductsUseCase;
 import br.com.devpasso.order_management.application.usecase.UpdateProductStockUseCase;
 import br.com.devpasso.order_management.application.usecase.UpdateProductUseCase;
-import br.com.devpasso.order_management.domain.common.PaginatedResult;
-import br.com.devpasso.order_management.domain.common.PaginationQuery;
 import br.com.devpasso.order_management.domain.exception.ResourceNotFoundException;
-import br.com.devpasso.order_management.domain.repository.ProductRepository;
 import br.com.devpasso.order_management.domain.model.Product;
+import br.com.devpasso.order_management.domain.repository.ProductRepository;
 
-public class ProductsService implements ListProductsUseCase,
-        FindProductByIdUseCase,
-        CreateProductUseCase,
-        UpdateProductUseCase,
-        UpdateProductStockUseCase {
+public class UpdateProductsService implements UpdateProductUseCase, UpdateProductStockUseCase {
     private final ProductRepository productRepository;
 
-    public ProductsService(ProductRepository productRepository) {
+    public UpdateProductsService(ProductRepository productRepository) {
         this.productRepository = productRepository;
-    }
-
-    @Override
-    public PaginatedResult<Product> execute(PaginationQuery paginationQuery, String name) {
-        return productRepository.findAllByNameContainingIgnoreCase(paginationQuery, name);
-    }
-
-    @Override
-    public Product execute(String id) {
-        return fetchProduct(id);
-    }
-
-    @Override
-    public Product execute(CreateProductCommand command) {
-        validateDuplicatedName(command.name());
-        Product newProduct = command.toDomainModel();
-        return productRepository.save(newProduct);
     }
 
     @Override
@@ -58,6 +30,11 @@ public class ProductsService implements ListProductsUseCase,
         return productRepository.save(product);
     }
 
+    private void validateDuplicatedName(String name) {
+        if (productRepository.existsByName(name))
+            throw new ResourceConflictException("Product already exists with name: " + name);
+    }
+
     @Override
     public Product execute(String id, UpdateProductStockCommand command) {
         Product product = fetchProduct(id);
@@ -69,10 +46,5 @@ public class ProductsService implements ListProductsUseCase,
     private Product fetchProduct(String id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found for ID: " + id));
-    }
-
-    private void validateDuplicatedName(String name) {
-        if (productRepository.existsByName(name))
-            throw new ResourceConflictException("Product already exists with name: " + name);
     }
 }

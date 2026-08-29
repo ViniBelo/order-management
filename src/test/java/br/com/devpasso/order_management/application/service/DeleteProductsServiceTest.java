@@ -1,6 +1,5 @@
-package br.com.devpasso.order_management.domain.service;
+package br.com.devpasso.order_management.application.service;
 
-import br.com.devpasso.order_management.application.service.DeleteProductService;
 import br.com.devpasso.order_management.domain.exception.ResourceNotFoundException;
 import br.com.devpasso.order_management.domain.model.Product;
 import br.com.devpasso.order_management.domain.repository.ProductRepository;
@@ -20,13 +19,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class DeleteProductServiceTest {
+class DeleteProductsServiceTest {
 
     @Mock
     private ProductRepository productRepository;
 
     @InjectMocks
-    private DeleteProductService deleteProductService;
+    private DeleteProductsService deleteProductsService;
 
     @Test
     @DisplayName("Should delete product when product exists")
@@ -45,7 +44,7 @@ class DeleteProductServiceTest {
         when(productRepository.findById(id.toString())).thenReturn(Optional.of(product));
 
         // When
-        deleteProductService.execute(id.toString());
+        deleteProductsService.execute(id.toString());
 
         // Then
         verify(productRepository).findById(id.toString());
@@ -60,7 +59,7 @@ class DeleteProductServiceTest {
         when(productRepository.findById(id.toString())).thenReturn(Optional.empty());
 
         // When & Then
-        assertThrows(ResourceNotFoundException.class, () -> deleteProductService.execute(id.toString()));
+        assertThrows(ResourceNotFoundException.class, () -> deleteProductsService.execute(id.toString()));
         verify(productRepository).findById(id.toString());
         verify(productRepository, never()).deleteById(any());
     }
