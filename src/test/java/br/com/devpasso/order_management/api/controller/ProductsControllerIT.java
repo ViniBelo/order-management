@@ -244,7 +244,7 @@ class ProductsControllerIT {
                         .content(requestJson))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value("Bad Request"))
-                .andExpect(jsonPath("$.detail").value("Invalid value provided."));
+                .andExpect(jsonPath("$.detail").value("Invalid request data."));
     }
 
     @Test
@@ -264,7 +264,7 @@ class ProductsControllerIT {
                         .content(requestJson))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value("Bad Request"))
-                .andExpect(jsonPath("$.detail").value("Invalid value provided."));
+                .andExpect(jsonPath("$.detail").value("Invalid request data."));
     }
 
     @Test
@@ -284,7 +284,7 @@ class ProductsControllerIT {
                         .content(requestJson))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value("Bad Request"))
-                .andExpect(jsonPath("$.detail").value("Invalid value provided."));
+                .andExpect(jsonPath("$.detail").value("Invalid request data."));
     }
 
     @Test
@@ -304,7 +304,7 @@ class ProductsControllerIT {
                         .content(requestJson))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value("Bad Request"))
-                .andExpect(jsonPath("$.detail").value("Invalid value provided."));
+                .andExpect(jsonPath("$.detail").value("Invalid request data."));
     }
 
     @Test
@@ -324,7 +324,7 @@ class ProductsControllerIT {
                         .content(requestJson))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value("Bad Request"))
-                .andExpect(jsonPath("$.detail").value("Invalid value provided."));
+                .andExpect(jsonPath("$.detail").value("Invalid request data."));
     }
 
     @Test
@@ -344,7 +344,7 @@ class ProductsControllerIT {
                         .content(requestJson))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value("Bad Request"))
-                .andExpect(jsonPath("$.detail").value("Invalid value provided."));
+                .andExpect(jsonPath("$.detail").value("Invalid request data."));
     }
 
     @Test
@@ -355,7 +355,7 @@ class ProductsControllerIT {
                         .content("{}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value("Bad Request"))
-                .andExpect(jsonPath("$.detail").value("Invalid value provided."));
+                .andExpect(jsonPath("$.detail").value("Invalid request data."));
     }
 
     @Test
@@ -429,7 +429,7 @@ class ProductsControllerIT {
                         .content(requestJson))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value("Bad Request"))
-                .andExpect(jsonPath("$.detail").value("Invalid value provided."));
+                .andExpect(jsonPath("$.detail").value("Invalid request data."));
     }
 
     @Test
@@ -449,7 +449,7 @@ class ProductsControllerIT {
                         .content(requestJson))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value("Bad Request"))
-                .andExpect(jsonPath("$.detail").value("Invalid value provided."));
+                .andExpect(jsonPath("$.detail").value("Invalid request data."));
     }
 
     @Test
@@ -598,7 +598,7 @@ class ProductsControllerIT {
                         .content(requestJson))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value("Bad Request"))
-                .andExpect(jsonPath("$.detail").value("Invalid value provided."));
+                .andExpect(jsonPath("$.detail").value("Invalid request data."));
     }
 
     @Test
@@ -611,7 +611,7 @@ class ProductsControllerIT {
                         .content("{}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value("Bad Request"))
-                .andExpect(jsonPath("$.detail").value("Invalid value provided."));
+                .andExpect(jsonPath("$.detail").value("Invalid request data."));
     }
 
     @Test

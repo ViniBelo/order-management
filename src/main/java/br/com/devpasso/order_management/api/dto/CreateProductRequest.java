@@ -5,17 +5,17 @@ import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 
 public record CreateProductRequest(
-        @NotBlank
-        @Size(min = 3, max = 255)
+        @NotBlank(message = "Name is required")
+        @Size(min = 3, max = 255, message = "Name must be between 3 and 255 characters")
         String name,
 
         String description,
 
-        @NotNull
-        @DecimalMin("0.01")
+        @NotNull(message = "Price is required")
+        @DecimalMin(value = "0.01", message = "Price must be greater than zero")
         BigDecimal price,
 
-        @NotNull
-        @PositiveOrZero
+        @NotNull(message = "Stock quantity is required")
+        @PositiveOrZero(message = "Stock quantity must be greater than or equal to zero")
         Integer stockQuantity
         ) { }

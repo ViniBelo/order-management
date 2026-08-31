@@ -7,10 +7,14 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+import java.util.List;
+import java.util.Map;
 
 @Hidden
 @RestControllerAdvice
@@ -33,11 +37,31 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handles 400 Bad Request: When the user passes invalid payload values failing validation or path variable format fails.
+     * Handles 400 Bad Request: When the user passes invalid payload values failing validation.
      */
-    @ExceptionHandler({MethodArgumentNotValidException.class,
-            MethodArgumentTypeMismatchException.class})
-    public ProblemDetail handleMethodArgumentNotValid(Exception e) {
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ProblemDetail handleMethodArgumentNotValid(MethodArgumentNotValidException e) {
+        List<Map<String, Object>> errors = e.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(this::toValidationError)
+                .toList();
+
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                "Invalid request data."
+        );
+        problem.setTitle("Bad Request");
+        problem.setProperty("errors", errors);
+
+        return problem;
+    }
+
+    /**
+     * Handles 400 Bad Request: When path variable format fails or parameter type mismatch occurs.
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ProblemDetail handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException e) {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_REQUEST,
                 "Invalid value provided."
@@ -45,6 +69,15 @@ public class GlobalExceptionHandler {
         problem.setTitle("Bad Request");
 
         return problem;
+    }
+
+    private Map<String, Object> toValidationError(FieldError error) {
+        assert error.getDefaultMessage() != null;
+        return Map.of(
+                "field", error.getField(),
+                "message", error.getDefaultMessage(),
+                "rejectedValue", error.getRejectedValue() == null ? "null" : error.getRejectedValue()
+        );
     }
 
     /**
