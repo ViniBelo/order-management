@@ -1,8 +1,12 @@
 package br.com.devpasso.order_management.api.controller;
 
+import br.com.devpasso.order_management.api.dto.exception.ConflictErrorResponse;
 import br.com.devpasso.order_management.api.dto.CreateProductRequest;
+import br.com.devpasso.order_management.api.dto.exception.InternalServerErrorResponse;
+import br.com.devpasso.order_management.api.dto.exception.NotFoundErrorResponse;
 import br.com.devpasso.order_management.api.dto.UpdateProductRequest;
 import br.com.devpasso.order_management.api.dto.UpdateProductStockRequest;
+import br.com.devpasso.order_management.api.dto.exception.ValidationErrorResponse;
 import br.com.devpasso.order_management.api.mapper.CreateProductRequestMapper;
 import br.com.devpasso.order_management.api.mapper.UpdateProductRequestMapper;
 import br.com.devpasso.order_management.api.mapper.UpdateProductStockRequestMapper;
@@ -18,6 +22,7 @@ import br.com.devpasso.order_management.application.usecase.*;
 import br.com.devpasso.order_management.domain.common.PaginatedResult;
 import br.com.devpasso.order_management.domain.model.Product;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -27,7 +32,6 @@ import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -79,15 +83,16 @@ public class ProductsController {
     @Operation(summary = "List all products")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Success"),
-            @ApiResponse(responseCode = "400", description = "Invalid pagination or sort parameter",
-                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid pagination or sort parameter provided",
+                    content = @Content(schema = @Schema(implementation = ValidationErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = "Internal server error",
-                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+                    content = @Content(schema = @Schema(implementation = InternalServerErrorResponse.class)))
     })
     public ResponseEntity<PaginatedResponse<ProductResponse>> listAll(
             @ParameterObject
             @PageableDefault(size = 20, sort = "name")
             Pageable pageable,
+            @Parameter(description = "Filter products by name (case-insensitive)", example = "Smartphone")
             @RequestParam(required = false, defaultValue = "")
             String name
     ) {
@@ -108,12 +113,15 @@ public class ProductsController {
     @Operation(summary = "Find product by ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Success"),
+            @ApiResponse(responseCode = "400", description = "Invalid value provided",
+                    content = @Content(schema = @Schema(implementation = ValidationErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "Product not found",
-                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+                    content = @Content(schema = @Schema(implementation = NotFoundErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = "Internal server error",
-                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+                    content = @Content(schema = @Schema(implementation = InternalServerErrorResponse.class)))
     })
     public ResponseEntity<ProductResponse> findById(
+            @Parameter(description = "Product UUID", example = "123e4567-e89b-12d3-a456-426614174000")
             @PathVariable UUID id
     ) {
         Product product = findProductByIdUseCase.execute(id.toString());
@@ -125,12 +133,12 @@ public class ProductsController {
     @Operation(summary = "Create a new product")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Product created successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid input data",
-                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request data or value provided",
+                    content = @Content(schema = @Schema(implementation = ValidationErrorResponse.class))),
             @ApiResponse(responseCode = "409", description = "Product already exists",
-                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+                    content = @Content(schema = @Schema(implementation = ConflictErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = "Internal server error",
-                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+                    content = @Content(schema = @Schema(implementation = InternalServerErrorResponse.class)))
     })
     public ResponseEntity<CreateProductResponse> createProduct(
             @RequestBody
@@ -147,14 +155,17 @@ public class ProductsController {
     @Operation(summary = "Updates products fields, except stock")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Product updated successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid input data",
-                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request data or value provided",
+                    content = @Content(schema = @Schema(implementation = ValidationErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "Product not found",
-                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+                    content = @Content(schema = @Schema(implementation = NotFoundErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = "Product already exists",
+                    content = @Content(schema = @Schema(implementation = ConflictErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = "Internal server error",
-                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+                    content = @Content(schema = @Schema(implementation = InternalServerErrorResponse.class)))
     })
     public ResponseEntity<ProductResponse> updateProduct(
+            @Parameter(description = "Product UUID", example = "123e4567-e89b-12d3-a456-426614174000")
             @PathVariable UUID id,
             @RequestBody
             @Valid
@@ -170,14 +181,15 @@ public class ProductsController {
     @Operation(summary = "Update product stock quantity")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Stock updated successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid input data",
-                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request data or value provided",
+                    content = @Content(schema = @Schema(implementation = ValidationErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "Product not found",
-                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+                    content = @Content(schema = @Schema(implementation = NotFoundErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = "Internal server error",
-                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+                    content = @Content(schema = @Schema(implementation = InternalServerErrorResponse.class)))
     })
     public ResponseEntity<ProductResponse> updateStock(
+            @Parameter(description = "Product UUID", example = "123e4567-e89b-12d3-a456-426614174000")
             @PathVariable UUID id,
             @RequestBody @Valid UpdateProductStockRequest updateProductStockRequest
     ) {
@@ -191,14 +203,17 @@ public class ProductsController {
     @Operation(summary = "Delete product by ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Product deleted successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid product ID",
-                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid value provided",
+                    content = @Content(schema = @Schema(implementation = ValidationErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "Product not found",
-                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+                    content = @Content(schema = @Schema(implementation = NotFoundErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = "Internal server error",
-                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+                    content = @Content(schema = @Schema(implementation = InternalServerErrorResponse.class)))
     })
-    public ResponseEntity<Void> deleteProduct(@PathVariable UUID id) {
+    public ResponseEntity<Void> deleteProduct(
+            @Parameter(description = "Product UUID", example = "123e4567-e89b-12d3-a456-426614174000")
+            @PathVariable UUID id
+    ) {
         deleteProductUseCase.execute(id.toString());
         return ResponseEntity.noContent().build();
     }

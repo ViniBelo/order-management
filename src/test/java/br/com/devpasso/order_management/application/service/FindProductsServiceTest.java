@@ -1,7 +1,5 @@
 package br.com.devpasso.order_management.application.service;
 
-import br.com.devpasso.order_management.application.dto.command.CreateProductCommand;
-import br.com.devpasso.order_management.application.exception.ResourceConflictException;
 import br.com.devpasso.order_management.domain.common.PaginatedResult;
 import br.com.devpasso.order_management.domain.common.PaginationQuery;
 import br.com.devpasso.order_management.domain.exception.ResourceNotFoundException;
@@ -40,7 +38,6 @@ class FindProductsServiceTest {
     void execute_ShouldReturnPaginatedProducts() {
         // Given
         PaginationQuery paginationQuery = new PaginationQuery(0, 10, "");
-        Pageable pageable = PageRequest.of(0, 10);
         String name = "Test";
 
         ProductEntity productEntity =
