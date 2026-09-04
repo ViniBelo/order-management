@@ -1,7 +1,9 @@
 package br.com.devpasso.order_management.application.service;
 
 import br.com.devpasso.order_management.application.dto.command.CreateProductCommand;
+import br.com.devpasso.order_management.application.dto.result.CreateProductResult;
 import br.com.devpasso.order_management.application.exception.ResourceConflictException;
+import br.com.devpasso.order_management.application.mapper.CreateProductResultMapper;
 import br.com.devpasso.order_management.domain.model.Product;
 import br.com.devpasso.order_management.domain.repository.ProductRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -23,6 +25,9 @@ public class CreateProductsServiceTest {
     
     @Mock
     private ProductRepository productRepository;
+
+    @Mock
+    private CreateProductResultMapper createProductResultMapper;
     
     @InjectMocks
     private CreateProductsService createProductsService;
@@ -49,20 +54,29 @@ public class CreateProductsServiceTest {
                 createdAt
         );
 
+        CreateProductResult createdProductResult = new CreateProductResult(
+                generatedId,
+                command.name(),
+                command.description(),
+                command.price(),
+                command.stockQuantity(),
+                createdAt
+        );
+
         when(productRepository.existsByName(command.name())).thenReturn(false);
         when(productRepository.save(any(Product.class))).thenReturn(savedProduct);
+        when(createProductResultMapper.toResult(savedProduct)).thenReturn(createdProductResult);
 
         // When
-        Product result = createProductsService.execute(command);
+        CreateProductResult result = createProductsService.execute(command);
 
         // Then
         assertNotNull(result);
-        assertEquals(generatedId, result.getId());
-        assertEquals(command.name(), result.getName());
-        assertEquals(command.description(), result.getDescription());
-        assertEquals(command.price(), result.getPrice());
-        assertEquals(command.stockQuantity(), result.getStockQuantity());
-        assertEquals(createdAt, result.getCreatedAt());
+        assertEquals(generatedId, result.id());
+        assertEquals(command.name(), result.name());
+        assertEquals(command.description(), result.description());
+        assertEquals(command.price(), result.price());
+        assertEquals(command.stockQuantity(), result.stockQuantity());
 
         verify(productRepository).existsByName(command.name());
         verify(productRepository).save(any(Product.class));

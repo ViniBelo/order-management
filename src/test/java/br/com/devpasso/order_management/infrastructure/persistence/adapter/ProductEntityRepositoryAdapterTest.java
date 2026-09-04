@@ -1,6 +1,6 @@
 package br.com.devpasso.order_management.infrastructure.persistence.adapter;
 
-import br.com.devpasso.order_management.domain.common.PaginatedResult;
+import br.com.devpasso.order_management.domain.common.PaginatedQueryResult;
 import br.com.devpasso.order_management.domain.common.PaginationQuery;
 import br.com.devpasso.order_management.domain.model.Product;
 import br.com.devpasso.order_management.infrastructure.persistence.adapter.mapper.InfraPaginationMapper;
@@ -69,7 +69,7 @@ class ProductEntityRepositoryAdapterTest {
                 Instant.now()
         );
 
-        PaginatedResult<Product> expectedResult = new PaginatedResult<>(
+        PaginatedQueryResult<Product> expectedResult = new PaginatedQueryResult<>(
                 List.of(domainProduct), 0, 10, 1, 1
         );
 
@@ -83,7 +83,7 @@ class ProductEntityRepositoryAdapterTest {
                 .thenReturn(expectedResult);
 
         // When
-        PaginatedResult<Product> result = productRepositoryAdapter.findAllByNameContainingIgnoreCase(paginationQuery, name);
+        PaginatedQueryResult<Product> result = productRepositoryAdapter.findAllByNameContainingIgnoreCase(paginationQuery, name);
 
         // Then
         assertEquals(1, result.totalElements());

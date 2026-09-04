@@ -1,6 +1,6 @@
 package br.com.devpasso.order_management.infrastructure.persistence.adapter.mapper;
 
-import br.com.devpasso.order_management.domain.common.PaginatedResult;
+import br.com.devpasso.order_management.domain.common.PaginatedQueryResult;
 import br.com.devpasso.order_management.domain.common.PaginationQuery;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -67,13 +67,13 @@ public class InfraPaginationMapperTest {
     }
 
     @Test
-    @DisplayName("Should correctly map Spring Page properties to Domain PaginatedResult")
+    @DisplayName("Should correctly map Spring Page properties to Domain PaginatedQueryResult")
     void toDomainResult_ValidSpringPage_MapsCorrectly() {
         Page<?> springPage = new PageImpl<>(List.of("Item 1", "Item 2"), PageRequest.of(2, 20), 150L);
 
         List<String> mappedContent = List.of("Item 1", "Item 2");
 
-        PaginatedResult<String> result = mapper.toDomainResult(springPage, mappedContent);
+        PaginatedQueryResult<String> result = mapper.toDomainResult(springPage, mappedContent);
 
         assertThat(result).isNotNull();
         assertThat(result.content()).isEqualTo(mappedContent);

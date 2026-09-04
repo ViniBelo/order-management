@@ -1,26 +1,29 @@
 package br.com.devpasso.order_management.api.controller;
 
 import br.com.devpasso.order_management.api.dto.exception.ConflictErrorResponse;
-import br.com.devpasso.order_management.api.dto.CreateProductRequest;
+import br.com.devpasso.order_management.api.dto.request.CreateProductRequest;
 import br.com.devpasso.order_management.api.dto.exception.InternalServerErrorResponse;
 import br.com.devpasso.order_management.api.dto.exception.NotFoundErrorResponse;
-import br.com.devpasso.order_management.api.dto.UpdateProductRequest;
-import br.com.devpasso.order_management.api.dto.UpdateProductStockRequest;
+import br.com.devpasso.order_management.api.dto.request.UpdateProductRequest;
+import br.com.devpasso.order_management.api.dto.request.UpdateProductStockRequest;
 import br.com.devpasso.order_management.api.dto.exception.ValidationErrorResponse;
-import br.com.devpasso.order_management.api.mapper.CreateProductRequestMapper;
-import br.com.devpasso.order_management.api.mapper.UpdateProductRequestMapper;
-import br.com.devpasso.order_management.api.mapper.UpdateProductStockRequestMapper;
+import br.com.devpasso.order_management.api.dto.response.CreateProductResponse;
+import br.com.devpasso.order_management.api.dto.response.PaginatedResponse;
+import br.com.devpasso.order_management.api.dto.response.ProductResponse;
+import br.com.devpasso.order_management.api.mapper.request.CreateProductRequestMapper;
+import br.com.devpasso.order_management.api.mapper.request.UpdateProductRequestMapper;
+import br.com.devpasso.order_management.api.mapper.request.UpdateProductStockRequestMapper;
+import br.com.devpasso.order_management.api.mapper.response.CreateProductResponseMapper;
+import br.com.devpasso.order_management.api.mapper.response.PaginatedResponseMapper;
+import br.com.devpasso.order_management.api.mapper.response.ProductResponseMapper;
 import br.com.devpasso.order_management.application.dto.command.CreateProductCommand;
 import br.com.devpasso.order_management.application.dto.command.UpdateProductCommand;
 import br.com.devpasso.order_management.application.dto.command.UpdateProductStockCommand;
-import br.com.devpasso.order_management.application.dto.response.CreateProductResponse;
-import br.com.devpasso.order_management.application.dto.response.PaginatedResponse;
-import br.com.devpasso.order_management.application.dto.response.ProductResponse;
-import br.com.devpasso.order_management.application.mapper.ProductResponseMapper;
-import br.com.devpasso.order_management.application.mapper.WebPaginationMapper;
+import br.com.devpasso.order_management.application.dto.result.CreateProductResult;
+import br.com.devpasso.order_management.application.dto.result.PaginatedResult;
+import br.com.devpasso.order_management.application.dto.result.ProductResult;
+import br.com.devpasso.order_management.application.mapper.PaginationQueryMapper;
 import br.com.devpasso.order_management.application.usecase.*;
-import br.com.devpasso.order_management.domain.common.PaginatedResult;
-import br.com.devpasso.order_management.domain.model.Product;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -36,8 +39,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/v1/products")
@@ -49,9 +52,11 @@ public class ProductsController {
     private final UpdateProductUseCase updateProductUseCase;
     private final UpdateProductStockUseCase updateProductStockUseCase;
     private final DeleteProductUseCase deleteProductUseCase;
-    private final WebPaginationMapper paginationMapper;
+    private final PaginationQueryMapper paginationQueryMapper;
+    private final PaginatedResponseMapper paginatedResponseMapper;
     private final ProductResponseMapper productResponseMapper;
     private final CreateProductRequestMapper createProductRequestMapper;
+    private final CreateProductResponseMapper createProductResponseMapper;
     private final UpdateProductRequestMapper updateProductRequestMapper;
     private final UpdateProductStockRequestMapper updateProductStockRequestMapper;
 
@@ -61,9 +66,11 @@ public class ProductsController {
                               UpdateProductUseCase updateProductUseCase,
                               UpdateProductStockUseCase updateProductStockUseCase,
                               DeleteProductUseCase deleteProductUseCase,
-                              WebPaginationMapper paginationMapper,
+                              PaginationQueryMapper paginationQueryMapper,
+                              PaginatedResponseMapper paginatedResponseMapper,
                               ProductResponseMapper productResponseMapper,
                               CreateProductRequestMapper createProductRequestMapper,
+                              CreateProductResponseMapper createProductResponseMapper,
                               UpdateProductRequestMapper updateProductRequestMapper,
                               UpdateProductStockRequestMapper updateProductStockRequestMapper) {
         this.listProductsUseCase = listProductsUseCase;
@@ -72,9 +79,11 @@ public class ProductsController {
         this.updateProductUseCase = updateProductUseCase;
         this.updateProductStockUseCase = updateProductStockUseCase;
         this.deleteProductUseCase = deleteProductUseCase;
-        this.paginationMapper = paginationMapper;
+        this.paginationQueryMapper = paginationQueryMapper;
+        this.paginatedResponseMapper = paginatedResponseMapper;
         this.productResponseMapper = productResponseMapper;
         this.createProductRequestMapper = createProductRequestMapper;
+        this.createProductResponseMapper = createProductResponseMapper;
         this.updateProductRequestMapper = updateProductRequestMapper;
         this.updateProductStockRequestMapper = updateProductStockRequestMapper;
     }
@@ -96,16 +105,16 @@ public class ProductsController {
             @RequestParam(required = false, defaultValue = "")
             String name
     ) {
-        PaginatedResult<Product> products = listProductsUseCase.execute(
-                paginationMapper.toDomainQuery(pageable),
+        PaginatedResult<ProductResult> paginatedResult = listProductsUseCase.execute(
+                paginationQueryMapper.toDomainQuery(pageable),
                 name
         );
-        List<ProductResponse> productsResponse = products.content()
-                .stream()
-                .map(productResponseMapper::toResponse)
-                .toList();
-        PaginatedResponse<ProductResponse> response =
-                PaginatedResponse.from(products, productsResponse);
+        PaginatedResponse<ProductResponse> response = paginatedResponseMapper.from(paginatedResult,
+                paginatedResult.content()
+                        .stream()
+                        .map(productResponseMapper::toResponse)
+                        .collect(Collectors.toList())
+        );
         return ResponseEntity.ok(response);
     }
 
@@ -124,9 +133,8 @@ public class ProductsController {
             @Parameter(description = "Product UUID", example = "123e4567-e89b-12d3-a456-426614174000")
             @PathVariable UUID id
     ) {
-        Product product = findProductByIdUseCase.execute(id.toString());
-        ProductResponse response = productResponseMapper.toResponse(product);
-        return ResponseEntity.ok(response);
+        ProductResult result = findProductByIdUseCase.execute(id.toString());
+        return ResponseEntity.ok(productResponseMapper.toResponse(result));
     }
 
     @PostMapping
@@ -146,7 +154,8 @@ public class ProductsController {
             CreateProductRequest createProductRequest
     ) {
         CreateProductCommand productToCreate = createProductRequestMapper.toCommand(createProductRequest);
-        CreateProductResponse createdProduct = CreateProductResponse.build(createProductUseCase.execute(productToCreate));
+        CreateProductResult createdProductResult = createProductUseCase.execute(productToCreate);
+        CreateProductResponse createdProduct = createProductResponseMapper.toResponse(createdProductResult);
         return ResponseEntity.created(URI.create("/v1/products/" + createdProduct.id()))
                 .body(createdProduct);
     }
@@ -172,8 +181,8 @@ public class ProductsController {
             UpdateProductRequest updateProductRequest
     ) {
         UpdateProductCommand updateProductCommand = updateProductRequestMapper.toCommand(updateProductRequest);
-        ProductResponse updatedProduct = productResponseMapper.toResponse(updateProductUseCase.execute(id.toString(),
-                updateProductCommand));
+        ProductResult updatedProductResult = updateProductUseCase.execute(id.toString(), updateProductCommand);
+        ProductResponse updatedProduct = productResponseMapper.toResponse(updatedProductResult);
         return ResponseEntity.ok(updatedProduct);
     }
 
@@ -194,9 +203,9 @@ public class ProductsController {
             @RequestBody @Valid UpdateProductStockRequest updateProductStockRequest
     ) {
         UpdateProductStockCommand command = updateProductStockRequestMapper.toCommand(updateProductStockRequest);
-        ProductResponse updatedProduct = productResponseMapper.toResponse(updateProductStockUseCase.execute(id.toString(),
-                command));
-        return ResponseEntity.ok(updatedProduct);
+        ProductResult updatedProduct = updateProductStockUseCase.execute(id.toString(), command);
+        ProductResponse updatedProductResponse = productResponseMapper.toResponse(updatedProduct);
+        return ResponseEntity.ok(updatedProductResponse);
     }
 
     @DeleteMapping("/{id}")
@@ -215,6 +224,7 @@ public class ProductsController {
             @PathVariable UUID id
     ) {
         deleteProductUseCase.execute(id.toString());
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.noContent()
+                .build();
     }
 }

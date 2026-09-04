@@ -1,6 +1,8 @@
 package br.com.devpasso.order_management.application.mapper;
 
-import br.com.devpasso.order_management.application.dto.response.ProductResponse;
+import br.com.devpasso.order_management.api.dto.response.ProductResponse;
+import br.com.devpasso.order_management.api.mapper.response.ProductResponseMapper;
+import br.com.devpasso.order_management.application.dto.result.ProductResult;
 import br.com.devpasso.order_management.domain.model.Product;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,7 +13,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ProductResponseMapperTest {
+class ProductResultMapperTest {
 
     private final ProductResponseMapper mapper = new ProductResponseMapper();
 
@@ -23,14 +25,12 @@ class ProductResponseMapperTest {
         String description = "Test Description";
         BigDecimal price = new BigDecimal("99.99");
         Integer stockQuantity = 10;
-        Instant createdAt = Instant.now();
 
-        Product product = new Product(id,
+        ProductResult product = new ProductResult(id,
                 name,
                 description,
                 price,
-                stockQuantity,
-                createdAt);
+                stockQuantity);
 
         ProductResponse response = mapper.toResponse(product);
 

@@ -1,6 +1,6 @@
 package br.com.devpasso.order_management.infrastructure.persistence.adapter;
 
-import br.com.devpasso.order_management.domain.common.PaginatedResult;
+import br.com.devpasso.order_management.domain.common.PaginatedQueryResult;
 import br.com.devpasso.order_management.domain.common.PaginationQuery;
 import br.com.devpasso.order_management.domain.model.Product;
 import br.com.devpasso.order_management.domain.repository.ProductRepository;
@@ -32,7 +32,7 @@ public class ProductRepositoryAdapter implements ProductRepository {
     }
 
     @Override
-    public PaginatedResult<Product> findAllByNameContainingIgnoreCase(PaginationQuery paginationQuery, String name) {
+    public PaginatedQueryResult<Product> findAllByNameContainingIgnoreCase(PaginationQuery paginationQuery, String name) {
         Page<ProductEntity> productEntities =
                 productJpaRepository.findAllByNameContainingIgnoreCase(
                         paginationMapper.toSpringPageable(paginationQuery),

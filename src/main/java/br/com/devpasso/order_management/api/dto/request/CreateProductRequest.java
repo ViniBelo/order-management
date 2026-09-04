@@ -1,4 +1,4 @@
-package br.com.devpasso.order_management.api.dto;
+package br.com.devpasso.order_management.api.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;

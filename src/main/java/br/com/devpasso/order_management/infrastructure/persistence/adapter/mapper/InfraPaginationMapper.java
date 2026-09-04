@@ -1,6 +1,6 @@
 package br.com.devpasso.order_management.infrastructure.persistence.adapter.mapper;
 
-import br.com.devpasso.order_management.domain.common.PaginatedResult;
+import br.com.devpasso.order_management.domain.common.PaginatedQueryResult;
 import br.com.devpasso.order_management.domain.common.PaginationQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,10 +23,10 @@ public class InfraPaginationMapper {
     }
 
     /**
-     * Converts the Spring Data Page into the Domain PaginatedResult.
+     * Converts the Spring Data Page into the Domain PaginatedQueryResult.
      */
-    public <T> PaginatedResult<T> toDomainResult(Page<?> springPage, List<T> mappedContent) {
-        return new PaginatedResult<>(
+    public <T> PaginatedQueryResult<T> toDomainResult(Page<?> springPage, List<T> mappedContent) {
+        return new PaginatedQueryResult<>(
                 mappedContent,
                 springPage.getNumber(),
                 springPage.getSize(),

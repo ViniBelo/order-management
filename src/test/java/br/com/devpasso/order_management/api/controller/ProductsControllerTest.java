@@ -1,25 +1,28 @@
 package br.com.devpasso.order_management.api.controller;
 
-import br.com.devpasso.order_management.api.dto.CreateProductRequest;
-import br.com.devpasso.order_management.api.dto.UpdateProductRequest;
-import br.com.devpasso.order_management.api.dto.UpdateProductStockRequest;
-import br.com.devpasso.order_management.api.mapper.CreateProductRequestMapper;
-import br.com.devpasso.order_management.api.mapper.UpdateProductRequestMapper;
-import br.com.devpasso.order_management.api.mapper.UpdateProductStockRequestMapper;
+import br.com.devpasso.order_management.api.dto.request.CreateProductRequest;
+import br.com.devpasso.order_management.api.dto.request.UpdateProductRequest;
+import br.com.devpasso.order_management.api.dto.request.UpdateProductStockRequest;
+import br.com.devpasso.order_management.api.dto.response.CreateProductResponse;
+import br.com.devpasso.order_management.api.dto.response.PaginatedResponse;
+import br.com.devpasso.order_management.api.dto.response.ProductResponse;
+import br.com.devpasso.order_management.api.mapper.request.CreateProductRequestMapper;
+import br.com.devpasso.order_management.api.mapper.request.UpdateProductRequestMapper;
+import br.com.devpasso.order_management.api.mapper.request.UpdateProductStockRequestMapper;
+import br.com.devpasso.order_management.api.mapper.response.CreateProductResponseMapper;
+import br.com.devpasso.order_management.api.mapper.response.PaginatedResponseMapper;
+import br.com.devpasso.order_management.api.mapper.response.ProductResponseMapper;
 import br.com.devpasso.order_management.application.dto.command.CreateProductCommand;
 import br.com.devpasso.order_management.application.dto.command.UpdateProductCommand;
 import br.com.devpasso.order_management.application.dto.command.UpdateProductStockCommand;
-import br.com.devpasso.order_management.application.dto.response.CreateProductResponse;
-import br.com.devpasso.order_management.application.dto.response.PaginatedResponse;
-import br.com.devpasso.order_management.application.dto.response.ProductResponse;
+import br.com.devpasso.order_management.application.dto.result.CreateProductResult;
+import br.com.devpasso.order_management.application.dto.result.PaginatedResult;
+import br.com.devpasso.order_management.application.dto.result.ProductResult;
 import br.com.devpasso.order_management.application.exception.ResourceConflictException;
-import br.com.devpasso.order_management.application.mapper.ProductResponseMapper;
-import br.com.devpasso.order_management.application.mapper.WebPaginationMapper;
+import br.com.devpasso.order_management.application.mapper.PaginationQueryMapper;
 import br.com.devpasso.order_management.application.usecase.*;
-import br.com.devpasso.order_management.domain.common.PaginatedResult;
 import br.com.devpasso.order_management.domain.common.PaginationQuery;
 import br.com.devpasso.order_management.domain.exception.ResourceNotFoundException;
-import br.com.devpasso.order_management.domain.model.Product;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,10 +65,16 @@ class ProductsControllerTest {
     private DeleteProductUseCase deleteProductUseCase;
 
     @Mock
-    private WebPaginationMapper paginationMapper;
+    private PaginationQueryMapper paginationMapper;
 
     @Mock
-    private ProductResponseMapper mapper;
+    private PaginatedResponseMapper paginatedResponseMapper;
+
+    @Mock
+    private CreateProductResponseMapper createProductResponseMapper;
+
+    @Mock
+    private ProductResponseMapper productResponseMapper;
 
     @Mock
     private CreateProductRequestMapper createProductRequestMapper;
@@ -87,27 +96,38 @@ class ProductsControllerTest {
         Pageable pageable = PageRequest.of(paginationQuery.page(), paginationQuery.size());
         String name = "Test";
 
-        Product product = new Product(UUID.randomUUID(),
+        ProductResult product = new ProductResult(UUID.randomUUID(),
                 "Test Product",
                 "Desc", new BigDecimal("10.0"),
-                5, Instant.now());
+                5);
 
-        PaginatedResult<Product> productPaginatedResult = new PaginatedResult<>(
+        PaginatedResult<ProductResult> productPaginatedResult = new PaginatedResult<>(
                 List.of(product), 0, 20, 1, 1
         );
 
-        ProductResponse response = new ProductResponse(product.getId(),
-                product.getName(),
-                product.getDescription(),
-                product.getPrice(),
-                product.getStockQuantity());
+        ProductResponse productResponse = new ProductResponse(product.id(),
+                product.name(),
+                product.description(),
+                product.price(),
+                product.stockQuantity());
+
+        List<ProductResponse> productResponses = List.of(productResponse);
+        PaginatedResponse<ProductResponse> paginatedResponse = new PaginatedResponse<>(
+                productResponses,
+                0,
+                20,
+                1,
+                1
+        );
 
         when(paginationMapper.toDomainQuery(pageable))
                 .thenReturn(paginationQuery);
         when(listProductsUseCase.execute(paginationQuery, name))
                 .thenReturn(productPaginatedResult);
-        when(mapper.toResponse(product))
-                .thenReturn(response);
+        when(productResponseMapper.toResponse(product))
+                .thenReturn(productResponse);
+        when(paginatedResponseMapper.from(productPaginatedResult, productResponses))
+                .thenReturn(paginatedResponse);
 
         // When
         ResponseEntity<PaginatedResponse<ProductResponse>> result = productsController.listAll(pageable, name);
@@ -117,10 +137,10 @@ class ProductsControllerTest {
                 result.getStatusCode());
         assertNotNull(result.getBody());
         assertEquals(1, result.getBody().totalElements());
-        assertEquals(response, result.getBody().content().getFirst());
+        assertEquals(productResponse, result.getBody().content().getFirst());
 
         verify(listProductsUseCase).execute(paginationQuery, name);
-        verify(mapper).toResponse(product);
+        verify(productResponseMapper).toResponse(product);
     }
 
     @Test
@@ -131,14 +151,22 @@ class ProductsControllerTest {
         Pageable pageable = PageRequest.of(paginationQuery.page(), paginationQuery.size());
         String name = "Nonexistent";
 
-        PaginatedResult<Product> emptyPaginatedResult = new PaginatedResult<>(
-                List.of(), 0, 20, 0, 0
+        List<ProductResult> emptyProductResultsList = List.of();
+        PaginatedResult<ProductResult> emptyPaginatedResult = new PaginatedResult<>(
+                emptyProductResultsList, 0, 20, 0, 0
+        );
+
+        List<ProductResponse> emptyProductResponsesList = List.of();
+        PaginatedResponse<ProductResponse> emptyPaginatedResponse = new PaginatedResponse<>(
+                emptyProductResponsesList, 0, 20, 0, 0
         );
 
         when(paginationMapper.toDomainQuery(pageable))
                 .thenReturn(paginationQuery);
         when(listProductsUseCase.execute(paginationQuery, name))
                 .thenReturn(emptyPaginatedResult);
+        when(paginatedResponseMapper.from(emptyPaginatedResult, emptyProductResponsesList))
+                .thenReturn(emptyPaginatedResponse);
 
         // When
         ResponseEntity<PaginatedResponse<ProductResponse>> result = productsController.listAll(pageable, name);
@@ -151,7 +179,7 @@ class ProductsControllerTest {
 
         verify(paginationMapper).toDomainQuery(pageable);
         verify(listProductsUseCase).execute(paginationQuery, name);
-        verifyNoInteractions(mapper);
+        verifyNoInteractions(productResponseMapper);
     }
 
     @Test
@@ -159,20 +187,20 @@ class ProductsControllerTest {
     void findById_ShouldReturnOkWithProduct() {
         // Given
         UUID id = UUID.randomUUID();
-        Product product = new Product(id,
+        ProductResult product = new ProductResult(id,
                 "Test Product",
                 "Desc", new BigDecimal("10.0"),
-                5, Instant.now());
+                5);
 
-        ProductResponse response = new ProductResponse(product.getId(),
-                product.getName(),
-                product.getDescription(),
-                product.getPrice(),
-                product.getStockQuantity());
+        ProductResponse response = new ProductResponse(product.id(),
+                product.name(),
+                product.description(),
+                product.price(),
+                product.stockQuantity());
 
         when(findProductByIdUseCase.execute(id.toString()))
                 .thenReturn(product);
-        when(mapper.toResponse(product))
+        when(productResponseMapper.toResponse(product))
                 .thenReturn(response);
 
         // When
@@ -184,7 +212,7 @@ class ProductsControllerTest {
         assertEquals(response, result.getBody());
 
         verify(findProductByIdUseCase).execute(id.toString());
-        verify(mapper).toResponse(product);
+        verify(productResponseMapper).toResponse(product);
     }
 
     @Test
@@ -204,7 +232,7 @@ class ProductsControllerTest {
 
         assertEquals("Product not found for ID: " + id, exception.getMessage());
         verify(findProductByIdUseCase).execute(id.toString());
-        verifyNoInteractions(mapper);
+        verifyNoInteractions(productResponseMapper);
     }
 
     @Test
@@ -227,7 +255,16 @@ class ProductsControllerTest {
 
         UUID productId = UUID.randomUUID();
         Instant createdAt = Instant.now();
-        Product createdProduct = new Product(
+        CreateProductResult createdProductResult = new CreateProductResult(
+                productId,
+                request.name(),
+                request.description(),
+                request.price(),
+                request.stockQuantity(),
+                Instant.now()
+        );
+
+        CreateProductResponse createProductResponse = new CreateProductResponse(
                 productId,
                 request.name(),
                 request.description(),
@@ -237,21 +274,22 @@ class ProductsControllerTest {
         );
 
         when(createProductRequestMapper.toCommand(request)).thenReturn(command);
-        when(createProductUseCase.execute(command)).thenReturn(createdProduct);
+        when(createProductUseCase.execute(command)).thenReturn(createdProductResult);
+        when(createProductResponseMapper.toResponse(createdProductResult)).thenReturn(createProductResponse);
 
         // When
-        ResponseEntity<CreateProductResponse> result = productsController.createProduct(request);
+        ResponseEntity<CreateProductResponse> response = productsController.createProduct(request);
 
         // Then
-        assertEquals(HttpStatus.CREATED, result.getStatusCode());
-        assertEquals(URI.create("/v1/products/" + productId), result.getHeaders().getLocation());
-        assertNotNull(result.getBody());
-        assertEquals(productId.toString(), result.getBody().id());
-        assertEquals(request.name(), result.getBody().name());
-        assertEquals(request.description(), result.getBody().description());
-        assertEquals(request.price(), result.getBody().price());
-        assertEquals(request.stockQuantity(), result.getBody().stockQuantity());
-        assertEquals(createdAt.toString(), result.getBody().createdAt());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(URI.create("/v1/products/" + productId), response.getHeaders().getLocation());
+        assertNotNull(response.getBody());
+        assertEquals(productId, response.getBody().id());
+        assertEquals(request.name(), response.getBody().name());
+        assertEquals(request.description(), response.getBody().description());
+        assertEquals(request.price(), response.getBody().price());
+        assertEquals(request.stockQuantity(), response.getBody().stockQuantity());
+        assertEquals(createdAt, response.getBody().createdAt());
 
         verify(createProductRequestMapper).toCommand(request);
         verify(createProductUseCase).execute(command);
@@ -307,14 +345,12 @@ class ProductsControllerTest {
                 request.price()
         );
 
-        Instant createdAt = Instant.now();
-        Product updatedProduct = new Product(
+        ProductResult updatedProductResult = new ProductResult(
                 productId,
                 request.name(),
                 request.description(),
                 request.price(),
-                10,
-                createdAt
+                10
         );
 
         ProductResponse response = new ProductResponse(
@@ -326,8 +362,8 @@ class ProductsControllerTest {
         );
 
         when(updateProductRequestMapper.toCommand(request)).thenReturn(command);
-        when(updateProductUseCase.execute(productId.toString(), command)).thenReturn(updatedProduct);
-        when(mapper.toResponse(updatedProduct)).thenReturn(response);
+        when(updateProductUseCase.execute(productId.toString(), command)).thenReturn(updatedProductResult);
+        when(productResponseMapper.toResponse(updatedProductResult)).thenReturn(response);
 
         // When
         ResponseEntity<ProductResponse> result = productsController.updateProduct(productId, request);
@@ -339,7 +375,7 @@ class ProductsControllerTest {
 
         verify(updateProductRequestMapper).toCommand(request);
         verify(updateProductUseCase).execute(productId.toString(), command);
-        verify(mapper).toResponse(updatedProduct);
+        verify(productResponseMapper).toResponse(updatedProductResult);
     }
 
     @Test
@@ -372,7 +408,7 @@ class ProductsControllerTest {
         assertEquals("Product not found for ID: " + productId, exception.getMessage());
         verify(updateProductRequestMapper).toCommand(request);
         verify(updateProductUseCase).execute(productId.toString(), command);
-        verifyNoInteractions(mapper);
+        verifyNoInteractions(productResponseMapper);
     }
 
     @Test
@@ -405,7 +441,7 @@ class ProductsControllerTest {
         assertEquals("Product already exists with name: " + request.name(), exception.getMessage());
         verify(updateProductRequestMapper).toCommand(request);
         verify(updateProductUseCase).execute(productId.toString(), command);
-        verifyNoInteractions(mapper);
+        verifyNoInteractions(productResponseMapper);
     }
 
     @Test
@@ -416,14 +452,12 @@ class ProductsControllerTest {
         UpdateProductStockRequest request = new UpdateProductStockRequest(50);
         UpdateProductStockCommand command = new UpdateProductStockCommand(50);
 
-        Instant createdAt = Instant.now();
-        Product updatedProduct = new Product(
+        ProductResult updatedProductResult = new ProductResult(
                 productId,
                 "Test Product",
                 "Test Description",
                 new BigDecimal("29.99"),
-                50,
-                createdAt
+                50
         );
 
         ProductResponse response = new ProductResponse(
@@ -435,8 +469,8 @@ class ProductsControllerTest {
         );
 
         when(updateProductStockRequestMapper.toCommand(request)).thenReturn(command);
-        when(updateProductStockUseCase.execute(productId.toString(), command)).thenReturn(updatedProduct);
-        when(mapper.toResponse(updatedProduct)).thenReturn(response);
+        when(updateProductStockUseCase.execute(productId.toString(), command)).thenReturn(updatedProductResult);
+        when(productResponseMapper.toResponse(updatedProductResult)).thenReturn(response);
 
         // When
         ResponseEntity<ProductResponse> result = productsController.updateStock(productId, request);
@@ -448,7 +482,7 @@ class ProductsControllerTest {
 
         verify(updateProductStockRequestMapper).toCommand(request);
         verify(updateProductStockUseCase).execute(productId.toString(), command);
-        verify(mapper).toResponse(updatedProduct);
+        verify(productResponseMapper).toResponse(updatedProductResult);
     }
 
     @Test
@@ -472,7 +506,7 @@ class ProductsControllerTest {
         assertEquals("Product not found for ID: " + productId, exception.getMessage());
         verify(updateProductStockRequestMapper).toCommand(request);
         verify(updateProductStockUseCase).execute(productId.toString(), command);
-        verifyNoInteractions(mapper);
+        verifyNoInteractions(productResponseMapper);
     }
 
     @Test

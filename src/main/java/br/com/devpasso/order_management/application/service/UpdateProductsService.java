@@ -2,7 +2,9 @@ package br.com.devpasso.order_management.application.service;
 
 import br.com.devpasso.order_management.application.dto.command.UpdateProductCommand;
 import br.com.devpasso.order_management.application.dto.command.UpdateProductStockCommand;
+import br.com.devpasso.order_management.application.dto.result.ProductResult;
 import br.com.devpasso.order_management.application.exception.ResourceConflictException;
+import br.com.devpasso.order_management.application.mapper.ProductResultMapper;
 import br.com.devpasso.order_management.application.usecase.UpdateProductStockUseCase;
 import br.com.devpasso.order_management.application.usecase.UpdateProductUseCase;
 import br.com.devpasso.order_management.domain.exception.ResourceNotFoundException;
@@ -11,13 +13,16 @@ import br.com.devpasso.order_management.domain.repository.ProductRepository;
 
 public class UpdateProductsService implements UpdateProductUseCase, UpdateProductStockUseCase {
     private final ProductRepository productRepository;
+    private final ProductResultMapper productResultMapper;
 
-    public UpdateProductsService(ProductRepository productRepository) {
+    public UpdateProductsService(ProductRepository productRepository,
+                                 ProductResultMapper productResultMapper) {
         this.productRepository = productRepository;
+        this.productResultMapper = productResultMapper;
     }
 
     @Override
-    public Product execute(String id, UpdateProductCommand command) {
+    public ProductResult execute(String id, UpdateProductCommand command) {
         Product product = fetchProduct(id);
 
         if (!product.getName().equals(command.name())) {
@@ -27,7 +32,8 @@ public class UpdateProductsService implements UpdateProductUseCase, UpdateProduc
 
         product.changeDescription(command.description());
         product.changePrice(command.price());
-        return productRepository.save(product);
+        Product updatedProduct = productRepository.save(product);
+        return productResultMapper.toResult(updatedProduct);
     }
 
     private void validateDuplicatedName(String name) {
@@ -36,11 +42,12 @@ public class UpdateProductsService implements UpdateProductUseCase, UpdateProduc
     }
 
     @Override
-    public Product execute(String id, UpdateProductStockCommand command) {
+    public ProductResult execute(String id, UpdateProductStockCommand command) {
         Product product = fetchProduct(id);
 
         product.changeStockQuantity(command.stockQuantity());
-        return productRepository.save(product);
+        Product updatedProduct = productRepository.save(product);
+        return productResultMapper.toResult(updatedProduct);
     }
 
     private Product fetchProduct(String id) {

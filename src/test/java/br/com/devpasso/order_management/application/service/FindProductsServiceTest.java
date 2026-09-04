@@ -1,6 +1,9 @@
 package br.com.devpasso.order_management.application.service;
 
-import br.com.devpasso.order_management.domain.common.PaginatedResult;
+import br.com.devpasso.order_management.application.dto.result.PaginatedResult;
+import br.com.devpasso.order_management.application.dto.result.ProductResult;
+import br.com.devpasso.order_management.application.mapper.ProductResultMapper;
+import br.com.devpasso.order_management.domain.common.PaginatedQueryResult;
 import br.com.devpasso.order_management.domain.common.PaginationQuery;
 import br.com.devpasso.order_management.domain.exception.ResourceNotFoundException;
 import br.com.devpasso.order_management.domain.model.Product;
@@ -12,8 +15,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -30,6 +31,9 @@ class FindProductsServiceTest {
     @Mock
     private ProductRepository productRepository;
 
+    @Mock
+    private ProductResultMapper productResultMapper;
+
     @InjectMocks
     private FindProductsService findProductsService;
 
@@ -44,28 +48,42 @@ class FindProductsServiceTest {
             new ProductEntity();
         productEntity.changeName("Test Product");
 
-
         Product domainProduct = new Product(productEntity.getId(),
                 productEntity.getName(),
                 "Test description",
                 new BigDecimal("10.0"),
                 5,
-                Instant.now());
+                Instant.now()
+        );
 
-        PaginatedResult<Product> expectedResult = new PaginatedResult<>(
+        ProductResult productResult = new ProductResult(productEntity.getId(),
+                productEntity.getName(),
+                "Test description",
+                new BigDecimal("10.0"),
+                5);
+
+        PaginatedQueryResult<Product> expectedResult = new PaginatedQueryResult<>(
                 List.of(domainProduct), 0, 10, 1, 1
+        );
+
+        List<ProductResult> productsResultList = List.of(productResult);
+
+        PaginatedResult<ProductResult> paginatedResult = new PaginatedResult<>(
+                productsResultList, 0, 10, 1, 1
         );
 
         when(productRepository.findAllByNameContainingIgnoreCase(paginationQuery, name))
                 .thenReturn(expectedResult);
+        when(productResultMapper.toResult(domainProduct))
+                .thenReturn(productResult);
 
         // When
-        PaginatedResult<Product> result = findProductsService.execute(paginationQuery, name);
+        PaginatedResult<ProductResult> result = findProductsService.execute(paginationQuery, name);
 
         // Then
         assertNotNull(result);
         assertEquals(1, result.totalElements());
-        assertEquals(domainProduct, result.content()
+        assertEquals(productResult, result.content()
                 .getFirst());
         verify(productRepository).findAllByNameContainingIgnoreCase(paginationQuery, name);
     }
@@ -75,23 +93,36 @@ class FindProductsServiceTest {
     void execute_WithId_ShouldReturnProduct() {
         // Given
         UUID id = UUID.randomUUID();
-        Product domainProduct = new Product(id,
+
+        Product domainProduct = new Product(
+                id,
                 "Test Product",
                 "Test description",
                 new BigDecimal("10.0"),
                 5,
-                Instant.now());
+                Instant.now()
+        );
+
+        ProductResult productResult = new ProductResult(
+                id,
+                "Test Product",
+                "Test description",
+                new BigDecimal("10.0"),
+                5
+        );
 
         when(productRepository.findById(id.toString()))
                 .thenReturn(Optional.of(domainProduct));
+        when(productResultMapper.toResult(domainProduct))
+                .thenReturn(productResult);
 
         // When
-        Product result = findProductsService.execute(id.toString());
+        ProductResult result = findProductsService.execute(id.toString());
 
         // Then
         assertNotNull(result);
-        assertEquals(id, result.getId());
-        assertEquals("Test Product", result.getName());
+        assertEquals(id, result.id());
+        assertEquals("Test Product", result.name());
         verify(productRepository).findById(id.toString());
     }
 

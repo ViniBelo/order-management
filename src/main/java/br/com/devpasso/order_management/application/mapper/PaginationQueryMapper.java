@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import java.util.stream.Collectors;
 
 @Component
-public class WebPaginationMapper {
+public class PaginationQueryMapper {
 
     /**
      * Translates the Spring Web `Pageable` into the Domain’s plain Query object.

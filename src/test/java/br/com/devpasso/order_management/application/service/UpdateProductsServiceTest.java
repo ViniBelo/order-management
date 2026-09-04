@@ -2,7 +2,9 @@ package br.com.devpasso.order_management.application.service;
 
 import br.com.devpasso.order_management.application.dto.command.UpdateProductCommand;
 import br.com.devpasso.order_management.application.dto.command.UpdateProductStockCommand;
+import br.com.devpasso.order_management.application.dto.result.ProductResult;
 import br.com.devpasso.order_management.application.exception.ResourceConflictException;
+import br.com.devpasso.order_management.application.mapper.ProductResultMapper;
 import br.com.devpasso.order_management.domain.exception.ResourceNotFoundException;
 import br.com.devpasso.order_management.domain.model.Product;
 import br.com.devpasso.order_management.domain.repository.ProductRepository;
@@ -28,6 +30,9 @@ public class UpdateProductsServiceTest {
     
     @Mock
     private ProductRepository productRepository;
+
+    @Mock
+    private ProductResultMapper productResultMapper;
     
     @InjectMocks
     private UpdateProductsService updateProductsService;
@@ -53,21 +58,33 @@ public class UpdateProductsServiceTest {
                 new BigDecimal("49.99")
         );
 
-        when(productRepository.findById(id.toString())).thenReturn(Optional.of(existingProduct));
-        when(productRepository.existsByName(command.name())).thenReturn(false);
-        when(productRepository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        ProductResult productResult = new ProductResult(
+                id,
+                command.name(),
+                command.description(),
+                command.price(),
+                existingProduct.getStockQuantity()
+        );
+
+        when(productRepository.findById(id.toString()))
+                .thenReturn(Optional.of(existingProduct));
+        when(productRepository.existsByName(command.name()))
+                .thenReturn(false);
+        when(productRepository.save(any(Product.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(productResultMapper.toResult(existingProduct))
+                .thenReturn(productResult);
 
         // When
-        Product result = updateProductsService.execute(id.toString(), command);
+        ProductResult result = updateProductsService.execute(id.toString(), command);
 
         // Then
         assertNotNull(result);
-        assertEquals(id, result.getId());
-        assertEquals(command.name(), result.getName());
-        assertEquals(command.description(), result.getDescription());
-        assertEquals(command.price(), result.getPrice());
-        assertEquals(5, result.getStockQuantity());
-        assertEquals(createdAt, result.getCreatedAt());
+        assertEquals(id, result.id());
+        assertEquals(command.name(), result.name());
+        assertEquals(command.description(), result.description());
+        assertEquals(command.price(), result.price());
+        assertEquals(5, result.stockQuantity());
 
         verify(productRepository).findById(id.toString());
         verify(productRepository).existsByName(command.name());
@@ -131,20 +148,31 @@ public class UpdateProductsServiceTest {
                 new BigDecimal("49.99")
         );
 
-        when(productRepository.findById(id.toString())).thenReturn(Optional.of(existingProduct));
-        when(productRepository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        ProductResult productResult = new ProductResult(
+                id,
+                command.name(),
+                command.description(),
+                command.price(),
+                existingProduct.getStockQuantity()
+        );
+
+        when(productRepository.findById(id.toString()))
+                .thenReturn(Optional.of(existingProduct));
+        when(productRepository.save(any(Product.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(productResultMapper.toResult(existingProduct))
+                .thenReturn(productResult);
 
         // When
-        Product result = updateProductsService.execute(id.toString(), command);
+        ProductResult result = updateProductsService.execute(id.toString(), command);
 
         // Then
         assertNotNull(result);
-        assertEquals(id, result.getId());
-        assertEquals("Original Name", result.getName());
-        assertEquals(command.description(), result.getDescription());
-        assertEquals(command.price(), result.getPrice());
-        assertEquals(5, result.getStockQuantity());
-        assertEquals(createdAt, result.getCreatedAt());
+        assertEquals(id, result.id());
+        assertEquals("Original Name", result.name());
+        assertEquals(command.description(), result.description());
+        assertEquals(command.price(), result.price());
+        assertEquals(5, result.stockQuantity());
 
         verify(productRepository).findById(id.toString());
         verify(productRepository, never()).existsByName(any());
@@ -192,20 +220,31 @@ public class UpdateProductsServiceTest {
 
         UpdateProductStockCommand command = new UpdateProductStockCommand(50);
 
-        when(productRepository.findById(id.toString())).thenReturn(Optional.of(existingProduct));
-        when(productRepository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        ProductResult productResult = new ProductResult(
+                id,
+                existingProduct.getName(),
+                existingProduct.getDescription(),
+                existingProduct.getPrice(),
+                command.stockQuantity()
+        );
+
+        when(productRepository.findById(id.toString()))
+                .thenReturn(Optional.of(existingProduct));
+        when(productRepository.save(any(Product.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(productResultMapper.toResult(existingProduct))
+                .thenReturn(productResult);
 
         // When
-        Product result = updateProductsService.execute(id.toString(), command);
+        ProductResult result = updateProductsService.execute(id.toString(), command);
 
         // Then
         assertNotNull(result);
-        assertEquals(id, result.getId());
-        assertEquals("Test Product", result.getName());
-        assertEquals("Test Description", result.getDescription());
-        assertEquals(new BigDecimal("29.99"), result.getPrice());
-        assertEquals(50, result.getStockQuantity());
-        assertEquals(createdAt, result.getCreatedAt());
+        assertEquals(id, result.id());
+        assertEquals("Test Product", result.name());
+        assertEquals("Test Description", result.description());
+        assertEquals(new BigDecimal("29.99"), result.price());
+        assertEquals(50, result.stockQuantity());
 
         verify(productRepository).findById(id.toString());
         verify(productRepository).save(existingProduct);
