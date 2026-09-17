@@ -1,7 +1,8 @@
 package br.com.devpasso.order_management.api.exception;
 
 import br.com.devpasso.order_management.api.dto.exception.ErrorResponse;
-import br.com.devpasso.order_management.application.exception.ResourceConflictException;
+import br.com.devpasso.order_management.domain.exception.DomainException;
+import br.com.devpasso.order_management.domain.exception.ResourceConflictException;
 import br.com.devpasso.order_management.domain.exception.ResourceNotFoundException;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -94,31 +95,24 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handles 404 Not Found: When the user requests a resource that does not exist.
+     * Handles Domain Exceptions
      */
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleResourceNotFound(RuntimeException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(DomainException.class)
+    public ResponseEntity<ErrorResponse> handleDomainException(DomainException e) {
+        HttpStatus status = determineDomainStatus(e);
+        return ResponseEntity.status(status)
                 .body(buildErrorResponse(
-                        HttpStatus.NOT_FOUND,
-                        "Not Found",
-                        "The requested resource could not be found.",
+                        status,
+                        status.getReasonPhrase(),
+                        e.getMessage(),
                         null
                 ));
     }
 
-    /**
-     * Handles 409 Conflict: When the user tries to create a resource that already exists.
-     */
-    @ExceptionHandler(ResourceConflictException.class)
-    public ResponseEntity<ErrorResponse> handleConflict(RuntimeException e) {
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(buildErrorResponse(
-                        HttpStatus.CONFLICT,
-                        "Conflict",
-                        Objects.requireNonNullElse(e.getMessage(), "The resource already exists."),
-                        null
-                ));
+    private HttpStatus determineDomainStatus(DomainException e) {
+        if (e instanceof ResourceNotFoundException) return HttpStatus.NOT_FOUND;
+        if (e instanceof ResourceConflictException) return HttpStatus.CONFLICT;
+        return HttpStatus.BAD_REQUEST;
     }
 
     /**

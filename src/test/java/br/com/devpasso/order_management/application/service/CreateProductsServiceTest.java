@@ -2,7 +2,7 @@ package br.com.devpasso.order_management.application.service;
 
 import br.com.devpasso.order_management.application.dto.command.CreateProductCommand;
 import br.com.devpasso.order_management.application.dto.result.CreateProductResult;
-import br.com.devpasso.order_management.application.exception.ResourceConflictException;
+import br.com.devpasso.order_management.domain.exception.ResourceConflictException;
 import br.com.devpasso.order_management.application.mapper.CreateProductResultMapper;
 import br.com.devpasso.order_management.domain.model.Product;
 import br.com.devpasso.order_management.domain.repository.ProductRepository;

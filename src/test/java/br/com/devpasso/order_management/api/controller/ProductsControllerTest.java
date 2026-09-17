@@ -18,7 +18,7 @@ import br.com.devpasso.order_management.application.dto.command.UpdateProductSto
 import br.com.devpasso.order_management.application.dto.result.CreateProductResult;
 import br.com.devpasso.order_management.application.dto.result.PaginatedResult;
 import br.com.devpasso.order_management.application.dto.result.ProductResult;
-import br.com.devpasso.order_management.application.exception.ResourceConflictException;
+import br.com.devpasso.order_management.domain.exception.ResourceConflictException;
 import br.com.devpasso.order_management.application.mapper.PaginationQueryMapper;
 import br.com.devpasso.order_management.application.usecase.*;
 import br.com.devpasso.order_management.domain.common.PaginationQuery;

@@ -3,7 +3,7 @@ package br.com.devpasso.order_management.application.service;
 import br.com.devpasso.order_management.application.dto.command.UpdateProductCommand;
 import br.com.devpasso.order_management.application.dto.command.UpdateProductStockCommand;
 import br.com.devpasso.order_management.application.dto.result.ProductResult;
-import br.com.devpasso.order_management.application.exception.ResourceConflictException;
+import br.com.devpasso.order_management.domain.exception.ResourceConflictException;
 import br.com.devpasso.order_management.application.mapper.ProductResultMapper;
 import br.com.devpasso.order_management.domain.exception.ResourceNotFoundException;
 import br.com.devpasso.order_management.domain.model.Product;

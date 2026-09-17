@@ -94,7 +94,7 @@ class ProductsControllerIT {
         mockMvc.perform(get("/v1/products/{id}", id))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.title").value("Not Found"))
-                .andExpect(jsonPath("$.detail").value("The requested resource could not be found."));
+                .andExpect(jsonPath("$.detail").value("Product not found for ID: " + id));
     }
 
     @Test
@@ -409,7 +409,7 @@ class ProductsControllerIT {
                         .content(requestJson))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.title").value("Not Found"))
-                .andExpect(jsonPath("$.detail").value("The requested resource could not be found."));
+                .andExpect(jsonPath("$.detail").value("Product not found for ID: " + nonExistentId));
     }
 
     @Test
@@ -580,7 +580,7 @@ class ProductsControllerIT {
                         .content(requestJson))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.title").value("Not Found"))
-                .andExpect(jsonPath("$.detail").value("The requested resource could not be found."));
+                .andExpect(jsonPath("$.detail").value("Product not found for ID: " + nonExistentId));
     }
 
     @Test
@@ -640,7 +640,7 @@ class ProductsControllerIT {
         mockMvc.perform(get("/v1/products/{id}", id))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.title").value("Not Found"))
-                .andExpect(jsonPath("$.detail").value("The requested resource could not be found."));
+                .andExpect(jsonPath("$.detail").value("Product not found for ID: " + id));
 
         mockMvc.perform(get("/v1/products"))
                 .andExpect(status().isOk())
@@ -658,7 +658,7 @@ class ProductsControllerIT {
         mockMvc.perform(delete("/v1/products/{id}", nonExistentId))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.title").value("Not Found"))
-                .andExpect(jsonPath("$.detail").value("The requested resource could not be found."));
+                .andExpect(jsonPath("$.detail").value("Product not found for ID: " + nonExistentId));
     }
 
     @Test
@@ -672,7 +672,7 @@ class ProductsControllerIT {
         mockMvc.perform(delete("/v1/products/{id}", id))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.title").value("Not Found"))
-                .andExpect(jsonPath("$.detail").value("The requested resource could not be found."));
+                .andExpect(jsonPath("$.detail").value("Product not found for ID: " + id));
     }
 
     @Test
