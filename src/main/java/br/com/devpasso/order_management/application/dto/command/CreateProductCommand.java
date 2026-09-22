@@ -11,17 +11,40 @@ public record CreateProductCommand(
         Integer stockQuantity
 ) {
     public CreateProductCommand {
-        if (name == null) {
-            throw new IllegalArgumentException("Name cannot be null");
+        validateName(name);
+        validateDescription(description);
+        validatePrice(price);
+        validateStockQuantity(stockQuantity);
+    }
+
+    private void validateName(String name) {
+        validateNotNull("Name", name);
+        if (name.length() < 3) {
+            throw new IllegalArgumentException("Name must have at least 3 characters");
         }
-        if (description == null) {
-            throw new IllegalArgumentException("Description cannot be null");
+    }
+
+    private void validateDescription(String description) {
+        validateNotNull("Description", description);
+    }
+
+    private void validatePrice(BigDecimal price) {
+        validateNotNull("Price", price);
+        if (price.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Price must be greater than zero");
         }
-        if (price == null) {
-            throw new IllegalArgumentException("Price cannot be null");
+    }
+
+    private void validateStockQuantity(Integer stockQuantity) {
+        validateNotNull("StockQuantity", stockQuantity);
+        if (stockQuantity < 0) {
+            throw new IllegalArgumentException("StockQuantity must be greater than or equal to zero");
         }
-        if (stockQuantity == null) {
-            throw new IllegalArgumentException("Stock quantity cannot be null");
+    }
+
+    private <T> void validateNotNull(String fieldName, T field) {
+        if (field == null) {
+            throw new IllegalArgumentException(fieldName + " cannot be null");
         }
     }
 
