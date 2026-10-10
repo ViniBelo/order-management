@@ -1,4 +1,4 @@
-package br.com.devpasso.order_management.api.controller;
+package br.com.devpasso.order_management.api.controller.products;
 
 import br.com.devpasso.order_management.infrastructure.persistence.entity.ProductEntity;
 import br.com.devpasso.order_management.infrastructure.persistence.repository.ProductJpaRepository;
