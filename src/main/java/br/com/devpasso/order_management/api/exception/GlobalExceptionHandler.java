@@ -1,7 +1,7 @@
 package br.com.devpasso.order_management.api.exception;
 
 import br.com.devpasso.order_management.api.dto.exception.ErrorResponse;
-import br.com.devpasso.order_management.domain.exception.DomainException;
+import br.com.devpasso.order_management.domain.exception.BaseDomainException;
 import br.com.devpasso.order_management.domain.exception.ResourceConflictException;
 import br.com.devpasso.order_management.domain.exception.ResourceNotFoundException;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -17,7 +17,6 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 @Hidden
@@ -97,8 +96,8 @@ public class GlobalExceptionHandler {
     /**
      * Handles Domain Exceptions
      */
-    @ExceptionHandler(DomainException.class)
-    public ResponseEntity<ErrorResponse> handleDomainException(DomainException e) {
+    @ExceptionHandler(BaseDomainException.class)
+    public ResponseEntity<ErrorResponse> handleDomainException(BaseDomainException e) {
         HttpStatus status = determineDomainStatus(e);
         return ResponseEntity.status(status)
                 .body(buildErrorResponse(
@@ -109,7 +108,7 @@ public class GlobalExceptionHandler {
                 ));
     }
 
-    private HttpStatus determineDomainStatus(DomainException e) {
+    private HttpStatus determineDomainStatus(BaseDomainException e) {
         if (e instanceof ResourceNotFoundException) return HttpStatus.NOT_FOUND;
         if (e instanceof ResourceConflictException) return HttpStatus.CONFLICT;
         return HttpStatus.BAD_REQUEST;
