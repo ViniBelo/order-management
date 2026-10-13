@@ -178,4 +178,48 @@ public class OrderTest {
         // When && Then
         assertThrows(InvalidOrderStateException.class, () -> order.transitionTo(OrderStatus.IN_DELIVERY));
     }
+
+    @Test
+    public void total_shouldSumOrderItemsSubtotals() {
+        // Given
+        UUID orderItemId1 = UUID.randomUUID();
+        UUID itemId1 = UUID.randomUUID();
+        String productName1 = "Product 1";
+        BigDecimal unitPrice1 = new BigDecimal("10.00");
+        Integer quantity1 = 2;
+
+        OrderItem orderItem1 = new OrderItem(
+                orderItemId1,
+                itemId1,
+                productName1,
+                unitPrice1,
+                quantity1
+        );
+
+        UUID orderItemId2 = UUID.randomUUID();
+        UUID itemId2 = UUID.randomUUID();
+        String productName2 = "Product 2";
+        BigDecimal unitPrice2 = new BigDecimal("20.00");
+        Integer quantity2 = 3;
+
+        OrderItem orderItem2 = new OrderItem(
+                orderItemId2,
+                itemId2,
+                productName2,
+                unitPrice2,
+                quantity2
+        );
+
+        UUID id = UUID.randomUUID();
+        UUID customerId = UUID.randomUUID();
+        Order order = new Order(id, customerId);
+        order.addItem(orderItem1);
+        order.addItem(orderItem2);
+
+        // When
+        BigDecimal total = order.total();
+
+        // Then
+        assertEquals(new BigDecimal("80.00"), total);
+    }
 }
