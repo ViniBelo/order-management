@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DataJpaTest
 @Testcontainers
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class ProductEntityJpaRepositoryTest {
+class ProductEntityJpaRepositoryIT {
 
     @Container
     @ServiceConnection
