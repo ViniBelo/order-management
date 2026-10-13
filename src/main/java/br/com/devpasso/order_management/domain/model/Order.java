@@ -11,7 +11,7 @@ public class Order {
     private final UUID id;
     private final UUID customerId;
     private OrderStatus status;
-    private ArrayList<OrderItem> items;
+    private final ArrayList<OrderItem> items;
     private final Instant createdAt;
 
     public Order(UUID id, UUID customerId) {
@@ -36,7 +36,7 @@ public class Order {
 
     public BigDecimal total() {
         return items.stream()
-                .map(OrderItem::unitPrice)
+                .map(OrderItem::subtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
