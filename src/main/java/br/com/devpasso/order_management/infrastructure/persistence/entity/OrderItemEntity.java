@@ -1,7 +1,6 @@
 package br.com.devpasso.order_management.infrastructure.persistence.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -13,15 +12,15 @@ public class OrderItemEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "order_id",
-            nullable = false)
-    private UUID orderId;
+    @ManyToOne
+    @JoinColumn(name = "order_id",
+                nullable = false)
+    private OrderEntity order;
 
     @Column(name = "product_id",
             nullable = false)
     private UUID productId;
 
-    @Size(max = 255)
     @Column(name = "product_name",
             nullable = false)
     private String productName;
@@ -40,8 +39,8 @@ public class OrderItemEntity {
         return id;
     }
 
-    public UUID getOrderId() {
-        return orderId;
+    public OrderEntity getOrder() {
+        return order;
     }
 
     public UUID getProductId() {
@@ -64,8 +63,8 @@ public class OrderItemEntity {
         this.id = id;
     }
 
-    public void changeOrderId(UUID orderId) {
-        this.orderId = orderId;
+    public void changeOrder(OrderEntity order) {
+        this.order = order;
     }
 
     public void changeProductId(UUID productId) {
