@@ -14,10 +14,9 @@ public class OrderTest {
     @Test
     public void addItem_shouldAddItem() {
         // Given
-        UUID id = UUID.randomUUID();
         UUID customerId = UUID.randomUUID();
 
-        Order order = new Order(id, customerId);
+        Order order = new Order(customerId);
 
         UUID orderItemId = UUID.randomUUID();
         UUID itemId = UUID.randomUUID();
@@ -44,10 +43,9 @@ public class OrderTest {
     @Test
     public void addItem_shouldThrowInvalidOrderStateExceptionWhenAddingItemToConfirmedOrder() {
         // Given
-        UUID id = UUID.randomUUID();
         UUID customerId = UUID.randomUUID();
 
-        Order order = new Order(id, customerId);
+        Order order = new Order(customerId);
         order.transitionTo(OrderStatus.CONFIRMED);
 
         UUID orderItemId = UUID.randomUUID();
@@ -71,10 +69,9 @@ public class OrderTest {
     @Test
     public void addItem_shouldThrowInvalidOrderStateExceptionWhenAddingItemToInDeliveryOrder() {
         // Given
-        UUID id = UUID.randomUUID();
         UUID customerId = UUID.randomUUID();
 
-        Order order = new Order(id, customerId);
+        Order order = new Order(customerId);
         order.transitionTo(OrderStatus.CONFIRMED);
         order.transitionTo(OrderStatus.IN_DELIVERY);
 
@@ -99,10 +96,9 @@ public class OrderTest {
     @Test
     public void addItem_shouldThrowInvalidOrderStateExceptionWhenAddingItemToDeliveredOrder() {
         // Given
-        UUID id = UUID.randomUUID();
         UUID customerId = UUID.randomUUID();
 
-        Order order = new Order(id, customerId);
+        Order order = new Order(customerId);
         order.transitionTo(OrderStatus.CONFIRMED);
         order.transitionTo(OrderStatus.IN_DELIVERY);
         order.transitionTo(OrderStatus.DELIVERED);
@@ -128,10 +124,9 @@ public class OrderTest {
     @Test
     public void addItem_shouldThrowInvalidOrderStateExceptionWhenAddingItemToCancelledOrder() {
         // Given
-        UUID id = UUID.randomUUID();
         UUID customerId = UUID.randomUUID();
 
-        Order order = new Order(id, customerId);
+        Order order = new Order(customerId);
         order.transitionTo(OrderStatus.CANCELLED);
 
         UUID orderItemId = UUID.randomUUID();
@@ -155,10 +150,9 @@ public class OrderTest {
     @Test
     public void transitionTo_shouldUpdateOrderStatus() {
         // Given
-        UUID id = UUID.randomUUID();
         UUID customerId = UUID.randomUUID();
 
-        Order order = new Order(id, customerId);
+        Order order = new Order(customerId);
 
         // When
         order.transitionTo(OrderStatus.CONFIRMED);
@@ -170,10 +164,9 @@ public class OrderTest {
     @Test
     public void transitionTo_shouldThrowInvalidOrderStateExceptionWhenInvalidNextOrderStatus() {
         // Given
-        UUID id = UUID.randomUUID();
         UUID customerId = UUID.randomUUID();
 
-        Order order = new Order(id, customerId);
+        Order order = new Order(customerId);
 
         // When && Then
         assertThrows(InvalidOrderStateException.class, () -> order.transitionTo(OrderStatus.IN_DELIVERY));
@@ -210,9 +203,8 @@ public class OrderTest {
                 quantity2
         );
 
-        UUID id = UUID.randomUUID();
         UUID customerId = UUID.randomUUID();
-        Order order = new Order(id, customerId);
+        Order order = new Order(customerId);
         order.addItem(orderItem1);
         order.addItem(orderItem2);
 

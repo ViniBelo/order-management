@@ -5,17 +5,30 @@ import br.com.devpasso.order_management.domain.exception.InvalidOrderStateExcept
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class Order {
     private final UUID id;
     private final UUID customerId;
     private OrderStatus status;
-    private final ArrayList<OrderItem> items;
+    private final List<OrderItem> items;
     private final Instant createdAt;
 
-    public Order(UUID id, UUID customerId) {
+    public Order(UUID id,
+                 UUID customerId,
+                 OrderStatus status,
+                 List<OrderItem> items,
+                 Instant createdAt) {
         this.id = id;
+        this.customerId = customerId;
+        this.status = status;
+        this.items = items;
+        this.createdAt = createdAt;
+    }
+
+    public Order(UUID customerId) {
+        this.id = UUID.randomUUID();
         this.customerId = customerId;
         this.status = OrderStatus.DRAFT;
         this.items = new ArrayList<>();
@@ -52,7 +65,7 @@ public class Order {
         return status;
     }
 
-    public ArrayList<OrderItem> items() {
+    public List<OrderItem> items() {
         return items;
     }
 
