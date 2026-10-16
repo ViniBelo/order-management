@@ -1,7 +1,7 @@
 package br.com.devpasso.order_management.api.mapper.request;
 
 import br.com.devpasso.order_management.api.dto.request.CreateProductRequest;
-import br.com.devpasso.order_management.application.dto.command.CreateProductCommand;
+import br.com.devpasso.order_management.application.dto.command.products.CreateProductCommand;
 import org.springframework.stereotype.Component;
 
 @Component

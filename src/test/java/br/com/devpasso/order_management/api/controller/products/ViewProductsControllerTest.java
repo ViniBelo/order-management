@@ -1,14 +1,14 @@
 package br.com.devpasso.order_management.api.controller.products;
 
-import br.com.devpasso.order_management.api.dto.response.PaginatedResponse;
-import br.com.devpasso.order_management.api.dto.response.ProductResponse;
+import br.com.devpasso.order_management.api.dto.products.response.PaginatedResponse;
+import br.com.devpasso.order_management.api.dto.products.response.ProductResponse;
 import br.com.devpasso.order_management.api.mapper.response.PaginatedResponseMapper;
 import br.com.devpasso.order_management.api.mapper.response.ProductResponseMapper;
 import br.com.devpasso.order_management.application.dto.result.PaginatedResult;
-import br.com.devpasso.order_management.application.dto.result.ProductResult;
+import br.com.devpasso.order_management.application.dto.result.products.ProductResult;
 import br.com.devpasso.order_management.application.mapper.PaginationQueryMapper;
-import br.com.devpasso.order_management.application.usecase.FindProductByIdUseCase;
-import br.com.devpasso.order_management.application.usecase.ListProductsUseCase;
+import br.com.devpasso.order_management.application.usecase.products.FindProductByIdUseCase;
+import br.com.devpasso.order_management.application.usecase.products.ListProductsUseCase;
 import br.com.devpasso.order_management.domain.common.PaginationQuery;
 import br.com.devpasso.order_management.domain.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.DisplayName;

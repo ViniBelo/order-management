@@ -1,7 +1,7 @@
 package br.com.devpasso.order_management.api.mapper.response;
 
 import br.com.devpasso.order_management.api.dto.response.ProductResponse;
-import br.com.devpasso.order_management.application.dto.result.ProductResult;
+import br.com.devpasso.order_management.application.dto.result.products.ProductResult;
 import org.springframework.stereotype.Component;
 
 @Component

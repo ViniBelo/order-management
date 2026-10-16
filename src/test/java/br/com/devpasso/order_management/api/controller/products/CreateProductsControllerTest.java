@@ -1,12 +1,12 @@
 package br.com.devpasso.order_management.api.controller.products;
 
-import br.com.devpasso.order_management.api.dto.request.CreateProductRequest;
-import br.com.devpasso.order_management.api.dto.response.CreateProductResponse;
+import br.com.devpasso.order_management.api.dto.products.request.CreateProductRequest;
+import br.com.devpasso.order_management.api.dto.products.response.CreateProductResponse;
 import br.com.devpasso.order_management.api.mapper.request.CreateProductRequestMapper;
 import br.com.devpasso.order_management.api.mapper.response.CreateProductResponseMapper;
-import br.com.devpasso.order_management.application.dto.command.CreateProductCommand;
-import br.com.devpasso.order_management.application.dto.result.CreateProductResult;
-import br.com.devpasso.order_management.application.usecase.CreateProductUseCase;
+import br.com.devpasso.order_management.application.dto.command.products.CreateProductCommand;
+import br.com.devpasso.order_management.application.dto.result.products.CreateProductResult;
+import br.com.devpasso.order_management.application.usecase.products.CreateProductUseCase;
 import br.com.devpasso.order_management.domain.exception.ResourceConflictException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

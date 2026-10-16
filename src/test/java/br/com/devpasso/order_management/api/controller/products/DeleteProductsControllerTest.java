@@ -1,6 +1,6 @@
 package br.com.devpasso.order_management.api.controller.products;
 
-import br.com.devpasso.order_management.application.usecase.DeleteProductUseCase;
+import br.com.devpasso.order_management.application.usecase.products.DeleteProductUseCase;
 import br.com.devpasso.order_management.domain.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

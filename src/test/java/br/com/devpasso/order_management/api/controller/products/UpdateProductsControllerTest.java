@@ -1,16 +1,16 @@
 package br.com.devpasso.order_management.api.controller.products;
 
-import br.com.devpasso.order_management.api.dto.request.UpdateProductRequest;
-import br.com.devpasso.order_management.api.dto.request.UpdateProductStockRequest;
-import br.com.devpasso.order_management.api.dto.response.ProductResponse;
+import br.com.devpasso.order_management.api.dto.products.request.UpdateProductRequest;
+import br.com.devpasso.order_management.api.dto.products.request.UpdateProductStockRequest;
+import br.com.devpasso.order_management.api.dto.products.response.ProductResponse;
 import br.com.devpasso.order_management.api.mapper.request.UpdateProductRequestMapper;
 import br.com.devpasso.order_management.api.mapper.request.UpdateProductStockRequestMapper;
 import br.com.devpasso.order_management.api.mapper.response.ProductResponseMapper;
-import br.com.devpasso.order_management.application.dto.command.UpdateProductCommand;
-import br.com.devpasso.order_management.application.dto.command.UpdateProductStockCommand;
-import br.com.devpasso.order_management.application.dto.result.ProductResult;
-import br.com.devpasso.order_management.application.usecase.UpdateProductStockUseCase;
-import br.com.devpasso.order_management.application.usecase.UpdateProductUseCase;
+import br.com.devpasso.order_management.application.dto.command.products.UpdateProductCommand;
+import br.com.devpasso.order_management.application.dto.command.products.UpdateProductStockCommand;
+import br.com.devpasso.order_management.application.dto.result.products.ProductResult;
+import br.com.devpasso.order_management.application.usecase.products.UpdateProductStockUseCase;
+import br.com.devpasso.order_management.application.usecase.products.UpdateProductUseCase;
 import br.com.devpasso.order_management.domain.exception.ResourceConflictException;
 import br.com.devpasso.order_management.domain.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.DisplayName;

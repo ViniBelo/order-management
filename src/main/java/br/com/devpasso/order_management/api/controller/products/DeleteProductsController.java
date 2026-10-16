@@ -3,7 +3,7 @@ package br.com.devpasso.order_management.api.controller.products;
 import br.com.devpasso.order_management.api.dto.exception.InternalServerErrorResponse;
 import br.com.devpasso.order_management.api.dto.exception.NotFoundErrorResponse;
 import br.com.devpasso.order_management.api.dto.exception.ValidationErrorResponse;
-import br.com.devpasso.order_management.application.usecase.DeleteProductUseCase;
+import br.com.devpasso.order_management.application.usecase.products.DeleteProductUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
