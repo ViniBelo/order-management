@@ -9,15 +9,15 @@ import br.com.devpasso.order_management.application.usecase.products.UpdateProdu
 import br.com.devpasso.order_management.application.usecase.products.UpdateProductUseCase;
 import br.com.devpasso.order_management.domain.exception.ResourceNotFoundException;
 import br.com.devpasso.order_management.domain.model.Product;
-import br.com.devpasso.order_management.domain.repository.ProductRepository;
+import br.com.devpasso.order_management.domain.repository.ProductRepositoryPort;
 
 public class UpdateProductsService implements UpdateProductUseCase, UpdateProductStockUseCase {
-    private final ProductRepository productRepository;
+    private final ProductRepositoryPort productRepositoryPort;
     private final ProductResultMapper productResultMapper;
 
-    public UpdateProductsService(ProductRepository productRepository,
+    public UpdateProductsService(ProductRepositoryPort productRepositoryPort,
                                  ProductResultMapper productResultMapper) {
-        this.productRepository = productRepository;
+        this.productRepositoryPort = productRepositoryPort;
         this.productResultMapper = productResultMapper;
     }
 
@@ -32,12 +32,12 @@ public class UpdateProductsService implements UpdateProductUseCase, UpdateProduc
 
         product.changeDescription(command.description());
         product.changePrice(command.price());
-        Product updatedProduct = productRepository.save(product);
+        Product updatedProduct = productRepositoryPort.save(product);
         return productResultMapper.toResult(updatedProduct);
     }
 
     private void validateDuplicatedName(String name) {
-        if (productRepository.existsByName(name))
+        if (productRepositoryPort.existsByName(name))
             throw new ResourceConflictException("Product already exists with name: " + name);
     }
 
@@ -46,12 +46,12 @@ public class UpdateProductsService implements UpdateProductUseCase, UpdateProduc
         Product product = fetchProduct(id);
 
         product.changeStockQuantity(command.stockQuantity());
-        Product updatedProduct = productRepository.save(product);
+        Product updatedProduct = productRepositoryPort.save(product);
         return productResultMapper.toResult(updatedProduct);
     }
 
     private Product fetchProduct(String id) {
-        return productRepository.findById(id)
+        return productRepositoryPort.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found for ID: " + id));
     }
 }

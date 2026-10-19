@@ -38,12 +38,14 @@ public class OrderEntityJpaRepositoryIT {
     @DisplayName("should persist order entity")
     void save_shouldPersistOrderEntity() {
         // Given
+        UUID id = UUID.randomUUID();
         UUID customerId = UUID.randomUUID();
         OrderStatusEntity orderStatusEntity = OrderStatusEntity.DRAFT;
         List<OrderItemEntity> orderItemEntities = List.of();
         Instant createdAt = Instant.now();
 
         OrderEntity orderEntity = new OrderEntity();
+        orderEntity.changeId(id);
         orderEntity.changeCustomerId(customerId);
         orderEntity.changeStatus(orderStatusEntity);
         orderEntity.changeItems(orderItemEntities);
@@ -64,12 +66,14 @@ public class OrderEntityJpaRepositoryIT {
     @DisplayName("should find order by id when order exists")
     void findById_shouldReturnOrderWhenExists() {
         // Given
+        UUID id = UUID.randomUUID();
         UUID customerId = UUID.randomUUID();
         OrderStatusEntity orderStatusEntity = OrderStatusEntity.DRAFT;
         List<OrderItemEntity> orderItemEntities = List.of();
         Instant createdAt = Instant.now();
 
         OrderEntity orderEntity = new OrderEntity();
+        orderEntity.changeId(id);
         orderEntity.changeCustomerId(customerId);
         orderEntity.changeStatus(orderStatusEntity);
         orderEntity.changeItems(orderItemEntities);

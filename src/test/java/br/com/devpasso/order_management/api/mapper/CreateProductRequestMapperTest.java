@@ -1,7 +1,7 @@
 package br.com.devpasso.order_management.api.mapper;
 
 import br.com.devpasso.order_management.api.dto.products.request.CreateProductRequest;
-import br.com.devpasso.order_management.api.mapper.request.CreateProductRequestMapper;
+import br.com.devpasso.order_management.api.mapper.products.request.CreateProductRequestMapper;
 import br.com.devpasso.order_management.application.dto.command.products.CreateProductCommand;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

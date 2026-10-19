@@ -31,9 +31,9 @@ class OrderItemResultMapperTest {
 
         // Then
         assertNotNull(result);
-        assertEquals(productId, result.productId());
+        assertEquals(itemId, result.id());
         assertEquals(productName, result.productName());
-        assertEquals(unitPrice, result.productPrice());
+        assertEquals(unitPrice, result.unitPrice());
         assertEquals(quantity, result.quantity());
     }
 }

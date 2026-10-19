@@ -5,7 +5,7 @@ import br.com.devpasso.order_management.application.dto.result.products.CreatePr
 import br.com.devpasso.order_management.domain.exception.ResourceConflictException;
 import br.com.devpasso.order_management.application.mapper.products.CreateProductResultMapper;
 import br.com.devpasso.order_management.domain.model.Product;
-import br.com.devpasso.order_management.domain.repository.ProductRepository;
+import br.com.devpasso.order_management.domain.repository.ProductRepositoryPort;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 public class CreateProductsServiceTest {
     
     @Mock
-    private ProductRepository productRepository;
+    private ProductRepositoryPort productRepositoryPort;
 
     @Mock
     private CreateProductResultMapper createProductResultMapper;
@@ -63,8 +63,8 @@ public class CreateProductsServiceTest {
                 createdAt
         );
 
-        when(productRepository.existsByName(command.name())).thenReturn(false);
-        when(productRepository.save(any(Product.class))).thenReturn(savedProduct);
+        when(productRepositoryPort.existsByName(command.name())).thenReturn(false);
+        when(productRepositoryPort.save(any(Product.class))).thenReturn(savedProduct);
         when(createProductResultMapper.toResult(savedProduct)).thenReturn(createdProductResult);
 
         // When
@@ -78,8 +78,8 @@ public class CreateProductsServiceTest {
         assertEquals(command.price(), result.price());
         assertEquals(command.stockQuantity(), result.stockQuantity());
 
-        verify(productRepository).existsByName(command.name());
-        verify(productRepository).save(any(Product.class));
+        verify(productRepositoryPort).existsByName(command.name());
+        verify(productRepositoryPort).save(any(Product.class));
     }
 
     @Test
@@ -93,7 +93,7 @@ public class CreateProductsServiceTest {
                 10
         );
 
-        when(productRepository.existsByName(command.name())).thenReturn(true);
+        when(productRepositoryPort.existsByName(command.name())).thenReturn(true);
 
         // When & Then
         ResourceConflictException exception = assertThrows(
@@ -102,7 +102,7 @@ public class CreateProductsServiceTest {
         );
 
         assertEquals("Product already exists with name: " + command.name(), exception.getMessage());
-        verify(productRepository).existsByName(command.name());
-        verify(productRepository, never()).save(any());
+        verify(productRepositoryPort).existsByName(command.name());
+        verify(productRepositoryPort, never()).save(any());
     }
 }

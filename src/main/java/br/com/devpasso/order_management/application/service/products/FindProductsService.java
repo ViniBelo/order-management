@@ -8,24 +8,24 @@ import br.com.devpasso.order_management.application.usecase.products.ListProduct
 import br.com.devpasso.order_management.domain.common.PaginatedQueryResult;
 import br.com.devpasso.order_management.domain.common.PaginationQuery;
 import br.com.devpasso.order_management.domain.exception.ResourceNotFoundException;
-import br.com.devpasso.order_management.domain.repository.ProductRepository;
+import br.com.devpasso.order_management.domain.repository.ProductRepositoryPort;
 import br.com.devpasso.order_management.domain.model.Product;
 
 import java.util.List;
 
 public class FindProductsService implements ListProductsUseCase, FindProductByIdUseCase {
-    private final ProductRepository productRepository;
+    private final ProductRepositoryPort productRepositoryPort;
     private final ProductResultMapper productResultMapper;
 
-    public FindProductsService(ProductRepository productRepository,
+    public FindProductsService(ProductRepositoryPort productRepositoryPort,
                                ProductResultMapper productResultMapper) {
-        this.productRepository = productRepository;
+        this.productRepositoryPort = productRepositoryPort;
         this.productResultMapper = productResultMapper;
     }
 
     @Override
     public PaginatedResult<ProductResult> execute(PaginationQuery paginationQuery, String name) {
-        PaginatedQueryResult<Product> products = productRepository.findAllByNameContainingIgnoreCase(paginationQuery, name);
+        PaginatedQueryResult<Product> products = productRepositoryPort.findAllByNameContainingIgnoreCase(paginationQuery, name);
         List<ProductResult> productsResult = products.content()
                 .stream()
                 .map(productResultMapper::toResult)
@@ -40,7 +40,7 @@ public class FindProductsService implements ListProductsUseCase, FindProductById
     }
 
     private Product fetchProduct(String id) {
-        return productRepository.findById(id)
+        return productRepositoryPort.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found for ID: " + id));
     }
 }

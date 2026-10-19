@@ -5,6 +5,8 @@ import br.com.devpasso.order_management.infrastructure.persistence.entity.OrderE
 import br.com.devpasso.order_management.infrastructure.persistence.entity.OrderStatusEntity;
 import org.springframework.stereotype.Component;
 
+import java.util.stream.Collectors;
+
 @Component
 public class OrderEntityMapper {
     private final OrderStatusMapper orderStatusMapper;
@@ -36,7 +38,7 @@ public class OrderEntityMapper {
                 orderEntity.getItems()
                         .stream()
                         .map(orderItemEntityMapper::toDomain)
-                        .toList(),
+                        .collect(Collectors.toList()),
                 orderEntity.getCreatedAt());
     }
 }

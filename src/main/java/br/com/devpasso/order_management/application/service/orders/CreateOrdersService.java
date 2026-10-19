@@ -5,22 +5,22 @@ import br.com.devpasso.order_management.application.dto.result.orders.OrderResul
 import br.com.devpasso.order_management.application.mapper.orders.OrderResultMapper;
 import br.com.devpasso.order_management.application.usecase.orders.CreateOrderUseCase;
 import br.com.devpasso.order_management.domain.model.Order;
-import br.com.devpasso.order_management.domain.repository.OrderRepository;
+import br.com.devpasso.order_management.domain.repository.OrderRepositoryPort;
 
 public class CreateOrdersService implements CreateOrderUseCase {
     private final OrderResultMapper orderResultMapper;
-    private final OrderRepository orderRepository;
+    private final OrderRepositoryPort orderRepositoryPort;
 
     public CreateOrdersService(OrderResultMapper orderResultMapper,
-                               OrderRepository orderRepository) {
+                               OrderRepositoryPort orderRepositoryPort) {
         this.orderResultMapper = orderResultMapper;
-        this.orderRepository = orderRepository;
+        this.orderRepositoryPort = orderRepositoryPort;
     }
 
     @Override
     public OrderResult execute(CreateOrderCommand command) {
         Order orderToSave = command.toDomainModel();
-        Order savedOrder = orderRepository.save(orderToSave);
+        Order savedOrder = orderRepositoryPort.save(orderToSave);
         return orderResultMapper.map(savedOrder);
     }
 }

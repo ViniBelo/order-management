@@ -7,7 +7,7 @@ import br.com.devpasso.order_management.domain.exception.ResourceConflictExcepti
 import br.com.devpasso.order_management.application.mapper.products.ProductResultMapper;
 import br.com.devpasso.order_management.domain.exception.ResourceNotFoundException;
 import br.com.devpasso.order_management.domain.model.Product;
-import br.com.devpasso.order_management.domain.repository.ProductRepository;
+import br.com.devpasso.order_management.domain.repository.ProductRepositoryPort;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,7 +29,7 @@ import static org.mockito.Mockito.*;
 public class UpdateProductsServiceTest {
     
     @Mock
-    private ProductRepository productRepository;
+    private ProductRepositoryPort productRepositoryPort;
 
     @Mock
     private ProductResultMapper productResultMapper;
@@ -66,11 +66,11 @@ public class UpdateProductsServiceTest {
                 existingProduct.getStockQuantity()
         );
 
-        when(productRepository.findById(id.toString()))
+        when(productRepositoryPort.findById(id.toString()))
                 .thenReturn(Optional.of(existingProduct));
-        when(productRepository.existsByName(command.name()))
+        when(productRepositoryPort.existsByName(command.name()))
                 .thenReturn(false);
-        when(productRepository.save(any(Product.class)))
+        when(productRepositoryPort.save(any(Product.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(productResultMapper.toResult(existingProduct))
                 .thenReturn(productResult);
@@ -86,9 +86,9 @@ public class UpdateProductsServiceTest {
         assertEquals(command.price(), result.price());
         assertEquals(5, result.stockQuantity());
 
-        verify(productRepository).findById(id.toString());
-        verify(productRepository).existsByName(command.name());
-        verify(productRepository).save(existingProduct);
+        verify(productRepositoryPort).findById(id.toString());
+        verify(productRepositoryPort).existsByName(command.name());
+        verify(productRepositoryPort).save(existingProduct);
     }
 
     @Test
@@ -112,8 +112,8 @@ public class UpdateProductsServiceTest {
                 new BigDecimal("49.99")
         );
 
-        when(productRepository.findById(id.toString())).thenReturn(Optional.of(existingProduct));
-        when(productRepository.existsByName(command.name())).thenReturn(true);
+        when(productRepositoryPort.findById(id.toString())).thenReturn(Optional.of(existingProduct));
+        when(productRepositoryPort.existsByName(command.name())).thenReturn(true);
 
         // When & Then
         ResourceConflictException exception = assertThrows(
@@ -122,9 +122,9 @@ public class UpdateProductsServiceTest {
         );
 
         assertEquals("Product already exists with name: " + command.name(), exception.getMessage());
-        verify(productRepository).findById(id.toString());
-        verify(productRepository).existsByName(command.name());
-        verify(productRepository, never()).save(any());
+        verify(productRepositoryPort).findById(id.toString());
+        verify(productRepositoryPort).existsByName(command.name());
+        verify(productRepositoryPort, never()).save(any());
     }
 
     @Test
@@ -156,9 +156,9 @@ public class UpdateProductsServiceTest {
                 existingProduct.getStockQuantity()
         );
 
-        when(productRepository.findById(id.toString()))
+        when(productRepositoryPort.findById(id.toString()))
                 .thenReturn(Optional.of(existingProduct));
-        when(productRepository.save(any(Product.class)))
+        when(productRepositoryPort.save(any(Product.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(productResultMapper.toResult(existingProduct))
                 .thenReturn(productResult);
@@ -174,9 +174,9 @@ public class UpdateProductsServiceTest {
         assertEquals(command.price(), result.price());
         assertEquals(5, result.stockQuantity());
 
-        verify(productRepository).findById(id.toString());
-        verify(productRepository, never()).existsByName(any());
-        verify(productRepository).save(existingProduct);
+        verify(productRepositoryPort).findById(id.toString());
+        verify(productRepositoryPort, never()).existsByName(any());
+        verify(productRepositoryPort).save(existingProduct);
     }
 
     @Test
@@ -190,7 +190,7 @@ public class UpdateProductsServiceTest {
                 new BigDecimal("49.99")
         );
 
-        when(productRepository.findById(id)).thenReturn(Optional.empty());
+        when(productRepositoryPort.findById(id)).thenReturn(Optional.empty());
 
         // When & Then
         ResourceNotFoundException exception = assertThrows(
@@ -199,8 +199,8 @@ public class UpdateProductsServiceTest {
         );
 
         assertEquals("Product not found for ID: " + id, exception.getMessage());
-        verify(productRepository).findById(id);
-        verify(productRepository, never()).save(any());
+        verify(productRepositoryPort).findById(id);
+        verify(productRepositoryPort, never()).save(any());
     }
 
     @Test
@@ -228,9 +228,9 @@ public class UpdateProductsServiceTest {
                 command.stockQuantity()
         );
 
-        when(productRepository.findById(id.toString()))
+        when(productRepositoryPort.findById(id.toString()))
                 .thenReturn(Optional.of(existingProduct));
-        when(productRepository.save(any(Product.class)))
+        when(productRepositoryPort.save(any(Product.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(productResultMapper.toResult(existingProduct))
                 .thenReturn(productResult);
@@ -246,8 +246,8 @@ public class UpdateProductsServiceTest {
         assertEquals(new BigDecimal("29.99"), result.price());
         assertEquals(50, result.stockQuantity());
 
-        verify(productRepository).findById(id.toString());
-        verify(productRepository).save(existingProduct);
+        verify(productRepositoryPort).findById(id.toString());
+        verify(productRepositoryPort).save(existingProduct);
     }
 
     @Test
@@ -257,7 +257,7 @@ public class UpdateProductsServiceTest {
         String id = UUID.randomUUID().toString();
         UpdateProductStockCommand command = new UpdateProductStockCommand(50);
 
-        when(productRepository.findById(id)).thenReturn(Optional.empty());
+        when(productRepositoryPort.findById(id)).thenReturn(Optional.empty());
 
         // When & Then
         ResourceNotFoundException exception = assertThrows(
@@ -266,7 +266,7 @@ public class UpdateProductsServiceTest {
         );
 
         assertEquals("Product not found for ID: " + id, exception.getMessage());
-        verify(productRepository).findById(id);
-        verify(productRepository, never()).save(any());
+        verify(productRepositoryPort).findById(id);
+        verify(productRepositoryPort, never()).save(any());
     }
 }

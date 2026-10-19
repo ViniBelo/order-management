@@ -8,10 +8,11 @@ import org.springframework.stereotype.Component;
 public class OrderItemResultMapper {
     public OrderItemResult map(OrderItem item) {
         return new OrderItemResult(
-                item.productId(),
+                item.id(),
                 item.productName(),
                 item.unitPrice(),
-                item.quantity()
+                item.quantity(),
+                item.subtotal()
         );
     }
 }

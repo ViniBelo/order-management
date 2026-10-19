@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.UUID;
 
 public record OrderResult(
-        UUID orderId,
+        UUID id,
         UUID customerId,
-        String orderStatus,
+        String status,
         List<OrderItemResult> items,
-        BigDecimal orderTotal,
+        BigDecimal total,
         Instant createdAt
 ) { }

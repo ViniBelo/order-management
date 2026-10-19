@@ -1,6 +1,8 @@
 package br.com.devpasso.order_management.infrastructure.persistence.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.type.PostgreSQLEnumJdbcType;
 
 import java.time.Instant;
 import java.util.List;
@@ -10,14 +12,16 @@ import java.util.UUID;
 @Table(name = "orders")
 public class OrderEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(name = "customer_id",
             nullable = false)
     private UUID customerId;
 
+    @Enumerated(EnumType.STRING)
+    @JdbcType(PostgreSQLEnumJdbcType.class)
     @Column(name = "status",
+            columnDefinition = "order_status",
             nullable = false)
     private OrderStatusEntity status;
 
@@ -26,7 +30,8 @@ public class OrderEntity {
     private List<OrderItemEntity> items;
 
     @Column(name = "created_at",
-            nullable = false)
+            nullable = false,
+            updatable = false)
     private Instant createdAt;
 
     public UUID getId() {

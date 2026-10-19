@@ -12,8 +12,9 @@ public class OrderItemEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "order_id",
+                referencedColumnName = "id",
                 nullable = false)
     private OrderEntity order;
 

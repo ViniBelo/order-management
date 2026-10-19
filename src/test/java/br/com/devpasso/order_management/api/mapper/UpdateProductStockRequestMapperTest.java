@@ -1,7 +1,7 @@
 package br.com.devpasso.order_management.api.mapper;
 
 import br.com.devpasso.order_management.api.dto.products.request.UpdateProductStockRequest;
-import br.com.devpasso.order_management.api.mapper.request.UpdateProductStockRequestMapper;
+import br.com.devpasso.order_management.api.mapper.products.request.UpdateProductStockRequestMapper;
 import br.com.devpasso.order_management.application.dto.command.products.UpdateProductStockCommand;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

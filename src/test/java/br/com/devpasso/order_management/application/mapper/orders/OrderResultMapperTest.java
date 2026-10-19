@@ -61,7 +61,8 @@ class OrderResultMapperTest {
                 productId,
                 "Monitor 4K",
                 new BigDecimal("2500.00"),
-                1
+                1,
+                new BigDecimal("2500.00")
         );
 
         when(orderItemResultMapper.map(item)).thenReturn(itemResult);
@@ -71,12 +72,12 @@ class OrderResultMapperTest {
 
         // Then
         assertNotNull(result);
-        assertEquals(orderId, result.orderId());
+        assertEquals(orderId, result.id());
         assertEquals(customerId, result.customerId());
-        assertEquals("DRAFT", result.orderStatus());
+        assertEquals("DRAFT", result.status());
         assertEquals(1, result.items().size());
         assertEquals(itemResult, result.items().getFirst());
-        assertEquals(new BigDecimal("2500.00"), result.orderTotal());
+        assertEquals(new BigDecimal("2500.00"), result.total());
         assertEquals(createdAt, result.createdAt());
 
         verify(orderItemResultMapper).map(item);
@@ -94,12 +95,12 @@ class OrderResultMapperTest {
 
         // Then
         assertNotNull(result);
-        assertEquals(order.id(), result.orderId());
+        assertEquals(order.id(), result.id());
         assertEquals(customerId, result.customerId());
-        assertEquals("DRAFT", result.orderStatus());
+        assertEquals("DRAFT", result.status());
         assertNotNull(result.items());
         assertTrue(result.items().isEmpty());
-        assertEquals(BigDecimal.ZERO, result.orderTotal());
+        assertEquals(BigDecimal.ZERO, result.total());
         assertEquals(order.createdAt(), result.createdAt());
 
         verifyNoInteractions(orderItemResultMapper);

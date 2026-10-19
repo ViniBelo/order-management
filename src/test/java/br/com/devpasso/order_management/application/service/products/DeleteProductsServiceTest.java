@@ -2,7 +2,7 @@ package br.com.devpasso.order_management.application.service.products;
 
 import br.com.devpasso.order_management.domain.exception.ResourceNotFoundException;
 import br.com.devpasso.order_management.domain.model.Product;
-import br.com.devpasso.order_management.domain.repository.ProductRepository;
+import br.com.devpasso.order_management.domain.repository.ProductRepositoryPort;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 class DeleteProductsServiceTest {
 
     @Mock
-    private ProductRepository productRepository;
+    private ProductRepositoryPort productRepositoryPort;
 
     @InjectMocks
     private DeleteProductsService deleteProductsService;
@@ -41,14 +41,14 @@ class DeleteProductsServiceTest {
                 Instant.now()
         );
 
-        when(productRepository.findById(id.toString())).thenReturn(Optional.of(product));
+        when(productRepositoryPort.findById(id.toString())).thenReturn(Optional.of(product));
 
         // When
         deleteProductsService.execute(id.toString());
 
         // Then
-        verify(productRepository).findById(id.toString());
-        verify(productRepository).deleteById(id.toString());
+        verify(productRepositoryPort).findById(id.toString());
+        verify(productRepositoryPort).deleteById(id.toString());
     }
 
     @Test
@@ -56,11 +56,11 @@ class DeleteProductsServiceTest {
     void execute_WithNonExistingId_ShouldThrowResourceNotFoundException() {
         // Given
         UUID id = UUID.randomUUID();
-        when(productRepository.findById(id.toString())).thenReturn(Optional.empty());
+        when(productRepositoryPort.findById(id.toString())).thenReturn(Optional.empty());
 
         // When & Then
         assertThrows(ResourceNotFoundException.class, () -> deleteProductsService.execute(id.toString()));
-        verify(productRepository).findById(id.toString());
-        verify(productRepository, never()).deleteById(any());
+        verify(productRepositoryPort).findById(id.toString());
+        verify(productRepositoryPort, never()).deleteById(any());
     }
 }

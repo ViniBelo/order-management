@@ -7,7 +7,7 @@ import br.com.devpasso.order_management.domain.common.PaginatedQueryResult;
 import br.com.devpasso.order_management.domain.common.PaginationQuery;
 import br.com.devpasso.order_management.domain.exception.ResourceNotFoundException;
 import br.com.devpasso.order_management.domain.model.Product;
-import br.com.devpasso.order_management.domain.repository.ProductRepository;
+import br.com.devpasso.order_management.domain.repository.ProductRepositoryPort;
 import br.com.devpasso.order_management.infrastructure.persistence.entity.ProductEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,7 +29,7 @@ import static org.mockito.Mockito.*;
 class FindProductsServiceTest {
 
     @Mock
-    private ProductRepository productRepository;
+    private ProductRepositoryPort productRepositoryPort;
 
     @Mock
     private ProductResultMapper productResultMapper;
@@ -72,7 +72,7 @@ class FindProductsServiceTest {
                 productsResultList, 0, 10, 1, 1
         );
 
-        when(productRepository.findAllByNameContainingIgnoreCase(paginationQuery, name))
+        when(productRepositoryPort.findAllByNameContainingIgnoreCase(paginationQuery, name))
                 .thenReturn(expectedResult);
         when(productResultMapper.toResult(domainProduct))
                 .thenReturn(productResult);
@@ -85,7 +85,7 @@ class FindProductsServiceTest {
         assertEquals(1, result.totalElements());
         assertEquals(productResult, result.content()
                 .getFirst());
-        verify(productRepository).findAllByNameContainingIgnoreCase(paginationQuery, name);
+        verify(productRepositoryPort).findAllByNameContainingIgnoreCase(paginationQuery, name);
     }
 
     @Test
@@ -111,7 +111,7 @@ class FindProductsServiceTest {
                 5
         );
 
-        when(productRepository.findById(id.toString()))
+        when(productRepositoryPort.findById(id.toString()))
                 .thenReturn(Optional.of(domainProduct));
         when(productResultMapper.toResult(domainProduct))
                 .thenReturn(productResult);
@@ -123,7 +123,7 @@ class FindProductsServiceTest {
         assertNotNull(result);
         assertEquals(id, result.id());
         assertEquals("Test Product", result.name());
-        verify(productRepository).findById(id.toString());
+        verify(productRepositoryPort).findById(id.toString());
     }
 
     @Test
@@ -132,11 +132,11 @@ class FindProductsServiceTest {
         // Given
         String id = UUID.randomUUID()
                 .toString();
-        when(productRepository.findById(id))
+        when(productRepositoryPort.findById(id))
                 .thenReturn(Optional.empty());
 
         // When & Then
         assertThrows(ResourceNotFoundException.class, () -> findProductsService.execute(id));
-        verify(productRepository).findById(id);
+        verify(productRepositoryPort).findById(id);
     }
 }

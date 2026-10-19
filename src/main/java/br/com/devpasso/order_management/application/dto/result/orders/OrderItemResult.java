@@ -4,8 +4,9 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 public record OrderItemResult(
-        UUID productId,
+        UUID id,
         String productName,
-        BigDecimal productPrice,
-        Integer quantity
+        BigDecimal unitPrice,
+        Integer quantity,
+        BigDecimal subtotal
 ) { }

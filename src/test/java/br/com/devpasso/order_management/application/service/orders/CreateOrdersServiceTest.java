@@ -5,7 +5,7 @@ import br.com.devpasso.order_management.application.dto.result.orders.OrderResul
 import br.com.devpasso.order_management.application.mapper.orders.OrderResultMapper;
 import br.com.devpasso.order_management.domain.model.Order;
 import br.com.devpasso.order_management.domain.model.OrderStatus;
-import br.com.devpasso.order_management.domain.repository.OrderRepository;
+import br.com.devpasso.order_management.domain.repository.OrderRepositoryPort;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,7 +30,7 @@ class CreateOrdersServiceTest {
     private OrderResultMapper orderResultMapper;
 
     @Mock
-    private OrderRepository orderRepository;
+    private OrderRepositoryPort orderRepositoryPort;
 
     @InjectMocks
     private CreateOrdersService createOrdersService;
@@ -61,7 +61,7 @@ class CreateOrdersServiceTest {
                 createdAt
         );
 
-        when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
+        when(orderRepositoryPort.save(any(Order.class))).thenReturn(savedOrder);
         when(orderResultMapper.map(savedOrder)).thenReturn(expectedResult);
 
         // When
@@ -72,7 +72,7 @@ class CreateOrdersServiceTest {
         assertEquals(expectedResult, result);
 
         ArgumentCaptor<Order> orderCaptor = ArgumentCaptor.forClass(Order.class);
-        verify(orderRepository).save(orderCaptor.capture());
+        verify(orderRepositoryPort).save(orderCaptor.capture());
         Order capturedOrder = orderCaptor.getValue();
         assertNotNull(capturedOrder);
         assertEquals(customerId, capturedOrder.customerId());

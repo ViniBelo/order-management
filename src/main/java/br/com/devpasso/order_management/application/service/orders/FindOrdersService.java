@@ -5,23 +5,23 @@ import br.com.devpasso.order_management.application.mapper.orders.OrderResultMap
 import br.com.devpasso.order_management.application.usecase.orders.FindOrderByIdUseCase;
 import br.com.devpasso.order_management.domain.exception.ResourceNotFoundException;
 import br.com.devpasso.order_management.domain.model.Order;
-import br.com.devpasso.order_management.domain.repository.OrderRepository;
+import br.com.devpasso.order_management.domain.repository.OrderRepositoryPort;
 
 import java.util.UUID;
 
 public class FindOrdersService implements FindOrderByIdUseCase {
     private final OrderResultMapper orderResultMapper;
-    private final OrderRepository orderRepository;
+    private final OrderRepositoryPort orderRepositoryPort;
 
     public FindOrdersService(OrderResultMapper orderResultMapper,
-                             OrderRepository orderRepository) {
+                             OrderRepositoryPort orderRepositoryPort) {
         this.orderResultMapper = orderResultMapper;
-        this.orderRepository = orderRepository;
+        this.orderRepositoryPort = orderRepositoryPort;
     }
 
     @Override
     public OrderResult execute(UUID id) {
-        Order order = orderRepository.findById(id)
+        Order order = orderRepositoryPort.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found for ID: " + id));
         return orderResultMapper.map(order);
     }

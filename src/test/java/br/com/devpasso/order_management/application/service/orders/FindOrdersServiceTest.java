@@ -7,7 +7,7 @@ import br.com.devpasso.order_management.domain.exception.ResourceNotFoundExcepti
 import br.com.devpasso.order_management.domain.model.Order;
 import br.com.devpasso.order_management.domain.model.OrderItem;
 import br.com.devpasso.order_management.domain.model.OrderStatus;
-import br.com.devpasso.order_management.domain.repository.OrderRepository;
+import br.com.devpasso.order_management.domain.repository.OrderRepositoryPort;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,7 +31,7 @@ class FindOrdersServiceTest {
     private OrderResultMapper orderResultMapper;
 
     @Mock
-    private OrderRepository orderRepository;
+    private OrderRepositoryPort orderRepositoryPort;
 
     @InjectMocks
     private FindOrdersService findOrdersService;
@@ -64,7 +64,8 @@ class FindOrdersServiceTest {
                 productId,
                 "Wireless Mouse",
                 new BigDecimal("80.00"),
-                2
+                2,
+                new BigDecimal("160.00")
         );
         OrderResult expectedResult = new OrderResult(
                 orderId,
@@ -75,7 +76,7 @@ class FindOrdersServiceTest {
                 createdAt
         );
 
-        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(orderRepositoryPort.findById(orderId)).thenReturn(Optional.of(order));
         when(orderResultMapper.map(order)).thenReturn(expectedResult);
 
         // When
@@ -84,14 +85,59 @@ class FindOrdersServiceTest {
         // Then
         assertNotNull(result);
         assertEquals(expectedResult, result);
-        assertEquals(orderId, result.orderId());
+        assertEquals(orderId, result.id());
         assertEquals(customerId, result.customerId());
-        assertEquals("DRAFT", result.orderStatus());
+        assertEquals("DRAFT", result.status());
         assertEquals(1, result.items().size());
-        assertEquals(new BigDecimal("160.00"), result.orderTotal());
+        assertEquals(new BigDecimal("160.00"), result.total());
         assertEquals(createdAt, result.createdAt());
 
-        verify(orderRepository).findById(orderId);
+        verify(orderRepositoryPort).findById(orderId);
+        verify(orderResultMapper).map(order);
+    }
+
+    @Test
+    @DisplayName("Should return mapped order result when order is found with empty items")
+    void shouldReturnOrderResultWhenOrderHasNoItems() {
+        // Given
+        UUID orderId = UUID.randomUUID();
+        UUID customerId = UUID.randomUUID();
+        Instant createdAt = Instant.now();
+
+        Order order = new Order(
+                orderId,
+                customerId,
+                OrderStatus.DRAFT,
+                List.of(),
+                createdAt
+        );
+
+        OrderResult expectedResult = new OrderResult(
+                orderId,
+                customerId,
+                "DRAFT",
+                List.of(),
+                BigDecimal.ZERO,
+                createdAt
+        );
+
+        when(orderRepositoryPort.findById(orderId)).thenReturn(Optional.of(order));
+        when(orderResultMapper.map(order)).thenReturn(expectedResult);
+
+        // When
+        OrderResult result = findOrdersService.execute(orderId);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(expectedResult, result);
+        assertEquals(orderId, result.id());
+        assertEquals(customerId, result.customerId());
+        assertEquals("DRAFT", result.status());
+        assertTrue(result.items().isEmpty());
+        assertEquals(BigDecimal.ZERO, result.total());
+        assertEquals(createdAt, result.createdAt());
+
+        verify(orderRepositoryPort).findById(orderId);
         verify(orderResultMapper).map(order);
     }
 
@@ -100,7 +146,7 @@ class FindOrdersServiceTest {
     void shouldThrowResourceNotFoundExceptionWhenOrderDoesNotExist() {
         // Given
         UUID orderId = UUID.randomUUID();
-        when(orderRepository.findById(orderId)).thenReturn(Optional.empty());
+        when(orderRepositoryPort.findById(orderId)).thenReturn(Optional.empty());
 
         // When & Then
         ResourceNotFoundException exception = assertThrows(
@@ -109,7 +155,7 @@ class FindOrdersServiceTest {
         );
 
         assertEquals("Order not found for ID: " + orderId, exception.getMessage());
-        verify(orderRepository).findById(orderId);
+        verify(orderRepositoryPort).findById(orderId);
         verifyNoInteractions(orderResultMapper);
     }
 }
