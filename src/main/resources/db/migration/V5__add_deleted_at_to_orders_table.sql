@@ -1,0 +1,2 @@
+ALTER TABLE orders
+    ADD COLUMN deleted_at TIMESTAMP DEFAULT NULL;
