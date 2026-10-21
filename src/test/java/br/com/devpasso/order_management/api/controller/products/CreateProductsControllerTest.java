@@ -1,7 +1,7 @@
 package br.com.devpasso.order_management.api.controller.products;
 
-import br.com.devpasso.order_management.api.dto.products.request.CreateProductRequest;
-import br.com.devpasso.order_management.api.dto.products.response.CreateProductResponse;
+import br.com.devpasso.order_management.api.dto.request.products.CreateProductRequest;
+import br.com.devpasso.order_management.api.dto.response.products.CreateProductResponse;
 import br.com.devpasso.order_management.api.mapper.products.request.CreateProductRequestMapper;
 import br.com.devpasso.order_management.api.mapper.products.response.CreateProductResponseMapper;
 import br.com.devpasso.order_management.application.dto.command.products.CreateProductCommand;

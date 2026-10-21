@@ -1,7 +1,7 @@
 package br.com.devpasso.order_management.api.controller.products;
 
-import br.com.devpasso.order_management.api.dto.products.response.PaginatedResponse;
-import br.com.devpasso.order_management.api.dto.products.response.ProductResponse;
+import br.com.devpasso.order_management.api.dto.response.PaginatedResponse;
+import br.com.devpasso.order_management.api.dto.response.products.ProductResponse;
 import br.com.devpasso.order_management.api.mapper.products.response.PaginatedResponseMapper;
 import br.com.devpasso.order_management.api.mapper.products.response.ProductResponseMapper;
 import br.com.devpasso.order_management.application.dto.result.PaginatedResult;

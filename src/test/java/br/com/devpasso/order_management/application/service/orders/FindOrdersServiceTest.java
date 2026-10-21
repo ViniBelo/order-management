@@ -1,8 +1,12 @@
 package br.com.devpasso.order_management.application.service.orders;
 
+import br.com.devpasso.order_management.application.dto.command.orders.FilterOrdersByStatusCommand;
+import br.com.devpasso.order_management.application.dto.result.PaginatedResult;
 import br.com.devpasso.order_management.application.dto.result.orders.OrderItemResult;
 import br.com.devpasso.order_management.application.dto.result.orders.OrderResult;
 import br.com.devpasso.order_management.application.mapper.orders.OrderResultMapper;
+import br.com.devpasso.order_management.domain.common.PaginatedQueryResult;
+import br.com.devpasso.order_management.domain.common.PaginationQuery;
 import br.com.devpasso.order_management.domain.exception.ResourceNotFoundException;
 import br.com.devpasso.order_management.domain.model.Order;
 import br.com.devpasso.order_management.domain.model.OrderItem;
@@ -17,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -156,6 +161,86 @@ class FindOrdersServiceTest {
 
         assertEquals("Order not found for ID: " + orderId, exception.getMessage());
         verify(orderRepositoryPort).findById(orderId);
+        verifyNoInteractions(orderResultMapper);
+    }
+
+    @Test
+    @DisplayName("Should return paginated order results when orders exist for status")
+    void shouldReturnPaginatedOrderResultWhenOrdersExist() {
+        // Given
+        PaginationQuery query = new PaginationQuery(0, 10, "createdAt,ASC");
+        FilterOrdersByStatusCommand command = FilterOrdersByStatusCommand.DRAFT;
+
+        UUID orderId = UUID.randomUUID();
+        UUID customerId = UUID.randomUUID();
+        Instant createdAt = Instant.now();
+
+        Order order = new Order(
+                orderId,
+                customerId,
+                OrderStatus.DRAFT,
+                Collections.emptyList(),
+                createdAt
+        );
+
+        OrderResult orderResult = new OrderResult(
+                orderId,
+                customerId,
+                "DRAFT",
+                Collections.emptyList(),
+                BigDecimal.ZERO,
+                createdAt
+        );
+
+        PaginatedQueryResult<Order> paginatedQueryResult = new PaginatedQueryResult<>(
+                List.of(order), 0, 10, 1, 1
+        );
+
+        when(orderRepositoryPort.findByStatus(query, OrderStatus.DRAFT))
+                .thenReturn(paginatedQueryResult);
+        when(orderResultMapper.map(order))
+                .thenReturn(orderResult);
+
+        // When
+        PaginatedResult<OrderResult> result = findOrdersService.execute(query, command);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(1, result.totalElements());
+        assertEquals(1, result.totalPages());
+        assertEquals(0, result.page());
+        assertEquals(10, result.size());
+        assertEquals(1, result.content().size());
+        assertEquals(orderResult, result.content().getFirst());
+
+        verify(orderRepositoryPort).findByStatus(query, OrderStatus.DRAFT);
+        verify(orderResultMapper).map(order);
+    }
+
+    @Test
+    @DisplayName("Should return empty paginated result when no orders match status")
+    void shouldReturnEmptyPaginatedResultWhenNoOrdersFound() {
+        // Given
+        PaginationQuery query = new PaginationQuery(0, 10, "createdAt,ASC");
+        FilterOrdersByStatusCommand command = FilterOrdersByStatusCommand.CONFIRMED;
+
+        PaginatedQueryResult<Order> paginatedQueryResult = new PaginatedQueryResult<>(
+                Collections.emptyList(), 0, 10, 0, 0
+        );
+
+        when(orderRepositoryPort.findByStatus(query, OrderStatus.CONFIRMED))
+                .thenReturn(paginatedQueryResult);
+
+        // When
+        PaginatedResult<OrderResult> result = findOrdersService.execute(query, command);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(0, result.totalElements());
+        assertEquals(0, result.totalPages());
+        assertTrue(result.content().isEmpty());
+
+        verify(orderRepositoryPort).findByStatus(query, OrderStatus.CONFIRMED);
         verifyNoInteractions(orderResultMapper);
     }
 }

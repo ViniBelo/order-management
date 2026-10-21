@@ -1,6 +1,6 @@
 package br.com.devpasso.order_management.api.mapper.orders.response;
 
-import br.com.devpasso.order_management.api.dto.orders.response.OrderItemResponse;
+import br.com.devpasso.order_management.api.dto.response.orders.OrderItemResponse;
 import br.com.devpasso.order_management.application.dto.result.orders.OrderItemResult;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

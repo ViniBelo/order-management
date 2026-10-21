@@ -1,4 +1,4 @@
-package br.com.devpasso.order_management.api.dto.products.response;
+package br.com.devpasso.order_management.api.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

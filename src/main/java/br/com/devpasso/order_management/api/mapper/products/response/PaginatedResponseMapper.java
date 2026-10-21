@@ -1,6 +1,6 @@
 package br.com.devpasso.order_management.api.mapper.products.response;
 
-import br.com.devpasso.order_management.api.dto.products.response.PaginatedResponse;
+import br.com.devpasso.order_management.api.dto.response.PaginatedResponse;
 import br.com.devpasso.order_management.application.dto.result.PaginatedResult;
 import org.springframework.stereotype.Component;
 

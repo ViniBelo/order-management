@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -103,5 +106,66 @@ public class OrderEntityJpaRepositoryIT {
 
         // Then
         assertTrue(foundOrder.isEmpty());
+    }
+
+    @Test
+    @DisplayName("should return orders matching the requested status")
+    void findAllByStatus_shouldReturnMatchingOrders() {
+        // Given
+        OrderEntity draftOrder1 = new OrderEntity();
+        draftOrder1.changeId(UUID.randomUUID());
+        draftOrder1.changeCustomerId(UUID.randomUUID());
+        draftOrder1.changeStatus(OrderStatusEntity.DRAFT);
+        draftOrder1.changeItems(List.of());
+        draftOrder1.changeCreatedAt(Instant.now());
+
+        OrderEntity draftOrder2 = new OrderEntity();
+        draftOrder2.changeId(UUID.randomUUID());
+        draftOrder2.changeCustomerId(UUID.randomUUID());
+        draftOrder2.changeStatus(OrderStatusEntity.DRAFT);
+        draftOrder2.changeItems(List.of());
+        draftOrder2.changeCreatedAt(Instant.now());
+
+        OrderEntity confirmedOrder = new OrderEntity();
+        confirmedOrder.changeId(UUID.randomUUID());
+        confirmedOrder.changeCustomerId(UUID.randomUUID());
+        confirmedOrder.changeStatus(OrderStatusEntity.CONFIRMED);
+        confirmedOrder.changeItems(List.of());
+        confirmedOrder.changeCreatedAt(Instant.now());
+
+        orderJpaRepository.saveAll(List.of(draftOrder1, draftOrder2, confirmedOrder));
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // When
+        Page<OrderEntity> draftPage = orderJpaRepository.findAllByStatus(pageable, OrderStatusEntity.DRAFT);
+
+        // Then
+        assertEquals(2, draftPage.getTotalElements());
+        assertEquals(2, draftPage.getContent().size());
+        assertTrue(draftPage.getContent().stream().allMatch(o -> o.getStatus() == OrderStatusEntity.DRAFT));
+    }
+
+    @Test
+    @DisplayName("should return empty page when no orders match the requested status")
+    void findAllByStatus_shouldReturnEmptyWhenNoMatch() {
+        // Given
+        OrderEntity draftOrder = new OrderEntity();
+        draftOrder.changeId(UUID.randomUUID());
+        draftOrder.changeCustomerId(UUID.randomUUID());
+        draftOrder.changeStatus(OrderStatusEntity.DRAFT);
+        draftOrder.changeItems(List.of());
+        draftOrder.changeCreatedAt(Instant.now());
+
+        orderJpaRepository.save(draftOrder);
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // When
+        Page<OrderEntity> page = orderJpaRepository.findAllByStatus(pageable, OrderStatusEntity.CANCELLED);
+
+        // Then
+        assertTrue(page.isEmpty());
+        assertEquals(0, page.getTotalElements());
     }
 }

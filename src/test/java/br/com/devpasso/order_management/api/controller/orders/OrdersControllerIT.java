@@ -401,4 +401,131 @@ class OrdersControllerIT {
                 .andExpect(jsonPath("$.items", hasSize(2)))
                 .andExpect(jsonPath("$.total").value(420.00));
     }
+
+    @Test
+    @DisplayName("Should list all orders with default DRAFT status and default pagination")
+    void shouldListAllDraftOrdersByDefault() throws Exception {
+        OrderEntity draftOrder1 = new OrderEntity();
+        draftOrder1.changeId(UUID.randomUUID());
+        draftOrder1.changeCustomerId(UUID.randomUUID());
+        draftOrder1.changeStatus(OrderStatusEntity.DRAFT);
+        draftOrder1.changeItems(new ArrayList<>());
+        draftOrder1.changeCreatedAt(Instant.now());
+
+        OrderEntity draftOrder2 = new OrderEntity();
+        draftOrder2.changeId(UUID.randomUUID());
+        draftOrder2.changeCustomerId(UUID.randomUUID());
+        draftOrder2.changeStatus(OrderStatusEntity.DRAFT);
+        draftOrder2.changeItems(new ArrayList<>());
+        draftOrder2.changeCreatedAt(Instant.now().plusSeconds(1));
+
+        OrderEntity confirmedOrder = new OrderEntity();
+        confirmedOrder.changeId(UUID.randomUUID());
+        confirmedOrder.changeCustomerId(UUID.randomUUID());
+        confirmedOrder.changeStatus(OrderStatusEntity.CONFIRMED);
+        confirmedOrder.changeItems(new ArrayList<>());
+        confirmedOrder.changeCreatedAt(Instant.now());
+
+        orderJpaRepository.saveAll(List.of(draftOrder1, draftOrder2, confirmedOrder));
+
+        mockMvc.perform(get("/v1/orders"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.content[0].status").value("DRAFT"))
+                .andExpect(jsonPath("$.content[1].status").value("DRAFT"))
+                .andExpect(jsonPath("$.page").value(0))
+                .andExpect(jsonPath("$.size").value(20))
+                .andExpect(jsonPath("$.totalElements").value(2))
+                .andExpect(jsonPath("$.totalPages").value(1));
+    }
+
+    @Test
+    @DisplayName("Should filter orders by specified status")
+    void shouldFilterOrdersBySpecifiedStatus() throws Exception {
+        OrderEntity draftOrder = new OrderEntity();
+        draftOrder.changeId(UUID.randomUUID());
+        draftOrder.changeCustomerId(UUID.randomUUID());
+        draftOrder.changeStatus(OrderStatusEntity.DRAFT);
+        draftOrder.changeItems(new ArrayList<>());
+        draftOrder.changeCreatedAt(Instant.now());
+
+        OrderEntity confirmedOrder = new OrderEntity();
+        confirmedOrder.changeId(UUID.randomUUID());
+        confirmedOrder.changeCustomerId(UUID.randomUUID());
+        confirmedOrder.changeStatus(OrderStatusEntity.CONFIRMED);
+        confirmedOrder.changeItems(new ArrayList<>());
+        confirmedOrder.changeCreatedAt(Instant.now());
+
+        orderJpaRepository.saveAll(List.of(draftOrder, confirmedOrder));
+
+        mockMvc.perform(get("/v1/orders")
+                        .param("status", "CONFIRMED"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].status").value("CONFIRMED"))
+                .andExpect(jsonPath("$.totalElements").value(1));
+    }
+
+    @Test
+    @DisplayName("Should support custom pagination and sorting for orders")
+    void shouldSupportCustomPaginationAndSortingForOrders() throws Exception {
+        OrderEntity draftOrder1 = new OrderEntity();
+        draftOrder1.changeId(UUID.randomUUID());
+        draftOrder1.changeCustomerId(UUID.randomUUID());
+        draftOrder1.changeStatus(OrderStatusEntity.DRAFT);
+        draftOrder1.changeItems(new ArrayList<>());
+        draftOrder1.changeCreatedAt(Instant.now().minusSeconds(10));
+
+        OrderEntity draftOrder2 = new OrderEntity();
+        draftOrder2.changeId(UUID.randomUUID());
+        draftOrder2.changeCustomerId(UUID.randomUUID());
+        draftOrder2.changeStatus(OrderStatusEntity.DRAFT);
+        draftOrder2.changeItems(new ArrayList<>());
+        draftOrder2.changeCreatedAt(Instant.now());
+
+        orderJpaRepository.saveAll(List.of(draftOrder1, draftOrder2));
+
+        mockMvc.perform(get("/v1/orders")
+                        .param("page", "0")
+                        .param("size", "1")
+                        .param("sort", "createdAt,desc"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].id").value(draftOrder2.getId().toString()))
+                .andExpect(jsonPath("$.page").value(0))
+                .andExpect(jsonPath("$.size").value(1))
+                .andExpect(jsonPath("$.totalElements").value(2))
+                .andExpect(jsonPath("$.totalPages").value(2));
+    }
+
+    @Test
+    @DisplayName("Should return empty content when no orders match status")
+    void shouldReturnEmptyContentWhenNoOrdersMatchStatus() throws Exception {
+        OrderEntity draftOrder = new OrderEntity();
+        draftOrder.changeId(UUID.randomUUID());
+        draftOrder.changeCustomerId(UUID.randomUUID());
+        draftOrder.changeStatus(OrderStatusEntity.DRAFT);
+        draftOrder.changeItems(new ArrayList<>());
+        draftOrder.changeCreatedAt(Instant.now());
+
+        orderJpaRepository.save(draftOrder);
+
+        mockMvc.perform(get("/v1/orders")
+                        .param("status", "DELIVERED"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content", hasSize(0)))
+                .andExpect(jsonPath("$.totalElements").value(0));
+    }
+
+    @Test
+    @DisplayName("Should return 400 Bad Request when invalid order status is provided")
+    void shouldReturn400WhenInvalidOrderStatusProvided() throws Exception {
+        mockMvc.perform(get("/v1/orders")
+                        .param("status", "INVALID_STATUS"))
+                .andExpect(status().isBadRequest());
+    }
 }

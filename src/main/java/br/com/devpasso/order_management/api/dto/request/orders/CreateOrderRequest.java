@@ -1,4 +1,4 @@
-package br.com.devpasso.order_management.api.dto.orders.request;
+package br.com.devpasso.order_management.api.dto.request.orders;
 
 import jakarta.validation.constraints.NotNull;
 

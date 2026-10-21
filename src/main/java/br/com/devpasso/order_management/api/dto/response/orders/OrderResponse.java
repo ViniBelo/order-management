@@ -1,4 +1,4 @@
-package br.com.devpasso.order_management.api.dto.orders.response;
+package br.com.devpasso.order_management.api.dto.response.orders;
 
 import java.math.BigDecimal;
 import java.time.Instant;

@@ -1,6 +1,6 @@
 package br.com.devpasso.order_management.api.mapper.products.response;
 
-import br.com.devpasso.order_management.api.dto.products.response.ProductResponse;
+import br.com.devpasso.order_management.api.dto.response.products.ProductResponse;
 import br.com.devpasso.order_management.application.dto.result.products.ProductResult;
 import org.springframework.stereotype.Component;
 

@@ -1,6 +1,6 @@
 package br.com.devpasso.order_management.api.mapper.products.request;
 
-import br.com.devpasso.order_management.api.dto.products.request.UpdateProductRequest;
+import br.com.devpasso.order_management.api.dto.request.products.UpdateProductRequest;
 import br.com.devpasso.order_management.application.dto.command.products.UpdateProductCommand;
 import org.springframework.stereotype.Component;
 

@@ -1,6 +1,6 @@
 package br.com.devpasso.order_management.api.mapper.orders.request;
 
-import br.com.devpasso.order_management.api.dto.orders.request.AddItemToOrderRequest;
+import br.com.devpasso.order_management.api.dto.request.orders.AddItemToOrderRequest;
 import br.com.devpasso.order_management.application.dto.command.orders.AddItemToOrderCommand;
 import org.springframework.stereotype.Component;
 
