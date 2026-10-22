@@ -1,12 +1,16 @@
 package br.com.devpasso.order_management.infrastructure.persistence.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
 @Table(name = "order_items")
+@SQLDelete(sql = "UPDATE order_items SET deleted_at = NOW() WHERE id = ?")
+@SQLRestriction("deleted_at IS NULL")
 public class OrderItemEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

@@ -28,6 +28,7 @@ import java.util.UUID;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -527,5 +528,76 @@ class OrdersControllerIT {
         mockMvc.perform(get("/v1/orders")
                         .param("status", "INVALID_STATUS"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Should delete order successfully (soft-delete)")
+    void shouldDeleteOrderSuccessfully() throws Exception {
+        OrderEntity order = new OrderEntity();
+        order.changeId(UUID.randomUUID());
+        order.changeCustomerId(UUID.randomUUID());
+        order.changeStatus(OrderStatusEntity.DRAFT);
+        order.changeItems(new ArrayList<>());
+        order.changeCreatedAt(Instant.now());
+
+        OrderEntity savedOrder = orderJpaRepository.save(order);
+        UUID id = savedOrder.getId();
+
+        mockMvc.perform(delete("/v1/orders/{id}", id))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(get("/v1/orders/{id}", id))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.title").value("Not Found"))
+                .andExpect(jsonPath("$.detail").value("Order not found for ID: " + id));
+
+        mockMvc.perform(get("/v1/orders"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(0)))
+                .andExpect(jsonPath("$.totalElements").value(0));
+
+        assertTrue(orderJpaRepository.findById(id).isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should return 404 Not Found when deleting non-existent order")
+    void shouldReturn404WhenDeletingNonExistentOrder() throws Exception {
+        UUID nonExistentId = UUID.randomUUID();
+
+        mockMvc.perform(delete("/v1/orders/{id}", nonExistentId))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.title").value("Not Found"))
+                .andExpect(jsonPath("$.detail").value("Order not found for ID: " + nonExistentId));
+    }
+
+    @Test
+    @DisplayName("Should return 404 Not Found when deleting already deleted order")
+    void shouldReturn404WhenDeletingAlreadyDeletedOrder() throws Exception {
+        OrderEntity order = new OrderEntity();
+        order.changeId(UUID.randomUUID());
+        order.changeCustomerId(UUID.randomUUID());
+        order.changeStatus(OrderStatusEntity.DRAFT);
+        order.changeItems(new ArrayList<>());
+        order.changeCreatedAt(Instant.now());
+
+        OrderEntity savedOrder = orderJpaRepository.save(order);
+        UUID id = savedOrder.getId();
+
+        mockMvc.perform(delete("/v1/orders/{id}", id))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(delete("/v1/orders/{id}", id))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.title").value("Not Found"))
+                .andExpect(jsonPath("$.detail").value("Order not found for ID: " + id));
+    }
+
+    @Test
+    @DisplayName("Should return 400 Bad Request when deleting with invalid UUID")
+    void shouldReturn400WhenDeletingWithInvalidUUID() throws Exception {
+        mockMvc.perform(delete("/v1/orders/{id}", "invalid-uuid"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Bad Request"))
+                .andExpect(jsonPath("$.detail").value("Invalid value provided."));
     }
 }

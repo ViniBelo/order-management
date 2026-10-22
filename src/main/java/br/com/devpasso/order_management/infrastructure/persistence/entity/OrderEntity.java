@@ -2,6 +2,8 @@ package br.com.devpasso.order_management.infrastructure.persistence.entity;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.JdbcType;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.dialect.type.PostgreSQLEnumJdbcType;
 
 import java.time.Instant;
@@ -10,6 +12,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "orders")
+@SQLDelete(sql = "UPDATE orders SET deleted_at = NOW() WHERE id = ?")
+@SQLRestriction("deleted_at IS NULL")
 public class OrderEntity {
     @Id
     private UUID id;

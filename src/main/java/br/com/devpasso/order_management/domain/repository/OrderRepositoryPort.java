@@ -13,4 +13,6 @@ public interface OrderRepositoryPort {
     Order save(Order order);
     Optional<Order> findById(UUID id);
     PaginatedQueryResult<Order> findByStatus(PaginationQuery paginationQuery, OrderStatus status);
+    boolean existsById(UUID id);
+    void deleteById(UUID id);
 }

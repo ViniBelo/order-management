@@ -52,6 +52,11 @@ public class OrderRepositoryAdapter implements OrderRepositoryPort {
     }
 
     @Override
+    public boolean existsById(UUID id) {
+        return orderJpaRepository.existsById(id);
+    }
+
+    @Override
     public PaginatedQueryResult<Order> findByStatus(PaginationQuery paginationQuery, OrderStatus status) {
         Page<OrderEntity> orderEntities = orderJpaRepository.findAllByStatus(
                 paginationMapper.toSpringPageable(paginationQuery),
@@ -64,5 +69,10 @@ public class OrderRepositoryAdapter implements OrderRepositoryPort {
                 .toList();
 
         return paginationMapper.toDomainResult(orderEntities, orders);
+    }
+
+    @Override
+    public void deleteById(UUID id) {
+        orderJpaRepository.deleteById(id);
     }
 }

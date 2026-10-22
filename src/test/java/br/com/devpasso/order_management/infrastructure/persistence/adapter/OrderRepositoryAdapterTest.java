@@ -29,6 +29,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -188,5 +190,48 @@ public class OrderRepositoryAdapterTest {
         verify(paginationMapper).toSpringPageable(paginationQuery);
         verify(orderJpaRepository).findAllByStatus(pageable, statusEntity);
         verify(paginationMapper).toDomainResult(emptyEntityPage, Collections.emptyList());
+    }
+
+    @Test
+    @DisplayName("Should return true when order exists by id")
+    void existsById_ShouldReturnTrueWhenOrderExists() {
+        // Given
+        UUID id = UUID.randomUUID();
+        when(orderJpaRepository.existsById(id)).thenReturn(true);
+
+        // When
+        boolean result = orderRepositoryAdapter.existsById(id);
+
+        // Then
+        assertTrue(result);
+        verify(orderJpaRepository).existsById(id);
+    }
+
+    @Test
+    @DisplayName("Should return false when order does not exist by id")
+    void existsById_ShouldReturnFalseWhenOrderDoesNotExist() {
+        // Given
+        UUID id = UUID.randomUUID();
+        when(orderJpaRepository.existsById(id)).thenReturn(false);
+
+        // When
+        boolean result = orderRepositoryAdapter.existsById(id);
+
+        // Then
+        assertFalse(result);
+        verify(orderJpaRepository).existsById(id);
+    }
+
+    @Test
+    @DisplayName("Should delegate deleteById to JPA repository")
+    void deleteById_ShouldDelegateToJpaRepository() {
+        // Given
+        UUID id = UUID.randomUUID();
+
+        // When
+        orderRepositoryAdapter.deleteById(id);
+
+        // Then
+        verify(orderJpaRepository).deleteById(id);
     }
 }
