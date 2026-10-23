@@ -7,6 +7,7 @@ import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.dialect.type.PostgreSQLEnumJdbcType;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,13 +31,23 @@ public class OrderEntity {
     private OrderStatusEntity status;
 
     @OneToMany(mappedBy = "order",
-            cascade = CascadeType.ALL)
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
     private List<OrderItemEntity> items;
 
     @Column(name = "created_at",
             nullable = false,
             updatable = false)
     private Instant createdAt;
+
+    public OrderEntity() {
+        items = new ArrayList<>();
+    }
+
+    public void addItem(OrderItemEntity item) {
+        items.add(item);
+        item.changeOrder(this);
+    }
 
     public UUID getId() {
         return id;
@@ -68,10 +79,6 @@ public class OrderEntity {
 
     public void changeStatus(OrderStatusEntity status) {
         this.status = status;
-    }
-
-    public void changeItems(List<OrderItemEntity> items) {
-        this.items = items;
     }
 
     public void changeCreatedAt(Instant createdAt) {

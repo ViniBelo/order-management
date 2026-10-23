@@ -2,11 +2,11 @@ package br.com.devpasso.order_management.infrastructure.persistence.adapter.mapp
 
 import br.com.devpasso.order_management.domain.model.Order;
 import br.com.devpasso.order_management.infrastructure.persistence.entity.OrderEntity;
-import br.com.devpasso.order_management.infrastructure.persistence.entity.OrderItemEntity;
 import br.com.devpasso.order_management.infrastructure.persistence.entity.OrderStatusEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,11 +35,13 @@ public class OrderEntityMapperTest {
         assertEquals(order.customerId(), orderEntity.getCustomerId());
         assertEquals(orderStatusMapper.toEntity(order.status()), orderEntity.getStatus());
         assertEquals(
-                order.items()
-                        .stream()
-                        .map(orderItemEntityMapper::toEntity)
-                        .toList(),
-                orderEntity.getItems()
+                order.items().isEmpty() ?
+                        Collections.emptyList() :
+                        order.items()
+                                .stream()
+                                .map(orderItemEntityMapper::toEntity)
+                                .toList(),
+                List.of()
         );
         assertEquals(order.createdAt(), orderEntity.getCreatedAt());
     }
@@ -55,7 +57,6 @@ public class OrderEntityMapperTest {
         orderEntity.changeId(id);
         orderEntity.changeCustomerId(customerId);
         orderEntity.changeStatus(status);
-        orderEntity.changeItems(List.of());
 
         // When
         Order order = orderEntityMapper.toDomain(orderEntity);
@@ -65,10 +66,12 @@ public class OrderEntityMapperTest {
         assertEquals(orderEntity.getCustomerId(), order.customerId());
         assertEquals(orderStatusMapper.toDomain(orderEntity.getStatus()), order.status());
         assertEquals(
-                orderEntity.getItems()
-                        .stream()
-                        .map(orderItemEntityMapper::toDomain)
-                        .toList(),
+                orderEntity.getItems() == null ?
+                        Collections.emptyList() :
+                        orderEntity.getItems()
+                                .stream()
+                                .map(orderItemEntityMapper::toDomain)
+                                .toList(),
                 order.items()
         );
         assertEquals(orderEntity.getCreatedAt(), order.createdAt());

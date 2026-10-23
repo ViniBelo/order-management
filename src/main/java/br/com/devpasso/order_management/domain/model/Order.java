@@ -36,9 +36,18 @@ public class Order {
     }
 
     public void addItem(OrderItem item) {
+        canChangeItems();
+        items.add(item);
+    }
+
+    public void removeItem(UUID id) {
+        canChangeItems();
+        items.removeIf(item -> item.id().equals(id));
+    }
+
+    private void canChangeItems() {
         if (status != OrderStatus.DRAFT)
             throw new InvalidOrderStateException("Order is not in draft status");
-        items.add(item);
     }
 
     public void transitionTo(OrderStatus next) {

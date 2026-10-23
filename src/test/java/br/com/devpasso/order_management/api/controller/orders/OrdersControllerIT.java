@@ -22,7 +22,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -137,7 +136,6 @@ class OrdersControllerIT {
         order.changeId(UUID.randomUUID());
         order.changeCustomerId(UUID.randomUUID());
         order.changeStatus(OrderStatusEntity.DRAFT);
-        order.changeItems(new ArrayList<>());
         order.changeCreatedAt(Instant.now());
         OrderEntity savedOrder = orderJpaRepository.save(order);
 
@@ -188,7 +186,6 @@ class OrdersControllerIT {
         order.changeId(UUID.randomUUID());
         order.changeCustomerId(UUID.randomUUID());
         order.changeStatus(OrderStatusEntity.DRAFT);
-        order.changeItems(new ArrayList<>());
         order.changeCreatedAt(Instant.now());
         OrderEntity savedOrder = orderJpaRepository.save(order);
 
@@ -215,7 +212,6 @@ class OrdersControllerIT {
         order.changeId(UUID.randomUUID());
         order.changeCustomerId(UUID.randomUUID());
         order.changeStatus(OrderStatusEntity.DRAFT);
-        order.changeItems(new ArrayList<>());
         order.changeCreatedAt(Instant.now());
         OrderEntity savedOrder = orderJpaRepository.save(order);
 
@@ -242,7 +238,6 @@ class OrdersControllerIT {
         order.changeId(UUID.randomUUID());
         order.changeCustomerId(UUID.randomUUID());
         order.changeStatus(OrderStatusEntity.DRAFT);
-        order.changeItems(new ArrayList<>());
         order.changeCreatedAt(Instant.now());
         OrderEntity savedOrder = orderJpaRepository.save(order);
 
@@ -301,7 +296,8 @@ class OrdersControllerIT {
         item.changeUnitPrice(savedProduct1.getPrice());
         item.changeQuantity(2);
 
-        orderEntity.changeItems(new ArrayList<>(List.of(item)));
+        orderEntity.addItem(item);
+
         OrderEntity savedOrder = orderJpaRepository.save(orderEntity);
 
         mockMvc.perform(get("/v1/orders/{id}", savedOrder.getId()))
@@ -410,21 +406,18 @@ class OrdersControllerIT {
         draftOrder1.changeId(UUID.randomUUID());
         draftOrder1.changeCustomerId(UUID.randomUUID());
         draftOrder1.changeStatus(OrderStatusEntity.DRAFT);
-        draftOrder1.changeItems(new ArrayList<>());
         draftOrder1.changeCreatedAt(Instant.now());
 
         OrderEntity draftOrder2 = new OrderEntity();
         draftOrder2.changeId(UUID.randomUUID());
         draftOrder2.changeCustomerId(UUID.randomUUID());
         draftOrder2.changeStatus(OrderStatusEntity.DRAFT);
-        draftOrder2.changeItems(new ArrayList<>());
         draftOrder2.changeCreatedAt(Instant.now().plusSeconds(1));
 
         OrderEntity confirmedOrder = new OrderEntity();
         confirmedOrder.changeId(UUID.randomUUID());
         confirmedOrder.changeCustomerId(UUID.randomUUID());
         confirmedOrder.changeStatus(OrderStatusEntity.CONFIRMED);
-        confirmedOrder.changeItems(new ArrayList<>());
         confirmedOrder.changeCreatedAt(Instant.now());
 
         orderJpaRepository.saveAll(List.of(draftOrder1, draftOrder2, confirmedOrder));
@@ -448,14 +441,12 @@ class OrdersControllerIT {
         draftOrder.changeId(UUID.randomUUID());
         draftOrder.changeCustomerId(UUID.randomUUID());
         draftOrder.changeStatus(OrderStatusEntity.DRAFT);
-        draftOrder.changeItems(new ArrayList<>());
         draftOrder.changeCreatedAt(Instant.now());
 
         OrderEntity confirmedOrder = new OrderEntity();
         confirmedOrder.changeId(UUID.randomUUID());
         confirmedOrder.changeCustomerId(UUID.randomUUID());
         confirmedOrder.changeStatus(OrderStatusEntity.CONFIRMED);
-        confirmedOrder.changeItems(new ArrayList<>());
         confirmedOrder.changeCreatedAt(Instant.now());
 
         orderJpaRepository.saveAll(List.of(draftOrder, confirmedOrder));
@@ -476,14 +467,12 @@ class OrdersControllerIT {
         draftOrder1.changeId(UUID.randomUUID());
         draftOrder1.changeCustomerId(UUID.randomUUID());
         draftOrder1.changeStatus(OrderStatusEntity.DRAFT);
-        draftOrder1.changeItems(new ArrayList<>());
         draftOrder1.changeCreatedAt(Instant.now().minusSeconds(10));
 
         OrderEntity draftOrder2 = new OrderEntity();
         draftOrder2.changeId(UUID.randomUUID());
         draftOrder2.changeCustomerId(UUID.randomUUID());
         draftOrder2.changeStatus(OrderStatusEntity.DRAFT);
-        draftOrder2.changeItems(new ArrayList<>());
         draftOrder2.changeCreatedAt(Instant.now());
 
         orderJpaRepository.saveAll(List.of(draftOrder1, draftOrder2));
@@ -509,7 +498,6 @@ class OrdersControllerIT {
         draftOrder.changeId(UUID.randomUUID());
         draftOrder.changeCustomerId(UUID.randomUUID());
         draftOrder.changeStatus(OrderStatusEntity.DRAFT);
-        draftOrder.changeItems(new ArrayList<>());
         draftOrder.changeCreatedAt(Instant.now());
 
         orderJpaRepository.save(draftOrder);
@@ -531,73 +519,91 @@ class OrdersControllerIT {
     }
 
     @Test
-    @DisplayName("Should delete order successfully (soft-delete)")
-    void shouldDeleteOrderSuccessfully() throws Exception {
-        OrderEntity order = new OrderEntity();
-        order.changeId(UUID.randomUUID());
-        order.changeCustomerId(UUID.randomUUID());
-        order.changeStatus(OrderStatusEntity.DRAFT);
-        order.changeItems(new ArrayList<>());
-        order.changeCreatedAt(Instant.now());
+    @DisplayName("Should successfully delete item from order and return 204 No Content")
+    void shouldSuccessfullyDeleteItemFromOrder() throws Exception {
+        OrderEntity orderEntity = new OrderEntity();
+        orderEntity.changeId(UUID.randomUUID());
+        orderEntity.changeCustomerId(UUID.randomUUID());
+        orderEntity.changeStatus(OrderStatusEntity.DRAFT);
+        orderEntity.changeCreatedAt(Instant.now());
 
-        OrderEntity savedOrder = orderJpaRepository.save(order);
-        UUID id = savedOrder.getId();
+        OrderItemEntity item1 = new OrderItemEntity();
+        item1.changeProductId(savedProduct1.getId());
+        item1.changeProductName(savedProduct1.getName());
+        item1.changeUnitPrice(savedProduct1.getPrice());
+        item1.changeQuantity(2);
+        orderEntity.addItem(item1);
 
-        mockMvc.perform(delete("/v1/orders/{id}", id))
+        OrderItemEntity item2 = new OrderItemEntity();
+        item2.changeProductId(savedProduct2.getId());
+        item2.changeProductName(savedProduct2.getName());
+        item2.changeUnitPrice(savedProduct2.getPrice());
+        item2.changeQuantity(1);
+        orderEntity.addItem(item2);
+
+        OrderEntity savedOrder = orderJpaRepository.save(orderEntity);
+        UUID item1Id = savedOrder.getItems().get(0).getId();
+        UUID item2Id = savedOrder.getItems().get(1).getId();
+
+        mockMvc.perform(delete("/v1/orders/{id}/items/{itemId}", savedOrder.getId(), item1Id))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get("/v1/orders/{id}", id))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.title").value("Not Found"))
-                .andExpect(jsonPath("$.detail").value("Order not found for ID: " + id));
-
-        mockMvc.perform(get("/v1/orders"))
+        mockMvc.perform(get("/v1/orders/{id}", savedOrder.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(0)))
-                .andExpect(jsonPath("$.totalElements").value(0));
-
-        assertTrue(orderJpaRepository.findById(id).isEmpty());
+                .andExpect(jsonPath("$.items", hasSize(1)))
+                .andExpect(jsonPath("$.items[0].id").value(item2Id.toString()))
+                .andExpect(jsonPath("$.items[0].productName").value("Gaming Mouse"))
+                .andExpect(jsonPath("$.total").value(60.00));
     }
 
     @Test
-    @DisplayName("Should return 404 Not Found when deleting non-existent order")
-    void shouldReturn404WhenDeletingNonExistentOrder() throws Exception {
-        UUID nonExistentId = UUID.randomUUID();
+    @DisplayName("Should return 404 Not Found when deleting item from non-existent order")
+    void shouldReturn404WhenDeletingItemFromNonExistentOrder() throws Exception {
+        UUID nonExistentOrderId = UUID.randomUUID();
+        UUID itemId = UUID.randomUUID();
 
-        mockMvc.perform(delete("/v1/orders/{id}", nonExistentId))
+        mockMvc.perform(delete("/v1/orders/{id}/items/{itemId}", nonExistentOrderId, itemId))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.title").value("Not Found"))
-                .andExpect(jsonPath("$.detail").value("Order not found for ID: " + nonExistentId));
+                .andExpect(jsonPath("$.detail").value("Order item not found for ID: " + nonExistentOrderId));
     }
 
     @Test
-    @DisplayName("Should return 404 Not Found when deleting already deleted order")
-    void shouldReturn404WhenDeletingAlreadyDeletedOrder() throws Exception {
-        OrderEntity order = new OrderEntity();
-        order.changeId(UUID.randomUUID());
-        order.changeCustomerId(UUID.randomUUID());
-        order.changeStatus(OrderStatusEntity.DRAFT);
-        order.changeItems(new ArrayList<>());
-        order.changeCreatedAt(Instant.now());
-
-        OrderEntity savedOrder = orderJpaRepository.save(order);
-        UUID id = savedOrder.getId();
-
-        mockMvc.perform(delete("/v1/orders/{id}", id))
-                .andExpect(status().isNoContent());
-
-        mockMvc.perform(delete("/v1/orders/{id}", id))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.title").value("Not Found"))
-                .andExpect(jsonPath("$.detail").value("Order not found for ID: " + id));
-    }
-
-    @Test
-    @DisplayName("Should return 400 Bad Request when deleting with invalid UUID")
-    void shouldReturn400WhenDeletingWithInvalidUUID() throws Exception {
-        mockMvc.perform(delete("/v1/orders/{id}", "invalid-uuid"))
+    @DisplayName("Should return 400 Bad Request when deleting item with invalid UUID format")
+    void shouldReturn400WhenDeletingItemWithInvalidUuidFormat() throws Exception {
+        mockMvc.perform(delete("/v1/orders/{id}/items/{itemId}", "invalid-order-uuid", UUID.randomUUID()))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value("Bad Request"))
                 .andExpect(jsonPath("$.detail").value("Invalid value provided."));
+
+        mockMvc.perform(delete("/v1/orders/{id}/items/{itemId}", UUID.randomUUID(), "invalid-item-uuid"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Bad Request"))
+                .andExpect(jsonPath("$.detail").value("Invalid value provided."));
+    }
+
+    @Test
+    @DisplayName("Should return 400 Bad Request when deleting item from non-draft order")
+    void shouldReturn400WhenDeletingItemFromNonDraftOrder() throws Exception {
+        OrderEntity orderEntity = new OrderEntity();
+        orderEntity.changeId(UUID.randomUUID());
+        orderEntity.changeCustomerId(UUID.randomUUID());
+        orderEntity.changeStatus(OrderStatusEntity.CONFIRMED);
+        orderEntity.changeCreatedAt(Instant.now());
+
+        OrderItemEntity item = new OrderItemEntity();
+        item.changeProductId(savedProduct1.getId());
+        item.changeProductName(savedProduct1.getName());
+        item.changeUnitPrice(savedProduct1.getPrice());
+        item.changeQuantity(1);
+        orderEntity.addItem(item);
+
+        OrderEntity savedOrder = orderJpaRepository.save(orderEntity);
+        UUID itemId = savedOrder.getItems().getFirst().getId();
+
+        mockMvc.perform(delete("/v1/orders/{id}/items/{itemId}", savedOrder.getId(), itemId))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Bad Request"))
+                .andExpect(jsonPath("$.detail").value("Order is not in draft status"));
     }
 }

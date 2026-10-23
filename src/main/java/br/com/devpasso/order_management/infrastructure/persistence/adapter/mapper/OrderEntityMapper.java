@@ -5,6 +5,8 @@ import br.com.devpasso.order_management.infrastructure.persistence.entity.OrderE
 import br.com.devpasso.order_management.infrastructure.persistence.entity.OrderStatusEntity;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 @Component
@@ -23,10 +25,11 @@ public class OrderEntityMapper {
         orderEntity.changeId(order.id());
         orderEntity.changeCustomerId(order.customerId());
         orderEntity.changeStatus(orderStatusMapper.toEntity(order.status()));
-        orderEntity.changeItems(order.items()
-                .stream()
-                .map(orderItemEntityMapper::toEntity)
-                .toList());
+        if (!order.items().isEmpty())
+            order.items()
+                    .stream()
+                    .map(orderItemEntityMapper::toEntity)
+                    .forEach(orderEntity::addItem);
         orderEntity.changeCreatedAt(order.createdAt());
         return orderEntity;
     }
@@ -35,7 +38,9 @@ public class OrderEntityMapper {
         return new Order(orderEntity.getId(),
                 orderEntity.getCustomerId(),
                 orderStatusMapper.toDomain(orderEntity.getStatus()),
-                orderEntity.getItems()
+                orderEntity.getItems() == null ?
+                        new ArrayList<>() :
+                        orderEntity.getItems()
                         .stream()
                         .map(orderItemEntityMapper::toDomain)
                         .collect(Collectors.toList()),

@@ -3,7 +3,7 @@ package br.com.devpasso.order_management.api.controller.orders;
 import br.com.devpasso.order_management.api.dto.exception.InternalServerErrorResponse;
 import br.com.devpasso.order_management.api.dto.exception.NotFoundErrorResponse;
 import br.com.devpasso.order_management.api.dto.exception.ValidationErrorResponse;
-import br.com.devpasso.order_management.application.usecase.orders.DeleteOrderUseCase;
+import br.com.devpasso.order_management.application.usecase.orders.DeleteOrderItemUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -18,14 +18,14 @@ import java.util.UUID;
 
 @RestController
 public class DeleteOrdersController extends OrdersController {
-    private final DeleteOrderUseCase deleteOrderUseCase;
+    private final DeleteOrderItemUseCase deleteOrderItemUseCase;
 
-    public DeleteOrdersController(DeleteOrderUseCase deleteOrderUseCase) {
-        this.deleteOrderUseCase = deleteOrderUseCase;
+    public DeleteOrdersController(DeleteOrderItemUseCase deleteOrderItemUseCase) {
+        this.deleteOrderItemUseCase = deleteOrderItemUseCase;
     }
 
-    @DeleteMapping("/{id}")
-    @Operation(summary = "Delete order by ID")
+    @DeleteMapping("/{id}/items/{itemId}")
+    @Operation(summary = "Delete order item by ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Order deleted successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid value provided",
@@ -35,8 +35,9 @@ public class DeleteOrdersController extends OrdersController {
             @ApiResponse(responseCode = "500", description = "Internal server error",
                     content = @Content(schema = @Schema(implementation = InternalServerErrorResponse.class)))
     })
-    public ResponseEntity<Void> deleteOrder(@PathVariable UUID id) {
-        deleteOrderUseCase.execute(id);
+    public ResponseEntity<Void> deleteOrder(@PathVariable UUID id,
+                                            @PathVariable UUID itemId) {
+        deleteOrderItemUseCase.execute(id, itemId);
         return ResponseEntity.noContent()
                 .build();
     }

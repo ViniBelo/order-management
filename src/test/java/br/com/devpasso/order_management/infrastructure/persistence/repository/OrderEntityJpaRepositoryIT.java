@@ -44,14 +44,12 @@ public class OrderEntityJpaRepositoryIT {
         UUID id = UUID.randomUUID();
         UUID customerId = UUID.randomUUID();
         OrderStatusEntity orderStatusEntity = OrderStatusEntity.DRAFT;
-        List<OrderItemEntity> orderItemEntities = List.of();
         Instant createdAt = Instant.now();
 
         OrderEntity orderEntity = new OrderEntity();
         orderEntity.changeId(id);
         orderEntity.changeCustomerId(customerId);
         orderEntity.changeStatus(orderStatusEntity);
-        orderEntity.changeItems(orderItemEntities);
         orderEntity.changeCreatedAt(createdAt);
 
         // When
@@ -72,14 +70,12 @@ public class OrderEntityJpaRepositoryIT {
         UUID id = UUID.randomUUID();
         UUID customerId = UUID.randomUUID();
         OrderStatusEntity orderStatusEntity = OrderStatusEntity.DRAFT;
-        List<OrderItemEntity> orderItemEntities = List.of();
         Instant createdAt = Instant.now();
 
         OrderEntity orderEntity = new OrderEntity();
         orderEntity.changeId(id);
         orderEntity.changeCustomerId(customerId);
         orderEntity.changeStatus(orderStatusEntity);
-        orderEntity.changeItems(orderItemEntities);
         orderEntity.changeCreatedAt(createdAt);
 
         OrderEntity savedOrder = orderJpaRepository.save(orderEntity);
@@ -116,21 +112,18 @@ public class OrderEntityJpaRepositoryIT {
         draftOrder1.changeId(UUID.randomUUID());
         draftOrder1.changeCustomerId(UUID.randomUUID());
         draftOrder1.changeStatus(OrderStatusEntity.DRAFT);
-        draftOrder1.changeItems(List.of());
         draftOrder1.changeCreatedAt(Instant.now());
 
         OrderEntity draftOrder2 = new OrderEntity();
         draftOrder2.changeId(UUID.randomUUID());
         draftOrder2.changeCustomerId(UUID.randomUUID());
         draftOrder2.changeStatus(OrderStatusEntity.DRAFT);
-        draftOrder2.changeItems(List.of());
         draftOrder2.changeCreatedAt(Instant.now());
 
         OrderEntity confirmedOrder = new OrderEntity();
         confirmedOrder.changeId(UUID.randomUUID());
         confirmedOrder.changeCustomerId(UUID.randomUUID());
         confirmedOrder.changeStatus(OrderStatusEntity.CONFIRMED);
-        confirmedOrder.changeItems(List.of());
         confirmedOrder.changeCreatedAt(Instant.now());
 
         orderJpaRepository.saveAll(List.of(draftOrder1, draftOrder2, confirmedOrder));
@@ -154,7 +147,6 @@ public class OrderEntityJpaRepositoryIT {
         draftOrder.changeId(UUID.randomUUID());
         draftOrder.changeCustomerId(UUID.randomUUID());
         draftOrder.changeStatus(OrderStatusEntity.DRAFT);
-        draftOrder.changeItems(List.of());
         draftOrder.changeCreatedAt(Instant.now());
 
         orderJpaRepository.save(draftOrder);

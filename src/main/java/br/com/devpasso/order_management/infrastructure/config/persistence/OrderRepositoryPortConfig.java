@@ -12,8 +12,8 @@ import org.springframework.context.annotation.Configuration;
 public class OrderRepositoryPortConfig {
     @Bean
     public OrderRepositoryPort orderRepository(OrderJpaRepository orderJpaRepository,
-                                               InfraPaginationMapper paginationMapper,
-                                               OrderEntityMapper orderEntityMapper) {
+                                                InfraPaginationMapper paginationMapper,
+                                                OrderEntityMapper orderEntityMapper) {
         return new OrderRepositoryAdapter(orderJpaRepository,
                 paginationMapper,
                 orderEntityMapper);

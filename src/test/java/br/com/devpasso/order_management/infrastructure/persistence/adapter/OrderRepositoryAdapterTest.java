@@ -67,12 +67,10 @@ public class OrderRepositoryAdapterTest {
         );
 
         OrderStatusEntity orderStatusEntity = OrderStatusEntity.DRAFT;
-        List<OrderItemEntity> orderItemsEntity = List.of();
         OrderEntity orderEntity = new OrderEntity();
         orderEntity.changeId(id);
         orderEntity.changeCustomerId(customerId);
         orderEntity.changeStatus(orderStatusEntity);
-        orderEntity.changeItems(orderItemsEntity);
         orderEntity.changeCreatedAt(createdAt);
 
         when(orderEntityMapper.toEntity(order)).thenReturn(orderEntity);

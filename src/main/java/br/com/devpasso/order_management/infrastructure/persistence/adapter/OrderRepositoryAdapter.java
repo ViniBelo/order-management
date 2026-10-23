@@ -32,17 +32,8 @@ public class OrderRepositoryAdapter implements OrderRepositoryPort {
     @Override
     public Order save(Order order) {
         OrderEntity orderEntity = orderEntityMapper.toEntity(order);
-        setOrderToOrderItemIfNeeded(orderEntity);
         OrderEntity savedOrderEntity = orderJpaRepository.save(orderEntity);
         return orderEntityMapper.toDomain(savedOrderEntity);
-    }
-
-    private void setOrderToOrderItemIfNeeded(OrderEntity orderEntity) {
-        orderEntity.getItems()
-                .forEach((item) -> {
-                    if (item.getOrder() == null)
-                        item.changeOrder(orderEntity);
-                });
     }
 
     @Override
