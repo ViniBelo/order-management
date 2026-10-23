@@ -66,7 +66,7 @@ public class UpdateProductsServiceTest {
                 existingProduct.getStockQuantity()
         );
 
-        when(productRepositoryPort.findById(id.toString()))
+        when(productRepositoryPort.findById(id))
                 .thenReturn(Optional.of(existingProduct));
         when(productRepositoryPort.existsByName(command.name()))
                 .thenReturn(false);
@@ -76,7 +76,7 @@ public class UpdateProductsServiceTest {
                 .thenReturn(productResult);
 
         // When
-        ProductResult result = updateProductsService.execute(id.toString(), command);
+        ProductResult result = updateProductsService.execute(id, command);
 
         // Then
         assertNotNull(result);
@@ -86,7 +86,7 @@ public class UpdateProductsServiceTest {
         assertEquals(command.price(), result.price());
         assertEquals(5, result.stockQuantity());
 
-        verify(productRepositoryPort).findById(id.toString());
+        verify(productRepositoryPort).findById(id);
         verify(productRepositoryPort).existsByName(command.name());
         verify(productRepositoryPort).save(existingProduct);
     }
@@ -112,17 +112,17 @@ public class UpdateProductsServiceTest {
                 new BigDecimal("49.99")
         );
 
-        when(productRepositoryPort.findById(id.toString())).thenReturn(Optional.of(existingProduct));
+        when(productRepositoryPort.findById(id)).thenReturn(Optional.of(existingProduct));
         when(productRepositoryPort.existsByName(command.name())).thenReturn(true);
 
         // When & Then
         ResourceConflictException exception = assertThrows(
                 ResourceConflictException.class,
-                () -> updateProductsService.execute(id.toString(), command)
+                () -> updateProductsService.execute(id, command)
         );
 
         assertEquals("Product already exists with name: " + command.name(), exception.getMessage());
-        verify(productRepositoryPort).findById(id.toString());
+        verify(productRepositoryPort).findById(id);
         verify(productRepositoryPort).existsByName(command.name());
         verify(productRepositoryPort, never()).save(any());
     }
@@ -156,7 +156,7 @@ public class UpdateProductsServiceTest {
                 existingProduct.getStockQuantity()
         );
 
-        when(productRepositoryPort.findById(id.toString()))
+        when(productRepositoryPort.findById(id))
                 .thenReturn(Optional.of(existingProduct));
         when(productRepositoryPort.save(any(Product.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -164,7 +164,7 @@ public class UpdateProductsServiceTest {
                 .thenReturn(productResult);
 
         // When
-        ProductResult result = updateProductsService.execute(id.toString(), command);
+        ProductResult result = updateProductsService.execute(id, command);
 
         // Then
         assertNotNull(result);
@@ -174,7 +174,7 @@ public class UpdateProductsServiceTest {
         assertEquals(command.price(), result.price());
         assertEquals(5, result.stockQuantity());
 
-        verify(productRepositoryPort).findById(id.toString());
+        verify(productRepositoryPort).findById(id);
         verify(productRepositoryPort, never()).existsByName(any());
         verify(productRepositoryPort).save(existingProduct);
     }
@@ -183,7 +183,7 @@ public class UpdateProductsServiceTest {
     @DisplayName("Should throw ResourceNotFoundException when updating non-existent product")
     void execute_WithUpdateProductCommand_ShouldThrowExceptionWhenNotFound() {
         // Given
-        String id = UUID.randomUUID().toString();
+        UUID id = UUID.randomUUID();
         UpdateProductCommand command = new UpdateProductCommand(
                 "Updated Name",
                 "Updated Description",
@@ -228,7 +228,7 @@ public class UpdateProductsServiceTest {
                 command.stockQuantity()
         );
 
-        when(productRepositoryPort.findById(id.toString()))
+        when(productRepositoryPort.findById(id))
                 .thenReturn(Optional.of(existingProduct));
         when(productRepositoryPort.save(any(Product.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -236,7 +236,7 @@ public class UpdateProductsServiceTest {
                 .thenReturn(productResult);
 
         // When
-        ProductResult result = updateProductsService.execute(id.toString(), command);
+        ProductResult result = updateProductsService.execute(id, command);
 
         // Then
         assertNotNull(result);
@@ -246,7 +246,7 @@ public class UpdateProductsServiceTest {
         assertEquals(new BigDecimal("29.99"), result.price());
         assertEquals(50, result.stockQuantity());
 
-        verify(productRepositoryPort).findById(id.toString());
+        verify(productRepositoryPort).findById(id);
         verify(productRepositoryPort).save(existingProduct);
     }
 
@@ -254,7 +254,7 @@ public class UpdateProductsServiceTest {
     @DisplayName("Should throw ResourceNotFoundException when updating stock of non-existent product")
     void execute_WithUpdateProductStockCommand_ShouldThrowExceptionWhenNotFound() {
         // Given
-        String id = UUID.randomUUID().toString();
+        UUID id = UUID.randomUUID();
         UpdateProductStockCommand command = new UpdateProductStockCommand(50);
 
         when(productRepositoryPort.findById(id)).thenReturn(Optional.empty());

@@ -78,7 +78,7 @@ public class AddItemToOrderServiceTest {
         );
 
         when(orderRepositoryPort.findById(orderId)).thenReturn(Optional.of(order));
-        when(productRepositoryPort.findById(productId.toString())).thenReturn(Optional.of(product));
+        when(productRepositoryPort.findById(productId)).thenReturn(Optional.of(product));
         when(orderItemResultMapper.map(any(OrderItem.class))).thenReturn(expectedResult);
 
         // When
@@ -94,7 +94,7 @@ public class AddItemToOrderServiceTest {
         assertEquals(quantity, order.items().getFirst().quantity());
 
         verify(orderRepositoryPort).findById(orderId);
-        verify(productRepositoryPort).findById(productId.toString());
+        verify(productRepositoryPort).findById(productId);
         verify(orderRepositoryPort).save(order);
         verify(orderItemResultMapper).map(any(OrderItem.class));
     }
@@ -134,7 +134,7 @@ public class AddItemToOrderServiceTest {
         );
 
         when(orderRepositoryPort.findById(orderId)).thenReturn(Optional.of(order));
-        when(productRepositoryPort.findById(productId.toString())).thenReturn(Optional.of(product));
+        when(productRepositoryPort.findById(productId)).thenReturn(Optional.of(product));
         when(orderItemResultMapper.map(any(OrderItem.class))).thenReturn(expectedResult);
 
         // When
@@ -186,7 +186,7 @@ public class AddItemToOrderServiceTest {
         );
 
         when(orderRepositoryPort.findById(orderId)).thenReturn(Optional.of(order));
-        when(productRepositoryPort.findById(productId.toString())).thenReturn(Optional.empty());
+        when(productRepositoryPort.findById(productId)).thenReturn(Optional.empty());
 
         // When & Then
         ResourceNotFoundException exception = assertThrows(
@@ -196,7 +196,7 @@ public class AddItemToOrderServiceTest {
 
         assertEquals("Product not found for ID: " + productId, exception.getMessage());
         verify(orderRepositoryPort).findById(orderId);
-        verify(productRepositoryPort).findById(productId.toString());
+        verify(productRepositoryPort).findById(productId);
         verify(orderRepositoryPort, never()).save(any());
         verifyNoInteractions(orderItemResultMapper);
     }
@@ -247,7 +247,7 @@ public class AddItemToOrderServiceTest {
         );
 
         when(orderRepositoryPort.findById(orderId)).thenReturn(Optional.of(order));
-        when(productRepositoryPort.findById(newProductId.toString())).thenReturn(Optional.of(newProduct));
+        when(productRepositoryPort.findById(newProductId)).thenReturn(Optional.of(newProduct));
         when(orderItemResultMapper.map(any(OrderItem.class))).thenReturn(expectedResult);
 
         // When
@@ -264,7 +264,7 @@ public class AddItemToOrderServiceTest {
         assertEquals(quantity, order.items().get(1).quantity());
 
         verify(orderRepositoryPort).findById(orderId);
-        verify(productRepositoryPort).findById(newProductId.toString());
+        verify(productRepositoryPort).findById(newProductId);
         verify(orderRepositoryPort).save(order);
         verify(orderItemResultMapper).map(any(OrderItem.class));
     }
@@ -297,7 +297,7 @@ public class AddItemToOrderServiceTest {
         );
 
         when(orderRepositoryPort.findById(orderId)).thenReturn(Optional.of(order));
-        when(productRepositoryPort.findById(productId.toString())).thenReturn(Optional.of(product));
+        when(productRepositoryPort.findById(productId)).thenReturn(Optional.of(product));
 
         // When & Then
         BusinessException exception = assertThrows(
@@ -311,7 +311,7 @@ public class AddItemToOrderServiceTest {
 
         assertEquals(expectedMessage, exception.getMessage());
         verify(orderRepositoryPort).findById(orderId);
-        verify(productRepositoryPort).findById(productId.toString());
+        verify(productRepositoryPort).findById(productId);
         verify(orderRepositoryPort, never()).save(any());
         verifyNoInteractions(orderItemResultMapper);
     }

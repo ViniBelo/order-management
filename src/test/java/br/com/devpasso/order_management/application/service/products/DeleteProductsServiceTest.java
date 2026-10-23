@@ -41,14 +41,14 @@ class DeleteProductsServiceTest {
                 Instant.now()
         );
 
-        when(productRepositoryPort.findById(id.toString())).thenReturn(Optional.of(product));
+        when(productRepositoryPort.findById(id)).thenReturn(Optional.of(product));
 
         // When
-        deleteProductsService.execute(id.toString());
+        deleteProductsService.execute(id);
 
         // Then
-        verify(productRepositoryPort).findById(id.toString());
-        verify(productRepositoryPort).deleteById(id.toString());
+        verify(productRepositoryPort).findById(id);
+        verify(productRepositoryPort).deleteById(id);
     }
 
     @Test
@@ -56,11 +56,11 @@ class DeleteProductsServiceTest {
     void execute_WithNonExistingId_ShouldThrowResourceNotFoundException() {
         // Given
         UUID id = UUID.randomUUID();
-        when(productRepositoryPort.findById(id.toString())).thenReturn(Optional.empty());
+        when(productRepositoryPort.findById(id)).thenReturn(Optional.empty());
 
         // When & Then
-        assertThrows(ResourceNotFoundException.class, () -> deleteProductsService.execute(id.toString()));
-        verify(productRepositoryPort).findById(id.toString());
+        assertThrows(ResourceNotFoundException.class, () -> deleteProductsService.execute(id));
+        verify(productRepositoryPort).findById(id);
         verify(productRepositoryPort, never()).deleteById(any());
     }
 }

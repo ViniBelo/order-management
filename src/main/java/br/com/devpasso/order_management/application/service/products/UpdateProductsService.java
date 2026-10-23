@@ -11,6 +11,8 @@ import br.com.devpasso.order_management.domain.exception.ResourceNotFoundExcepti
 import br.com.devpasso.order_management.domain.model.Product;
 import br.com.devpasso.order_management.domain.repository.ProductRepositoryPort;
 
+import java.util.UUID;
+
 public class UpdateProductsService implements UpdateProductUseCase, UpdateProductStockUseCase {
     private final ProductRepositoryPort productRepositoryPort;
     private final ProductResultMapper productResultMapper;
@@ -22,7 +24,7 @@ public class UpdateProductsService implements UpdateProductUseCase, UpdateProduc
     }
 
     @Override
-    public ProductResult execute(String id, UpdateProductCommand command) {
+    public ProductResult execute(UUID id, UpdateProductCommand command) {
         Product product = fetchProduct(id);
 
         if (!product.getName().equals(command.name())) {
@@ -42,7 +44,7 @@ public class UpdateProductsService implements UpdateProductUseCase, UpdateProduc
     }
 
     @Override
-    public ProductResult execute(String id, UpdateProductStockCommand command) {
+    public ProductResult execute(UUID id, UpdateProductStockCommand command) {
         Product product = fetchProduct(id);
 
         product.changeStockQuantity(command.stockQuantity());
@@ -50,7 +52,7 @@ public class UpdateProductsService implements UpdateProductUseCase, UpdateProduc
         return productResultMapper.toResult(updatedProduct);
     }
 
-    private Product fetchProduct(String id) {
+    private Product fetchProduct(UUID id) {
         return productRepositoryPort.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found for ID: " + id));
     }

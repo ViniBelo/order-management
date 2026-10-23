@@ -111,27 +111,26 @@ class FindProductsServiceTest {
                 5
         );
 
-        when(productRepositoryPort.findById(id.toString()))
+        when(productRepositoryPort.findById(id))
                 .thenReturn(Optional.of(domainProduct));
         when(productResultMapper.toResult(domainProduct))
                 .thenReturn(productResult);
 
         // When
-        ProductResult result = findProductsService.execute(id.toString());
+        ProductResult result = findProductsService.execute(id);
 
         // Then
         assertNotNull(result);
         assertEquals(id, result.id());
         assertEquals("Test Product", result.name());
-        verify(productRepositoryPort).findById(id.toString());
+        verify(productRepositoryPort).findById(id);
     }
 
     @Test
     @DisplayName("Should throw ResourceNotFoundException when product not found")
     void execute_WithId_ShouldThrowExceptionWhenNotFound() {
         // Given
-        String id = UUID.randomUUID()
-                .toString();
+        UUID id = UUID.randomUUID();
         when(productRepositoryPort.findById(id))
                 .thenReturn(Optional.empty());
 

@@ -84,7 +84,7 @@ public class UpdateProductsControllerTest {
         );
 
         when(updateProductRequestMapper.toCommand(request)).thenReturn(command);
-        when(updateProductUseCase.execute(productId.toString(), command)).thenReturn(updatedProductResult);
+        when(updateProductUseCase.execute(productId, command)).thenReturn(updatedProductResult);
         when(productResponseMapper.toResponse(updatedProductResult)).thenReturn(response);
 
         // When
@@ -96,7 +96,7 @@ public class UpdateProductsControllerTest {
         assertEquals(response, result.getBody());
 
         verify(updateProductRequestMapper).toCommand(request);
-        verify(updateProductUseCase).execute(productId.toString(), command);
+        verify(updateProductUseCase).execute(productId, command);
         verify(productResponseMapper).toResponse(updatedProductResult);
     }
 
@@ -118,7 +118,7 @@ public class UpdateProductsControllerTest {
         );
 
         when(updateProductRequestMapper.toCommand(request)).thenReturn(command);
-        when(updateProductUseCase.execute(productId.toString(), command))
+        when(updateProductUseCase.execute(productId, command))
                 .thenThrow(new ResourceNotFoundException("Product not found for ID: " + productId));
 
         // When & Then
@@ -129,7 +129,7 @@ public class UpdateProductsControllerTest {
 
         assertEquals("Product not found for ID: " + productId, exception.getMessage());
         verify(updateProductRequestMapper).toCommand(request);
-        verify(updateProductUseCase).execute(productId.toString(), command);
+        verify(updateProductUseCase).execute(productId, command);
         verifyNoInteractions(productResponseMapper);
     }
 
@@ -151,7 +151,7 @@ public class UpdateProductsControllerTest {
         );
 
         when(updateProductRequestMapper.toCommand(request)).thenReturn(command);
-        when(updateProductUseCase.execute(productId.toString(), command))
+        when(updateProductUseCase.execute(productId, command))
                 .thenThrow(new ResourceConflictException("Product already exists with name: " + request.name()));
 
         // When & Then
@@ -162,7 +162,7 @@ public class UpdateProductsControllerTest {
 
         assertEquals("Product already exists with name: " + request.name(), exception.getMessage());
         verify(updateProductRequestMapper).toCommand(request);
-        verify(updateProductUseCase).execute(productId.toString(), command);
+        verify(updateProductUseCase).execute(productId, command);
         verifyNoInteractions(productResponseMapper);
     }
 
@@ -191,7 +191,7 @@ public class UpdateProductsControllerTest {
         );
 
         when(updateProductStockRequestMapper.toCommand(request)).thenReturn(command);
-        when(updateProductStockUseCase.execute(productId.toString(), command)).thenReturn(updatedProductResult);
+        when(updateProductStockUseCase.execute(productId, command)).thenReturn(updatedProductResult);
         when(productResponseMapper.toResponse(updatedProductResult)).thenReturn(response);
 
         // When
@@ -203,7 +203,7 @@ public class UpdateProductsControllerTest {
         assertEquals(response, result.getBody());
 
         verify(updateProductStockRequestMapper).toCommand(request);
-        verify(updateProductStockUseCase).execute(productId.toString(), command);
+        verify(updateProductStockUseCase).execute(productId, command);
         verify(productResponseMapper).toResponse(updatedProductResult);
     }
 
@@ -216,7 +216,7 @@ public class UpdateProductsControllerTest {
         UpdateProductStockCommand command = new UpdateProductStockCommand(50);
 
         when(updateProductStockRequestMapper.toCommand(request)).thenReturn(command);
-        when(updateProductStockUseCase.execute(productId.toString(), command))
+        when(updateProductStockUseCase.execute(productId, command))
                 .thenThrow(new ResourceNotFoundException("Product not found for ID: " + productId));
 
         // When & Then
@@ -227,7 +227,7 @@ public class UpdateProductsControllerTest {
 
         assertEquals("Product not found for ID: " + productId, exception.getMessage());
         verify(updateProductStockRequestMapper).toCommand(request);
-        verify(updateProductStockUseCase).execute(productId.toString(), command);
+        verify(updateProductStockUseCase).execute(productId, command);
         verifyNoInteractions(productResponseMapper);
     }
 }

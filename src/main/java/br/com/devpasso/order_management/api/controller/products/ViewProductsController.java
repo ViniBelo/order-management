@@ -96,7 +96,7 @@ public class ViewProductsController extends ProductsController {
             @Parameter(description = "Product UUID", example = "123e4567-e89b-12d3-a456-426614174000")
             @PathVariable UUID id
     ) {
-        ProductResult result = findProductByIdUseCase.execute(id.toString());
+        ProductResult result = findProductByIdUseCase.execute(id);
         return ResponseEntity.ok(productResponseMapper.toResponse(result));
     }
 }

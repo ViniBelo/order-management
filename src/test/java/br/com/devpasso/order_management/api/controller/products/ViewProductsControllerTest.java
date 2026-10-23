@@ -162,7 +162,7 @@ public class ViewProductsControllerTest {
                 product.price(),
                 product.stockQuantity());
 
-        when(findProductByIdUseCase.execute(id.toString()))
+        when(findProductByIdUseCase.execute(id))
                 .thenReturn(product);
         when(productResponseMapper.toResponse(product))
                 .thenReturn(response);
@@ -175,7 +175,7 @@ public class ViewProductsControllerTest {
         assertNotNull(result.getBody());
         assertEquals(response, result.getBody());
 
-        verify(findProductByIdUseCase).execute(id.toString());
+        verify(findProductByIdUseCase).execute(id);
         verify(productResponseMapper).toResponse(product);
     }
 
@@ -185,7 +185,7 @@ public class ViewProductsControllerTest {
         // Given
         UUID id = UUID.randomUUID();
 
-        when(findProductByIdUseCase.execute(id.toString()))
+        when(findProductByIdUseCase.execute(id))
                 .thenThrow(new ResourceNotFoundException("Product not found for ID: " + id));
 
         // When & Then
@@ -195,7 +195,7 @@ public class ViewProductsControllerTest {
         );
 
         assertEquals("Product not found for ID: " + id, exception.getMessage());
-        verify(findProductByIdUseCase).execute(id.toString());
+        verify(findProductByIdUseCase).execute(id);
         verifyNoInteractions(productResponseMapper);
     }
 }

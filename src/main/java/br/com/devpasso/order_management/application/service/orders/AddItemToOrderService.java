@@ -30,7 +30,7 @@ public class AddItemToOrderService implements AddItemToOrderUseCase {
         Order order = orderRepositoryPort.findById(command.orderId())
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found for ID: " + command.orderId()));
 
-        Product product = productRepositoryPort.findById(command.productId().toString())
+        Product product = productRepositoryPort.findById(command.productId())
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found for ID: " + command.productId()));
 
         if (product.getStockQuantity() < command.quantity()) {

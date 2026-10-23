@@ -12,6 +12,7 @@ import br.com.devpasso.order_management.domain.repository.ProductRepositoryPort;
 import br.com.devpasso.order_management.domain.model.Product;
 
 import java.util.List;
+import java.util.UUID;
 
 public class FindProductsService implements ListProductsUseCase, FindProductByIdUseCase {
     private final ProductRepositoryPort productRepositoryPort;
@@ -34,12 +35,12 @@ public class FindProductsService implements ListProductsUseCase, FindProductById
     }
 
     @Override
-    public ProductResult execute(String id) {
+    public ProductResult execute(UUID id) {
         Product product = fetchProduct(id);
         return productResultMapper.toResult(product);
     }
 
-    private Product fetchProduct(String id) {
+    private Product fetchProduct(UUID id) {
         return productRepositoryPort.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found for ID: " + id));
     }

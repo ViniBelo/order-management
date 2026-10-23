@@ -48,8 +48,8 @@ public class ProductRepositoryAdapter implements ProductRepositoryPort {
     }
 
     @Override
-    public Optional<Product> findById(String id) {
-        return productJpaRepository.findById(UUID.fromString(id))
+    public Optional<Product> findById(UUID id) {
+        return productJpaRepository.findById(id)
                 .map(productModelMapper::toModel);
     }
 
@@ -66,7 +66,7 @@ public class ProductRepositoryAdapter implements ProductRepositoryPort {
     }
 
     @Override
-    public void deleteById(String id) {
-        productJpaRepository.deleteById(UUID.fromString(id));
+    public void deleteById(UUID id) {
+        productJpaRepository.deleteById(id);
     }
 }

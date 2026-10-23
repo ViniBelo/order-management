@@ -69,7 +69,7 @@ public class UpdateProductsController extends ProductsController {
             UpdateProductRequest updateProductRequest
     ) {
         UpdateProductCommand updateProductCommand = updateProductRequestMapper.toCommand(updateProductRequest);
-        ProductResult updatedProductResult = updateProductUseCase.execute(id.toString(), updateProductCommand);
+        ProductResult updatedProductResult = updateProductUseCase.execute(id, updateProductCommand);
         ProductResponse updatedProduct = productResponseMapper.toResponse(updatedProductResult);
         return ResponseEntity.ok(updatedProduct);
     }
@@ -91,7 +91,7 @@ public class UpdateProductsController extends ProductsController {
             @RequestBody @Valid UpdateProductStockRequest updateProductStockRequest
     ) {
         UpdateProductStockCommand command = updateProductStockRequestMapper.toCommand(updateProductStockRequest);
-        ProductResult updatedProduct = updateProductStockUseCase.execute(id.toString(), command);
+        ProductResult updatedProduct = updateProductStockUseCase.execute(id, command);
         ProductResponse updatedProductResponse = productResponseMapper.toResponse(updatedProduct);
         return ResponseEntity.ok(updatedProductResponse);
     }

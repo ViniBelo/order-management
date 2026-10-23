@@ -38,7 +38,7 @@ public class DeleteProductsControllerTest {
         // Then
         assertEquals(HttpStatus.NO_CONTENT, result.getStatusCode());
         assertNull(result.getBody());
-        verify(deleteProductUseCase).execute(productId.toString());
+        verify(deleteProductUseCase).execute(productId);
     }
 
     @Test
@@ -47,7 +47,7 @@ public class DeleteProductsControllerTest {
         // Given
         UUID productId = UUID.randomUUID();
         doThrow(new ResourceNotFoundException("Product not found for ID: " + productId))
-                .when(deleteProductUseCase).execute(productId.toString());
+                .when(deleteProductUseCase).execute(productId);
 
         // When & Then
         ResourceNotFoundException exception = assertThrows(
@@ -56,6 +56,6 @@ public class DeleteProductsControllerTest {
         );
 
         assertEquals("Product not found for ID: " + productId, exception.getMessage());
-        verify(deleteProductUseCase).execute(productId.toString());
+        verify(deleteProductUseCase).execute(productId);
     }
 }

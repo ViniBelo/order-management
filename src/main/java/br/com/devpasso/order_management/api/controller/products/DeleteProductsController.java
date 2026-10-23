@@ -41,7 +41,7 @@ public class DeleteProductsController extends ProductsController {
             @Parameter(description = "Product UUID", example = "123e4567-e89b-12d3-a456-426614174000")
             @PathVariable UUID id
     ) {
-        deleteProductUseCase.execute(id.toString());
+        deleteProductUseCase.execute(id);
         return ResponseEntity.noContent()
                 .build();
     }

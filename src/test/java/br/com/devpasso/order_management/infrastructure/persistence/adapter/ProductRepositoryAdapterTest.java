@@ -117,7 +117,7 @@ class ProductRepositoryAdapterTest {
                 .thenReturn(domainProduct);
 
         // When
-        Optional<Product> result = productRepositoryAdapter.findById(id.toString());
+        Optional<Product> result = productRepositoryAdapter.findById(id);
 
         // Then
         assertTrue(result.isPresent());
@@ -204,7 +204,7 @@ class ProductRepositoryAdapterTest {
         UUID id = UUID.randomUUID();
 
         // When
-        productRepositoryAdapter.deleteById(id.toString());
+        productRepositoryAdapter.deleteById(id);
 
         // Then
         verify(productJpaRepository).deleteById(id);

@@ -1,5 +1,7 @@
 package br.com.devpasso.order_management.application.usecase.products;
 
+import java.util.UUID;
+
 public interface DeleteProductUseCase {
-    void execute(String id);
+    void execute(UUID id);
 }
