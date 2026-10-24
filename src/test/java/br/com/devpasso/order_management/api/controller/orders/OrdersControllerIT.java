@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -45,6 +46,9 @@ class OrdersControllerIT {
     private MockMvc mockMvc;
 
     @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @Autowired
     private OrderJpaRepository orderJpaRepository;
 
     @Autowired
@@ -55,8 +59,9 @@ class OrdersControllerIT {
 
     @BeforeEach
     void setUp() {
-        orderJpaRepository.deleteAll();
-        productJpaRepository.deleteAll();
+        jdbcTemplate.execute("DELETE FROM order_items");
+        jdbcTemplate.execute("DELETE FROM orders");
+        jdbcTemplate.execute("DELETE FROM products");
 
         ProductEntity p1 = new ProductEntity();
         p1.changeName("Wireless Keyboard");
