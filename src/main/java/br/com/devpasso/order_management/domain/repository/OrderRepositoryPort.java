@@ -1,6 +1,5 @@
 package br.com.devpasso.order_management.domain.repository;
 
-import br.com.devpasso.order_management.application.dto.command.orders.FilterOrdersByStatusCommand;
 import br.com.devpasso.order_management.domain.common.PaginatedQueryResult;
 import br.com.devpasso.order_management.domain.common.PaginationQuery;
 import br.com.devpasso.order_management.domain.model.Order;
