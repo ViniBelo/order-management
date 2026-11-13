@@ -296,7 +296,7 @@ class OrdersControllerIT {
 
         OrderItemEntity item = new OrderItemEntity();
         item.changeOrder(orderEntity);
-        item.changeProductId(savedProduct1.getId());
+        item.changeProduct(savedProduct1);
         item.changeProductName(savedProduct1.getName());
         item.changeUnitPrice(savedProduct1.getPrice());
         item.changeQuantity(2);
@@ -533,14 +533,14 @@ class OrdersControllerIT {
         orderEntity.changeCreatedAt(Instant.now());
 
         OrderItemEntity item1 = new OrderItemEntity();
-        item1.changeProductId(savedProduct1.getId());
+        item1.changeProduct(savedProduct1);
         item1.changeProductName(savedProduct1.getName());
         item1.changeUnitPrice(savedProduct1.getPrice());
         item1.changeQuantity(2);
         orderEntity.addItem(item1);
 
         OrderItemEntity item2 = new OrderItemEntity();
-        item2.changeProductId(savedProduct2.getId());
+        item2.changeProduct(savedProduct2);
         item2.changeProductName(savedProduct2.getName());
         item2.changeUnitPrice(savedProduct2.getPrice());
         item2.changeQuantity(1);
@@ -597,7 +597,7 @@ class OrdersControllerIT {
         orderEntity.changeCreatedAt(Instant.now());
 
         OrderItemEntity item = new OrderItemEntity();
-        item.changeProductId(savedProduct1.getId());
+        item.changeProduct(savedProduct1);
         item.changeProductName(savedProduct1.getName());
         item.changeUnitPrice(savedProduct1.getPrice());
         item.changeQuantity(1);

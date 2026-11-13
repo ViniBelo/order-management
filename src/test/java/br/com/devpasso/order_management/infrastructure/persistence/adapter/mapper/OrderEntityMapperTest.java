@@ -14,7 +14,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class OrderEntityMapperTest {
     private final OrderStatusMapper orderStatusMapper = new OrderStatusMapper();
-    private final OrderItemEntityMapper orderItemEntityMapper = new OrderItemEntityMapper();
+    private final OrderItemEntityMapper orderItemEntityMapper = new OrderItemEntityMapper(
+            new ProductEntityMapper(),
+            new ProductModelMapper()
+    );
     private final OrderEntityMapper orderEntityMapper = new OrderEntityMapper(
             orderStatusMapper,
             orderItemEntityMapper

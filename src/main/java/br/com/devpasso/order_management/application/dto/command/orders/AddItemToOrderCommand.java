@@ -1,8 +1,8 @@
 package br.com.devpasso.order_management.application.dto.command.orders;
 
 import br.com.devpasso.order_management.domain.model.OrderItem;
+import br.com.devpasso.order_management.domain.model.Product;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
 public record AddItemToOrderCommand(
@@ -10,12 +10,12 @@ public record AddItemToOrderCommand(
         UUID productId,
         Integer quantity
 ) {
-    public OrderItem toDomainModel(String productName, BigDecimal unitPrice) {
+    public OrderItem toDomainModel(Product product) {
         return new OrderItem(
                 null,
-                productId,
-                productName,
-                unitPrice,
+                product,
+                product.getName(),
+                product.getPrice(),
                 quantity
         );
     }

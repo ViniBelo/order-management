@@ -4,6 +4,7 @@ import br.com.devpasso.order_management.domain.exception.InvalidOrderStateExcept
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -19,17 +20,21 @@ public class OrderTest {
         Order order = new Order(customerId);
 
         UUID orderItemId = UUID.randomUUID();
-        UUID itemId = UUID.randomUUID();
-        String productName = "Product 1";
-        BigDecimal unitPrice = new BigDecimal("10.00");
-        Integer quantity = 1;
+        Product product = new Product(
+                UUID.randomUUID(),
+                "Keyboard",
+                "Description",
+                new BigDecimal("150.00"),
+                1,
+                Instant.now()
+        );
 
         OrderItem orderItem = new OrderItem(
                 orderItemId,
-                itemId,
-                productName,
-                unitPrice,
-                quantity
+                product,
+                product.getName(),
+                product.getPrice(),
+                product.getStockQuantity()
         );
 
         // When
@@ -49,17 +54,21 @@ public class OrderTest {
         order.transitionTo(OrderStatus.CONFIRMED);
 
         UUID orderItemId = UUID.randomUUID();
-        UUID itemId = UUID.randomUUID();
-        String productName = "Product 1";
-        BigDecimal unitPrice = new BigDecimal("10.00");
-        Integer quantity = 1;
+        Product product = new Product(
+                UUID.randomUUID(),
+                "Keyboard",
+                "Description",
+                new BigDecimal("150.00"),
+                1,
+                Instant.now()
+        );
 
         OrderItem orderItem = new OrderItem(
                 orderItemId,
-                itemId,
-                productName,
-                unitPrice,
-                quantity
+                product,
+                product.getName(),
+                product.getPrice(),
+                product.getStockQuantity()
         );
 
         // When && Then
@@ -76,17 +85,21 @@ public class OrderTest {
         order.transitionTo(OrderStatus.IN_DELIVERY);
 
         UUID orderItemId = UUID.randomUUID();
-        UUID itemId = UUID.randomUUID();
-        String productName = "Product 1";
-        BigDecimal unitPrice = new BigDecimal("10.00");
-        Integer quantity = 1;
+        Product product = new Product(
+                UUID.randomUUID(),
+                "Keyboard",
+                "Description",
+                new BigDecimal("150.00"),
+                1,
+                Instant.now()
+        );
 
         OrderItem orderItem = new OrderItem(
                 orderItemId,
-                itemId,
-                productName,
-                unitPrice,
-                quantity
+                product,
+                product.getName(),
+                product.getPrice(),
+                product.getStockQuantity()
         );
 
         // When && Then
@@ -104,17 +117,21 @@ public class OrderTest {
         order.transitionTo(OrderStatus.DELIVERED);
 
         UUID orderItemId = UUID.randomUUID();
-        UUID itemId = UUID.randomUUID();
-        String productName = "Product 1";
-        BigDecimal unitPrice = new BigDecimal("10.00");
-        Integer quantity = 1;
+        Product product = new Product(
+                UUID.randomUUID(),
+                "Keyboard",
+                "Description",
+                new BigDecimal("150.00"),
+                1,
+                Instant.now()
+        );
 
         OrderItem orderItem = new OrderItem(
                 orderItemId,
-                itemId,
-                productName,
-                unitPrice,
-                quantity
+                product,
+                product.getName(),
+                product.getPrice(),
+                product.getStockQuantity()
         );
 
         // When && Then
@@ -130,17 +147,21 @@ public class OrderTest {
         order.transitionTo(OrderStatus.CANCELLED);
 
         UUID orderItemId = UUID.randomUUID();
-        UUID itemId = UUID.randomUUID();
-        String productName = "Product 1";
-        BigDecimal unitPrice = new BigDecimal("10.00");
-        Integer quantity = 1;
+        Product product = new Product(
+                UUID.randomUUID(),
+                "Keyboard",
+                "Description",
+                new BigDecimal("150.00"),
+                1,
+                Instant.now()
+        );
 
         OrderItem orderItem = new OrderItem(
                 orderItemId,
-                itemId,
-                productName,
-                unitPrice,
-                quantity
+                product,
+                product.getName(),
+                product.getPrice(),
+                product.getStockQuantity()
         );
 
         // When && Then
@@ -176,31 +197,39 @@ public class OrderTest {
     public void total_shouldSumOrderItemsSubtotals() {
         // Given
         UUID orderItemId1 = UUID.randomUUID();
-        UUID itemId1 = UUID.randomUUID();
-        String productName1 = "Product 1";
-        BigDecimal unitPrice1 = new BigDecimal("10.00");
-        Integer quantity1 = 2;
+        Product product1 = new Product(
+                UUID.randomUUID(),
+                "Keyboard",
+                "Description",
+                new BigDecimal("10.00"),
+                2,
+                Instant.now()
+        );
 
         OrderItem orderItem1 = new OrderItem(
                 orderItemId1,
-                itemId1,
-                productName1,
-                unitPrice1,
-                quantity1
+                product1,
+                product1.getName(),
+                product1.getPrice(),
+                product1.getStockQuantity()
         );
 
         UUID orderItemId2 = UUID.randomUUID();
-        UUID itemId2 = UUID.randomUUID();
-        String productName2 = "Product 2";
-        BigDecimal unitPrice2 = new BigDecimal("20.00");
-        Integer quantity2 = 3;
+        Product product2 = new Product(
+                UUID.randomUUID(),
+                "Mouse",
+                "Description",
+                new BigDecimal("20.00"),
+                3,
+                Instant.now()
+        );
 
         OrderItem orderItem2 = new OrderItem(
                 orderItemId2,
-                itemId2,
-                productName2,
-                unitPrice2,
-                quantity2
+                product2,
+                product2.getName(),
+                product2.getPrice(),
+                product2.getStockQuantity()
         );
 
         UUID customerId = UUID.randomUUID();
@@ -222,13 +251,20 @@ public class OrderTest {
         Order order = new Order(customerId);
 
         UUID orderItemId = UUID.randomUUID();
-        UUID itemId = UUID.randomUUID();
+        Product product = new Product(
+                UUID.randomUUID(),
+                "Keyboard",
+                "Description",
+                new BigDecimal("150.00"),
+                1,
+                Instant.now()
+        );
         OrderItem orderItem = new OrderItem(
                 orderItemId,
-                itemId,
-                "Product 1",
-                new BigDecimal("10.00"),
-                1
+                product,
+                product.getName(),
+                product.getPrice(),
+                product.getStockQuantity()
         );
         order.addItem(orderItem);
 
@@ -246,23 +282,37 @@ public class OrderTest {
         Order order = new Order(customerId);
 
         UUID orderItemId1 = UUID.randomUUID();
-        UUID itemId1 = UUID.randomUUID();
+        Product product1 = new Product(
+                UUID.randomUUID(),
+                "Keyboard",
+                "Description",
+                new BigDecimal("10.00"),
+                1,
+                Instant.now()
+        );
         OrderItem orderItem1 = new OrderItem(
                 orderItemId1,
-                itemId1,
-                "Product 1",
-                new BigDecimal("10.00"),
-                1
+                product1,
+                product1.getName(),
+                product1.getPrice(),
+                product1.getStockQuantity()
         );
 
         UUID orderItemId2 = UUID.randomUUID();
-        UUID itemId2 = UUID.randomUUID();
+        Product product2 = new Product(
+                UUID.randomUUID(),
+                "Mouse",
+                "Description",
+                new BigDecimal("20.00"),
+                2,
+                Instant.now()
+        );
         OrderItem orderItem2 = new OrderItem(
                 orderItemId2,
-                itemId2,
-                "Product 2",
-                new BigDecimal("20.00"),
-                2
+                product2,
+                product2.getName(),
+                product2.getPrice(),
+                product2.getStockQuantity()
         );
 
         order.addItem(orderItem1);
@@ -283,13 +333,20 @@ public class OrderTest {
         Order order = new Order(customerId);
 
         UUID orderItemId = UUID.randomUUID();
-        UUID itemId = UUID.randomUUID();
+        Product product = new Product(
+                UUID.randomUUID(),
+                "Keyboard",
+                "Description",
+                new BigDecimal("150.00"),
+                1,
+                Instant.now()
+        );
         OrderItem orderItem = new OrderItem(
                 orderItemId,
-                itemId,
-                "Product 1",
-                new BigDecimal("10.00"),
-                1
+                product,
+                product.getName(),
+                product.getPrice(),
+                product.getStockQuantity()
         );
         order.addItem(orderItem);
 
@@ -308,13 +365,20 @@ public class OrderTest {
         Order order = new Order(customerId);
 
         UUID orderItemId = UUID.randomUUID();
-        UUID itemId = UUID.randomUUID();
+        Product product = new Product(
+                UUID.randomUUID(),
+                "Keyboard",
+                "Description",
+                new BigDecimal("150.00"),
+                1,
+                Instant.now()
+        );
         OrderItem orderItem = new OrderItem(
                 orderItemId,
-                itemId,
-                "Product 1",
-                new BigDecimal("10.00"),
-                1
+                product,
+                product.getName(),
+                product.getPrice(),
+                product.getStockQuantity()
         );
         order.addItem(orderItem);
         order.transitionTo(OrderStatus.CONFIRMED);
@@ -330,13 +394,20 @@ public class OrderTest {
         Order order = new Order(customerId);
 
         UUID orderItemId = UUID.randomUUID();
-        UUID itemId = UUID.randomUUID();
+        Product product = new Product(
+                UUID.randomUUID(),
+                "Keyboard",
+                "Description",
+                new BigDecimal("150.00"),
+                1,
+                Instant.now()
+        );
         OrderItem orderItem = new OrderItem(
                 orderItemId,
-                itemId,
-                "Product 1",
-                new BigDecimal("10.00"),
-                1
+                product,
+                product.getName(),
+                product.getPrice(),
+                product.getStockQuantity()
         );
         order.addItem(orderItem);
         order.transitionTo(OrderStatus.CONFIRMED);
@@ -353,13 +424,20 @@ public class OrderTest {
         Order order = new Order(customerId);
 
         UUID orderItemId = UUID.randomUUID();
-        UUID itemId = UUID.randomUUID();
+        Product product = new Product(
+                UUID.randomUUID(),
+                "Keyboard",
+                "Description",
+                new BigDecimal("150.00"),
+                1,
+                Instant.now()
+        );
         OrderItem orderItem = new OrderItem(
                 orderItemId,
-                itemId,
-                "Product 1",
-                new BigDecimal("10.00"),
-                1
+                product,
+                product.getName(),
+                product.getPrice(),
+                product.getStockQuantity()
         );
         order.addItem(orderItem);
         order.transitionTo(OrderStatus.CONFIRMED);
@@ -377,13 +455,20 @@ public class OrderTest {
         Order order = new Order(customerId);
 
         UUID orderItemId = UUID.randomUUID();
-        UUID itemId = UUID.randomUUID();
+        Product product = new Product(
+                UUID.randomUUID(),
+                "Keyboard",
+                "Description",
+                new BigDecimal("150.00"),
+                1,
+                Instant.now()
+        );
         OrderItem orderItem = new OrderItem(
                 orderItemId,
-                itemId,
-                "Product 1",
-                new BigDecimal("10.00"),
-                1
+                product,
+                product.getName(),
+                product.getPrice(),
+                product.getStockQuantity()
         );
         order.addItem(orderItem);
         order.transitionTo(OrderStatus.CANCELLED);

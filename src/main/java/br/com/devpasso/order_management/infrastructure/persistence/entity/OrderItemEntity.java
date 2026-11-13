@@ -22,9 +22,11 @@ public class OrderItemEntity {
                 nullable = false)
     private OrderEntity order;
 
-    @Column(name = "product_id",
-            nullable = false)
-    private UUID productId;
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "product_id",
+                referencedColumnName = "id",
+                nullable = false)
+    private ProductEntity product;
 
     @Column(name = "product_name",
             nullable = false)
@@ -48,8 +50,8 @@ public class OrderItemEntity {
         return order;
     }
 
-    public UUID getProductId() {
-        return productId;
+    public ProductEntity getProduct() {
+        return product;
     }
 
     public String getProductName() {
@@ -72,8 +74,8 @@ public class OrderItemEntity {
         this.order = order;
     }
 
-    public void changeProductId(UUID productId) {
-        this.productId = productId;
+    public void changeProduct(ProductEntity product) {
+        this.product = product;
     }
 
     public void changeProductName(String productName) {

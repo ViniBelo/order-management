@@ -5,6 +5,7 @@ import br.com.devpasso.order_management.application.dto.result.orders.OrderItemR
 import br.com.devpasso.order_management.domain.model.Order;
 import br.com.devpasso.order_management.domain.model.OrderItem;
 import br.com.devpasso.order_management.domain.model.OrderStatus;
+import br.com.devpasso.order_management.domain.model.Product;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,11 +38,18 @@ class OrderResultMapperTest {
         UUID orderId = UUID.randomUUID();
         UUID customerId = UUID.randomUUID();
         Instant createdAt = Instant.now();
-        UUID productId = UUID.randomUUID();
+        Product product = new Product(
+                UUID.randomUUID(),
+                "Keyboard",
+                "Description",
+                new BigDecimal("150.00"),
+                1,
+                Instant.now()
+        );
 
         OrderItem item = new OrderItem(
                 UUID.randomUUID(),
-                productId,
+                product,
                 "Monitor 4K",
                 new BigDecimal("2500.00"),
                 1
@@ -58,7 +66,7 @@ class OrderResultMapperTest {
         );
 
         OrderItemResult itemResult = new OrderItemResult(
-                productId,
+                product.getId(),
                 "Monitor 4K",
                 new BigDecimal("2500.00"),
                 1,

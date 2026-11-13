@@ -11,27 +11,11 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class ProductRepositoryPortConfig {
-
-    @Bean
-    public InfraPaginationMapper infraPaginationMapper() {
-        return new InfraPaginationMapper();
-    }
-
-    @Bean
-    public ProductModelMapper productModelMapper() {
-        return new ProductModelMapper();
-    }
-
-    @Bean
-    public ProductEntityMapper productEntityMapper() {
-        return new ProductEntityMapper();
-    }
-
     @Bean
     public ProductRepositoryPort productRepository(ProductJpaRepository productJpaRepository,
                                                    InfraPaginationMapper infraPaginationMapper,
-                                                   ProductEntityMapper productEntityMapper,
-                                                   ProductModelMapper productModelMapper) {
+                                                   ProductModelMapper productModelMapper,
+                                                   ProductEntityMapper productEntityMapper) {
         return new ProductRepositoryAdapter(productJpaRepository,
                 infraPaginationMapper,
                 productModelMapper,

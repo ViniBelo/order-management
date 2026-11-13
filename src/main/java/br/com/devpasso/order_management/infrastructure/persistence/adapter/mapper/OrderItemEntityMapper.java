@@ -6,10 +6,19 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class OrderItemEntityMapper {
+    private final ProductEntityMapper productEntityMapper;
+    private final ProductModelMapper productModelMapper;
+
+    public OrderItemEntityMapper(ProductEntityMapper productEntityMapper,
+                                 ProductModelMapper productModelMapper) {
+        this.productEntityMapper = productEntityMapper;
+        this.productModelMapper = productModelMapper;
+    }
+
     public OrderItemEntity toEntity(OrderItem item) {
         OrderItemEntity orderItemEntity = new OrderItemEntity();
         orderItemEntity.changeId(item.id());
-        orderItemEntity.changeProductId(item.productId());
+        orderItemEntity.changeProduct(productEntityMapper.toEntity(item.product()));
         orderItemEntity.changeProductName(item.productName());
         orderItemEntity.changeUnitPrice(item.unitPrice());
         orderItemEntity.changeQuantity(item.quantity());
@@ -19,7 +28,7 @@ public class OrderItemEntityMapper {
     public OrderItem toDomain(OrderItemEntity item) {
         return new OrderItem(
                 item.getId(),
-                item.getProductId(),
+                productModelMapper.toModel(item.getProduct()),
                 item.getProductName(),
                 item.getUnitPrice(),
                 item.getQuantity()

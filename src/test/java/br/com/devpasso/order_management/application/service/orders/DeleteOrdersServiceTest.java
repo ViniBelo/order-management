@@ -5,6 +5,7 @@ import br.com.devpasso.order_management.domain.exception.ResourceNotFoundExcepti
 import br.com.devpasso.order_management.domain.model.Order;
 import br.com.devpasso.order_management.domain.model.OrderItem;
 import br.com.devpasso.order_management.domain.model.OrderStatus;
+import br.com.devpasso.order_management.domain.model.Product;
 import br.com.devpasso.order_management.domain.repository.OrderRepositoryPort;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,11 +44,18 @@ class DeleteOrdersServiceTest {
         // Given
         UUID orderId = UUID.randomUUID();
         UUID itemIdToRemove = UUID.randomUUID();
-        UUID productId = UUID.randomUUID();
+        Product product = new Product(
+                UUID.randomUUID(),
+                "Keyboard",
+                "Description",
+                new BigDecimal("150.00"),
+                1,
+                Instant.now()
+        );
 
         OrderItem itemToRemove = new OrderItem(
                 itemIdToRemove,
-                productId,
+                product,
                 "Keyboard",
                 new BigDecimal("100.00"),
                 1
@@ -101,11 +109,18 @@ class DeleteOrdersServiceTest {
         // Given
         UUID orderId = UUID.randomUUID();
         UUID itemId = UUID.randomUUID();
-        UUID productId = UUID.randomUUID();
+        Product product = new Product(
+                UUID.randomUUID(),
+                "Keyboard",
+                "Description",
+                new BigDecimal("150.00"),
+                1,
+                Instant.now()
+        );
 
         OrderItem item = new OrderItem(
                 itemId,
-                productId,
+                product,
                 "Keyboard",
                 new BigDecimal("100.00"),
                 1

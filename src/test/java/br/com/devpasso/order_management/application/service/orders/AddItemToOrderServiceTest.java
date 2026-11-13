@@ -88,7 +88,7 @@ public class AddItemToOrderServiceTest {
         assertNotNull(result);
         assertEquals(expectedResult, result);
         assertEquals(1, order.items().size());
-        assertEquals(productId, order.items().getFirst().productId());
+        assertEquals(productId, order.items().getFirst().product().getId());
         assertEquals("Mechanical Keyboard", order.items().getFirst().productName());
         assertEquals(new BigDecimal("150.00"), order.items().getFirst().unitPrice());
         assertEquals(quantity, order.items().getFirst().quantity());
@@ -206,14 +206,21 @@ public class AddItemToOrderServiceTest {
     void shouldAddItemToOrderWhenOrderAlreadyHasExistingItems() {
         // Given
         UUID orderId = UUID.randomUUID();
-        UUID existingProductId = UUID.randomUUID();
+        Product existingProduct = new Product(
+                UUID.randomUUID(),
+                "Keyboard",
+                "Description",
+                new BigDecimal("150.00"),
+                1,
+                Instant.now()
+        );
         UUID newProductId = UUID.randomUUID();
         int quantity = 3;
         AddItemToOrderCommand command = new AddItemToOrderCommand(orderId, newProductId, quantity);
 
         OrderItem existingItem = new OrderItem(
                 UUID.randomUUID(),
-                existingProductId,
+                existingProduct,
                 "Existing Product",
                 new BigDecimal("50.00"),
                 1
@@ -257,8 +264,8 @@ public class AddItemToOrderServiceTest {
         assertNotNull(result);
         assertEquals(expectedResult, result);
         assertEquals(2, order.items().size());
-        assertEquals(existingProductId, order.items().get(0).productId());
-        assertEquals(newProductId, order.items().get(1).productId());
+        assertEquals(existingProduct.getId(), order.items().get(0).product().getId());
+        assertEquals(newProductId, order.items().get(1).product().getId());
         assertEquals("New Product", order.items().get(1).productName());
         assertEquals(new BigDecimal("80.00"), order.items().get(1).unitPrice());
         assertEquals(quantity, order.items().get(1).quantity());

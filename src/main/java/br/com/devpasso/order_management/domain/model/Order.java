@@ -38,11 +38,18 @@ public class Order {
     public void addItem(OrderItem item) {
         canChangeItems();
         items.add(item);
+        item.reserveStock();
     }
 
     public void removeItem(UUID id) {
         canChangeItems();
-        items.removeIf(item -> item.id().equals(id));
+        for (OrderItem item : items) {
+            if (item.id().equals(id)) {
+                item.releaseProductStock();
+                items.remove(item);
+                break;
+            }
+        }
     }
 
     private void canChangeItems() {

@@ -39,8 +39,7 @@ public class AddItemToOrderService implements AddItemToOrderUseCase {
                     "Requested: " + command.quantity());
         }
 
-        OrderItem item = command.toDomainModel(product.getName(),
-                product.getPrice());
+        OrderItem item = command.toDomainModel(product);
         order.addItem(item);
         orderRepositoryPort.save(order);
 

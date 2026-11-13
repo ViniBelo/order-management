@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public record OrderItem(
         UUID id,
-        UUID productId,
+        Product product,
         String productName,
         BigDecimal unitPrice,
         Integer quantity
@@ -20,6 +20,18 @@ public record OrderItem(
         if (unitPrice == null || unitPrice.compareTo(BigDecimal.ZERO) <= 0) {
             throw new DomainException("Unit price must be greater than zero");
         }
+
+        if (product == null) {
+            throw new DomainException("Product must be provided");
+        }
+    }
+
+    public void reserveStock() {
+        product.decrementStockQuantity(quantity);
+    }
+
+    public void releaseProductStock() {
+        product.incrementStockQuantity(quantity);
     }
 
     public BigDecimal subtotal() {

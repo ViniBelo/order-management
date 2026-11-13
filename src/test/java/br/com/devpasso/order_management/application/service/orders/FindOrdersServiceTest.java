@@ -11,6 +11,7 @@ import br.com.devpasso.order_management.domain.exception.ResourceNotFoundExcepti
 import br.com.devpasso.order_management.domain.model.Order;
 import br.com.devpasso.order_management.domain.model.OrderItem;
 import br.com.devpasso.order_management.domain.model.OrderStatus;
+import br.com.devpasso.order_management.domain.model.Product;
 import br.com.devpasso.order_management.domain.repository.OrderRepositoryPort;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,12 +48,19 @@ class FindOrdersServiceTest {
         // Given
         UUID orderId = UUID.randomUUID();
         UUID customerId = UUID.randomUUID();
-        UUID productId = UUID.randomUUID();
         Instant createdAt = Instant.now();
+        Product product = new Product(
+                UUID.randomUUID(),
+                "Keyboard",
+                "Description",
+                new BigDecimal("150.00"),
+                1,
+                Instant.now()
+        );
 
         OrderItem item = new OrderItem(
                 UUID.randomUUID(),
-                productId,
+                product,
                 "Wireless Mouse",
                 new BigDecimal("80.00"),
                 2
@@ -66,7 +74,7 @@ class FindOrdersServiceTest {
         );
 
         OrderItemResult itemResult = new OrderItemResult(
-                productId,
+                product.getId(),
                 "Wireless Mouse",
                 new BigDecimal("80.00"),
                 2,

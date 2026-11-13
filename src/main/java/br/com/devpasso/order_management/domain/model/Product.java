@@ -65,6 +65,25 @@ public class Product {
         this.stockQuantity = stockQuantity;
     }
 
+    public void decrementStockQuantity(Integer quantity) {
+        validateQuantity(quantity);
+        if (stockQuantity < quantity) {
+            throw new IllegalArgumentException("Not enough stock quantity");
+        }
+        stockQuantity -= quantity;
+    }
+
+    public void incrementStockQuantity(Integer quantity) {
+        validateQuantity(quantity);
+        stockQuantity += quantity;
+    }
+
+    private void validateQuantity(Integer quantity) {
+        if (quantity == null || quantity < 0) {
+            throw new IllegalArgumentException("Quantity cannot be negative");
+        }
+    }
+
     public Instant getCreatedAt() {
         return createdAt;
     }
