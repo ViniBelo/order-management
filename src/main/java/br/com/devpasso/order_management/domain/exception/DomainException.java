@@ -1,10 +1,7 @@
 package br.com.devpasso.order_management.domain.exception;
 
-public abstract class DomainException extends RuntimeException {
-    protected DomainException(String message) {
+public class DomainException extends BaseDomainException {
+    public DomainException(String message) {
         super(message);
-    }
-    protected DomainException(String message, Throwable cause) {
-        super(message, cause);
     }
 }

@@ -3,7 +3,7 @@ package br.com.devpasso.order_management.infrastructure.persistence.adapter;
 import br.com.devpasso.order_management.domain.common.PaginatedQueryResult;
 import br.com.devpasso.order_management.domain.common.PaginationQuery;
 import br.com.devpasso.order_management.domain.model.Product;
-import br.com.devpasso.order_management.domain.repository.ProductRepository;
+import br.com.devpasso.order_management.domain.repository.ProductRepositoryPort;
 import br.com.devpasso.order_management.infrastructure.persistence.adapter.mapper.InfraPaginationMapper;
 import br.com.devpasso.order_management.infrastructure.persistence.adapter.mapper.ProductEntityMapper;
 import br.com.devpasso.order_management.infrastructure.persistence.adapter.mapper.ProductModelMapper;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class ProductRepositoryAdapter implements ProductRepository {
+public class ProductRepositoryAdapter implements ProductRepositoryPort {
     private final ProductJpaRepository productJpaRepository;
     private final InfraPaginationMapper paginationMapper;
     private final ProductModelMapper productModelMapper;
@@ -48,8 +48,8 @@ public class ProductRepositoryAdapter implements ProductRepository {
     }
 
     @Override
-    public Optional<Product> findById(String id) {
-        return productJpaRepository.findById(UUID.fromString(id))
+    public Optional<Product> findById(UUID id) {
+        return productJpaRepository.findById(id)
                 .map(productModelMapper::toModel);
     }
 
@@ -66,7 +66,7 @@ public class ProductRepositoryAdapter implements ProductRepository {
     }
 
     @Override
-    public void deleteById(String id) {
-        productJpaRepository.deleteById(UUID.fromString(id));
+    public void deleteById(UUID id) {
+        productJpaRepository.deleteById(id);
     }
 }

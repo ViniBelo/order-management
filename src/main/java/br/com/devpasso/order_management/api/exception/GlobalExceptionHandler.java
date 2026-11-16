@@ -1,7 +1,8 @@
 package br.com.devpasso.order_management.api.exception;
 
 import br.com.devpasso.order_management.api.dto.exception.ErrorResponse;
-import br.com.devpasso.order_management.domain.exception.DomainException;
+import br.com.devpasso.order_management.application.exception.BusinessException;
+import br.com.devpasso.order_management.domain.exception.BaseDomainException;
 import br.com.devpasso.order_management.domain.exception.ResourceConflictException;
 import br.com.devpasso.order_management.domain.exception.ResourceNotFoundException;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -9,6 +10,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -17,7 +19,6 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 @Hidden
@@ -61,6 +62,20 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles 400 Bad Request: When request body cannot be parsed or format is invalid.
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(buildErrorResponse(
+                        HttpStatus.BAD_REQUEST,
+                        "Bad Request",
+                        "Invalid value provided.",
+                        null
+                ));
+    }
+
+    /**
      * Handles 400 Bad Request: When path variable format fails or parameter type mismatch occurs.
      */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
@@ -97,8 +112,8 @@ public class GlobalExceptionHandler {
     /**
      * Handles Domain Exceptions
      */
-    @ExceptionHandler(DomainException.class)
-    public ResponseEntity<ErrorResponse> handleDomainException(DomainException e) {
+    @ExceptionHandler(BaseDomainException.class)
+    public ResponseEntity<ErrorResponse> handleDomainException(BaseDomainException e) {
         HttpStatus status = determineDomainStatus(e);
         return ResponseEntity.status(status)
                 .body(buildErrorResponse(
@@ -109,10 +124,24 @@ public class GlobalExceptionHandler {
                 ));
     }
 
-    private HttpStatus determineDomainStatus(DomainException e) {
+    private HttpStatus determineDomainStatus(BaseDomainException e) {
         if (e instanceof ResourceNotFoundException) return HttpStatus.NOT_FOUND;
         if (e instanceof ResourceConflictException) return HttpStatus.CONFLICT;
         return HttpStatus.BAD_REQUEST;
+    }
+
+    /**
+     * Handles Business Exceptions
+     */
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(buildErrorResponse(
+                        HttpStatus.BAD_REQUEST,
+                        "Bad Request",
+                        e.getMessage(),
+                        null
+                ));
     }
 
     /**

@@ -4,17 +4,17 @@ import br.com.devpasso.order_management.api.dto.exception.ConflictErrorResponse;
 import br.com.devpasso.order_management.api.dto.exception.InternalServerErrorResponse;
 import br.com.devpasso.order_management.api.dto.exception.NotFoundErrorResponse;
 import br.com.devpasso.order_management.api.dto.exception.ValidationErrorResponse;
-import br.com.devpasso.order_management.api.dto.request.UpdateProductRequest;
-import br.com.devpasso.order_management.api.dto.request.UpdateProductStockRequest;
-import br.com.devpasso.order_management.api.dto.response.ProductResponse;
-import br.com.devpasso.order_management.api.mapper.request.UpdateProductRequestMapper;
-import br.com.devpasso.order_management.api.mapper.request.UpdateProductStockRequestMapper;
-import br.com.devpasso.order_management.api.mapper.response.ProductResponseMapper;
-import br.com.devpasso.order_management.application.dto.command.UpdateProductCommand;
-import br.com.devpasso.order_management.application.dto.command.UpdateProductStockCommand;
-import br.com.devpasso.order_management.application.dto.result.ProductResult;
-import br.com.devpasso.order_management.application.usecase.UpdateProductStockUseCase;
-import br.com.devpasso.order_management.application.usecase.UpdateProductUseCase;
+import br.com.devpasso.order_management.api.dto.request.products.UpdateProductRequest;
+import br.com.devpasso.order_management.api.dto.request.products.UpdateProductStockRequest;
+import br.com.devpasso.order_management.api.dto.response.products.ProductResponse;
+import br.com.devpasso.order_management.api.mapper.products.request.UpdateProductRequestMapper;
+import br.com.devpasso.order_management.api.mapper.products.request.UpdateProductStockRequestMapper;
+import br.com.devpasso.order_management.api.mapper.products.response.ProductResponseMapper;
+import br.com.devpasso.order_management.application.dto.command.products.UpdateProductCommand;
+import br.com.devpasso.order_management.application.dto.command.products.UpdateProductStockCommand;
+import br.com.devpasso.order_management.application.dto.result.products.ProductResult;
+import br.com.devpasso.order_management.application.usecase.products.UpdateProductStockUseCase;
+import br.com.devpasso.order_management.application.usecase.products.UpdateProductUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -69,7 +69,7 @@ public class UpdateProductsController extends ProductsController {
             UpdateProductRequest updateProductRequest
     ) {
         UpdateProductCommand updateProductCommand = updateProductRequestMapper.toCommand(updateProductRequest);
-        ProductResult updatedProductResult = updateProductUseCase.execute(id.toString(), updateProductCommand);
+        ProductResult updatedProductResult = updateProductUseCase.execute(id, updateProductCommand);
         ProductResponse updatedProduct = productResponseMapper.toResponse(updatedProductResult);
         return ResponseEntity.ok(updatedProduct);
     }
@@ -91,7 +91,7 @@ public class UpdateProductsController extends ProductsController {
             @RequestBody @Valid UpdateProductStockRequest updateProductStockRequest
     ) {
         UpdateProductStockCommand command = updateProductStockRequestMapper.toCommand(updateProductStockRequest);
-        ProductResult updatedProduct = updateProductStockUseCase.execute(id.toString(), command);
+        ProductResult updatedProduct = updateProductStockUseCase.execute(id, command);
         ProductResponse updatedProductResponse = productResponseMapper.toResponse(updatedProduct);
         return ResponseEntity.ok(updatedProductResponse);
     }

@@ -1,14 +1,14 @@
 package br.com.devpasso.order_management.api.controller.products;
 
 import br.com.devpasso.order_management.api.dto.response.PaginatedResponse;
-import br.com.devpasso.order_management.api.dto.response.ProductResponse;
-import br.com.devpasso.order_management.api.mapper.response.PaginatedResponseMapper;
-import br.com.devpasso.order_management.api.mapper.response.ProductResponseMapper;
+import br.com.devpasso.order_management.api.dto.response.products.ProductResponse;
+import br.com.devpasso.order_management.api.mapper.products.response.PaginatedResponseMapper;
+import br.com.devpasso.order_management.api.mapper.products.response.ProductResponseMapper;
 import br.com.devpasso.order_management.application.dto.result.PaginatedResult;
-import br.com.devpasso.order_management.application.dto.result.ProductResult;
+import br.com.devpasso.order_management.application.dto.result.products.ProductResult;
 import br.com.devpasso.order_management.application.mapper.PaginationQueryMapper;
-import br.com.devpasso.order_management.application.usecase.FindProductByIdUseCase;
-import br.com.devpasso.order_management.application.usecase.ListProductsUseCase;
+import br.com.devpasso.order_management.application.usecase.products.FindProductByIdUseCase;
+import br.com.devpasso.order_management.application.usecase.products.ListProductsUseCase;
 import br.com.devpasso.order_management.domain.common.PaginationQuery;
 import br.com.devpasso.order_management.domain.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.DisplayName;
@@ -162,7 +162,7 @@ public class ViewProductsControllerTest {
                 product.price(),
                 product.stockQuantity());
 
-        when(findProductByIdUseCase.execute(id.toString()))
+        when(findProductByIdUseCase.execute(id))
                 .thenReturn(product);
         when(productResponseMapper.toResponse(product))
                 .thenReturn(response);
@@ -175,7 +175,7 @@ public class ViewProductsControllerTest {
         assertNotNull(result.getBody());
         assertEquals(response, result.getBody());
 
-        verify(findProductByIdUseCase).execute(id.toString());
+        verify(findProductByIdUseCase).execute(id);
         verify(productResponseMapper).toResponse(product);
     }
 
@@ -185,7 +185,7 @@ public class ViewProductsControllerTest {
         // Given
         UUID id = UUID.randomUUID();
 
-        when(findProductByIdUseCase.execute(id.toString()))
+        when(findProductByIdUseCase.execute(id))
                 .thenThrow(new ResourceNotFoundException("Product not found for ID: " + id));
 
         // When & Then
@@ -195,7 +195,7 @@ public class ViewProductsControllerTest {
         );
 
         assertEquals("Product not found for ID: " + id, exception.getMessage());
-        verify(findProductByIdUseCase).execute(id.toString());
+        verify(findProductByIdUseCase).execute(id);
         verifyNoInteractions(productResponseMapper);
     }
 }

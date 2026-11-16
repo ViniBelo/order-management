@@ -4,14 +4,14 @@ import br.com.devpasso.order_management.api.dto.exception.InternalServerErrorRes
 import br.com.devpasso.order_management.api.dto.exception.NotFoundErrorResponse;
 import br.com.devpasso.order_management.api.dto.exception.ValidationErrorResponse;
 import br.com.devpasso.order_management.api.dto.response.PaginatedResponse;
-import br.com.devpasso.order_management.api.dto.response.ProductResponse;
-import br.com.devpasso.order_management.api.mapper.response.PaginatedResponseMapper;
-import br.com.devpasso.order_management.api.mapper.response.ProductResponseMapper;
+import br.com.devpasso.order_management.api.dto.response.products.ProductResponse;
+import br.com.devpasso.order_management.api.mapper.products.response.PaginatedResponseMapper;
+import br.com.devpasso.order_management.api.mapper.products.response.ProductResponseMapper;
 import br.com.devpasso.order_management.application.dto.result.PaginatedResult;
-import br.com.devpasso.order_management.application.dto.result.ProductResult;
+import br.com.devpasso.order_management.application.dto.result.products.ProductResult;
 import br.com.devpasso.order_management.application.mapper.PaginationQueryMapper;
-import br.com.devpasso.order_management.application.usecase.FindProductByIdUseCase;
-import br.com.devpasso.order_management.application.usecase.ListProductsUseCase;
+import br.com.devpasso.order_management.application.usecase.products.FindProductByIdUseCase;
+import br.com.devpasso.order_management.application.usecase.products.ListProductsUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -96,7 +96,7 @@ public class ViewProductsController extends ProductsController {
             @Parameter(description = "Product UUID", example = "123e4567-e89b-12d3-a456-426614174000")
             @PathVariable UUID id
     ) {
-        ProductResult result = findProductByIdUseCase.execute(id.toString());
+        ProductResult result = findProductByIdUseCase.execute(id);
         return ResponseEntity.ok(productResponseMapper.toResponse(result));
     }
 }
