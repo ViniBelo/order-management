@@ -7,6 +7,7 @@ import br.com.devpasso.order_management.domain.model.OrderItem;
 import br.com.devpasso.order_management.domain.model.OrderStatus;
 import br.com.devpasso.order_management.domain.model.Product;
 import br.com.devpasso.order_management.domain.repository.OrderRepositoryPort;
+import br.com.devpasso.order_management.domain.repository.ProductRepositoryPort;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +35,9 @@ class DeleteOrdersServiceTest {
 
     @Mock
     private OrderRepositoryPort orderRepositoryPort;
+
+    @Mock
+    private ProductRepositoryPort productRepositoryPort;
 
     @InjectMocks
     private DeleteOrderItemsServiceItem deleteOrdersService;
@@ -81,6 +85,7 @@ class DeleteOrdersServiceTest {
         assertTrue(order.items().isEmpty());
         verify(orderRepositoryPort).findById(orderId);
         verify(orderRepositoryPort).save(order);
+        verify(productRepositoryPort).save(product);
     }
 
     @Test

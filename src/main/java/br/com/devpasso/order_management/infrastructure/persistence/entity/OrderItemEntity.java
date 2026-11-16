@@ -22,7 +22,7 @@ public class OrderItemEntity {
                 nullable = false)
     private OrderEntity order;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "product_id",
                 referencedColumnName = "id",
                 nullable = false)

@@ -163,6 +163,7 @@ class OrdersControllerIT {
         OrderEntity reloadedOrder = orderJpaRepository.findById(savedOrder.getId()).orElseThrow();
         assertEquals(1, reloadedOrder.getItems().size());
         assertEquals("Wireless Keyboard", reloadedOrder.getItems().getFirst().getProductName());
+        assertEquals(8, productJpaRepository.findById(savedProduct1.getId()).orElseThrow().getStockQuantity());
     }
 
     @Test
@@ -526,6 +527,9 @@ class OrdersControllerIT {
     @Test
     @DisplayName("Should successfully delete item from order and return 204 No Content")
     void shouldSuccessfullyDeleteItemFromOrder() throws Exception {
+        savedProduct1.changeStockQuantity(8);
+        productJpaRepository.save(savedProduct1);
+
         OrderEntity orderEntity = new OrderEntity();
         orderEntity.changeId(UUID.randomUUID());
         orderEntity.changeCustomerId(UUID.randomUUID());
@@ -552,6 +556,8 @@ class OrdersControllerIT {
 
         mockMvc.perform(delete("/v1/orders/{id}/items/{itemId}", savedOrder.getId(), item1Id))
                 .andExpect(status().isNoContent());
+
+        assertEquals(10, productJpaRepository.findById(savedProduct1.getId()).orElseThrow().getStockQuantity());
 
         mockMvc.perform(get("/v1/orders/{id}", savedOrder.getId()))
                 .andExpect(status().isOk())

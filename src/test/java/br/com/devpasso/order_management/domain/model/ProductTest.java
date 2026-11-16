@@ -85,4 +85,59 @@ class ProductTest {
 
         assertEquals("Stock quantity cannot be negative", exception.getMessage());
     }
+
+    @Test
+    @DisplayName("Should decrement stock quantity by the requested amount")
+    void decrementStockQuantity_ShouldReduceStock() {
+        Product product = new Product(
+                UUID.randomUUID(),
+                "Product A",
+                "Description A",
+                new BigDecimal("19.99"),
+                10,
+                Instant.now()
+        );
+
+        product.decrementStockQuantity(4);
+
+        assertEquals(6, product.getStockQuantity());
+    }
+
+    @Test
+    @DisplayName("Should reject decrementing stock below zero")
+    void decrementStockQuantity_ShouldThrowException_WhenInsufficientStock() {
+        Product product = new Product(
+                UUID.randomUUID(),
+                "Product A",
+                "Description A",
+                new BigDecimal("19.99"),
+                3,
+                Instant.now()
+        );
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> product.decrementStockQuantity(4)
+        );
+
+        assertEquals("Not enough stock quantity", exception.getMessage());
+        assertEquals(3, product.getStockQuantity());
+    }
+
+    @Test
+    @DisplayName("Should increment stock quantity by the requested amount")
+    void incrementStockQuantity_ShouldIncreaseStock() {
+        Product product = new Product(
+                UUID.randomUUID(),
+                "Product A",
+                "Description A",
+                new BigDecimal("19.99"),
+                6,
+                Instant.now()
+        );
+
+        product.incrementStockQuantity(4);
+
+        assertEquals(10, product.getStockQuantity());
+    }
 }

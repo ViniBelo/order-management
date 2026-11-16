@@ -43,6 +43,7 @@ public class OrderTest {
         // Then
         assertEquals(orderItem, order.items().getFirst());
         assertEquals(1, order.items().size());
+        assertEquals(0, product.getStockQuantity());
     }
 
     @Test
@@ -273,6 +274,7 @@ public class OrderTest {
 
         // Then
         assertEquals(0, order.items().size());
+        assertEquals(1, product.getStockQuantity());
     }
 
     @Test
@@ -324,6 +326,8 @@ public class OrderTest {
         // Then
         assertEquals(1, order.items().size());
         assertEquals(orderItem2, order.items().getFirst());
+        assertEquals(1, product1.getStockQuantity());
+        assertEquals(0, product2.getStockQuantity());
     }
 
     @Test
