@@ -65,7 +65,7 @@ public class Product {
         this.stockQuantity = stockQuantity;
     }
 
-    public void decrementStockQuantity(Integer quantity) {
+    public void decreaseStockQuantity(Integer quantity) {
         validateQuantity(quantity);
         if (stockQuantity < quantity) {
             throw new IllegalArgumentException("Not enough stock quantity");
@@ -73,7 +73,7 @@ public class Product {
         stockQuantity -= quantity;
     }
 
-    public void incrementStockQuantity(Integer quantity) {
+    public void increaseStockQuantity(Integer quantity) {
         validateQuantity(quantity);
         stockQuantity += quantity;
     }

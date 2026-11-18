@@ -87,8 +87,8 @@ class ProductTest {
     }
 
     @Test
-    @DisplayName("Should decrement stock quantity by the requested amount")
-    void decrementStockQuantity_ShouldReduceStock() {
+    @DisplayName("Should decrease stock quantity by the requested amount")
+    void decreaseStockQuantity_ShouldReduceStock() {
         Product product = new Product(
                 UUID.randomUUID(),
                 "Product A",
@@ -98,14 +98,14 @@ class ProductTest {
                 Instant.now()
         );
 
-        product.decrementStockQuantity(4);
+        product.decreaseStockQuantity(4);
 
         assertEquals(6, product.getStockQuantity());
     }
 
     @Test
-    @DisplayName("Should reject decrementing stock below zero")
-    void decrementStockQuantity_ShouldThrowException_WhenInsufficientStock() {
+    @DisplayName("Should reject decreasing stock below zero")
+    void decreaseStockQuantity_ShouldThrowException_WhenInsufficientStock() {
         Product product = new Product(
                 UUID.randomUUID(),
                 "Product A",
@@ -117,7 +117,7 @@ class ProductTest {
 
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> product.decrementStockQuantity(4)
+                () -> product.decreaseStockQuantity(4)
         );
 
         assertEquals("Not enough stock quantity", exception.getMessage());
@@ -125,8 +125,8 @@ class ProductTest {
     }
 
     @Test
-    @DisplayName("Should increment stock quantity by the requested amount")
-    void incrementStockQuantity_ShouldIncreaseStock() {
+    @DisplayName("Should increase stock quantity by the requested amount")
+    void increaseStockQuantity_ShouldIncreaseStock() {
         Product product = new Product(
                 UUID.randomUUID(),
                 "Product A",
@@ -136,7 +136,7 @@ class ProductTest {
                 Instant.now()
         );
 
-        product.incrementStockQuantity(4);
+        product.increaseStockQuantity(4);
 
         assertEquals(10, product.getStockQuantity());
     }

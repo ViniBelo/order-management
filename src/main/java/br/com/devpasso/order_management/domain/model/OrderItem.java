@@ -27,11 +27,11 @@ public record OrderItem(
     }
 
     public void reserveStock() {
-        product.decrementStockQuantity(quantity);
+        product.decreaseStockQuantity(quantity);
     }
 
     public void releaseProductStock() {
-        product.incrementStockQuantity(quantity);
+        product.increaseStockQuantity(quantity);
     }
 
     public BigDecimal subtotal() {
